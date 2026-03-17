@@ -1,20 +1,21 @@
-﻿using Project.Scripts.Services.Audio.AudioSystem;
-using Project.Scripts.Services.ServiceLocatorSystem;
+using Project.Scripts.Services.Audio.AudioSystem;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Scripts.Services.Audio
 {
     public class AudioVolumeChanger : MonoBehaviour
     {
-        AudioManager _audioManager;
+        private AudioManager _audioManager;
 
-        
-        private void Awake()
+
+        [Inject]
+        public void Construct(AudioManager audioManager)
         {
-            _audioManager = ServiceLocator.Get<AudioManager>();
+            _audioManager = audioManager;
         }
 
-        
+
         public void SetMusicVolume(float volume)
         {
             _audioManager.SetMusicVolume(volume);

@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 193616204}
   - component: {fileID: 193616203}
   - component: {fileID: 193616202}
+  - component: {fileID: 193616205}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -198,6 +199,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &193616205
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193616201}
+  m_Enabled: 1
 --- !u!1 &2072815872
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,11 +253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Bootstrap.BootstrapController
   _loadingScreen: {fileID: 3576273838028713211}
   _initialDelaySeconds: 0.1
-  _delayBetweenServicesInitSeconds: 0.05
   _finalLoadingDelaySeconds: 0.3
-  _audioMixer: {fileID: 24100000, guid: 0d915cdbca3059d44aca56f0ed471e1d, type: 2}
-  _musicMixerGroup: {fileID: -2415745301654176229, guid: 0d915cdbca3059d44aca56f0ed471e1d, type: 2}
-  _sfxMixerGroup: {fileID: 4461477774142558291, guid: 0d915cdbca3059d44aca56f0ed471e1d, type: 2}
 --- !u!224 &77076439773914607
 RectTransform:
   m_ObjectHideFlags: 0

@@ -1,35 +1,32 @@
-﻿using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
-using Project.Scripts.Services.ServiceLocatorSystem;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace Project.Scripts.Services.Audio.AudioSystem
 {
-    public class AudioManager : ServiceMonoBehaviour
+    public class AudioManager : MonoBehaviour
     {
         [Header("Audio Mixer Settings")]
-        public AudioMixer AudioMixer;
-        public AudioMixerGroup MusicMixerGroup;
-        public AudioMixerGroup SFXMixerGroup;
-        
-        
+        [SerializeField] public AudioMixer AudioMixer;
+        [SerializeField] public AudioMixerGroup MusicMixerGroup;
+        [SerializeField] public AudioMixerGroup SFXMixerGroup;
+
+
         private AudioSource _bgmSource;
         private List<AudioSource> _sfxSources = new List<AudioSource>();
         private int _currentSFXIndex;
         private int _baseSFXSourcesAmount = 5;
-        
 
-        public override async UniTask InitAsync()
+
+        private void Awake()
         {
             _bgmSource = gameObject.AddComponent<AudioSource>();
             _bgmSource.loop = false;
             _bgmSource.playOnAwake = false;
             _bgmSource.outputAudioMixerGroup = MusicMixerGroup;
-            await UniTask.CompletedTask;
             Debug.Log("AudioManager initialized");
         }
-        
+
         public AudioSource GetBGMSource()
         {
             return _bgmSource;
@@ -37,9 +34,9 @@ namespace Project.Scripts.Services.Audio.AudioSystem
 
         public AudioSource GetSFXSource()
         {
-            if (_sfxSources.Count == 0) 
+            if (_sfxSources.Count == 0)
                 AddSFXSources(_baseSFXSourcesAmount);
-            
+
             var source = _sfxSources[_currentSFXIndex];
             _currentSFXIndex = (_currentSFXIndex + 1) % _sfxSources.Count;
             return source;
@@ -75,10 +72,12 @@ namespace Project.Scripts.Services.Audio.AudioSystem
             float dB;
             if (AudioMixer.GetFloat("MusicVolume", out dB))
             {
-                if (dB <= -80f) return 0f;
+                if (dB <= -80f) 
+                    return 0f;
+                
                 return Mathf.Pow(10f, dB / 20f);
             }
-            
+
             return 1f;
         }
 
@@ -87,10 +86,12 @@ namespace Project.Scripts.Services.Audio.AudioSystem
             float dB;
             if (AudioMixer.GetFloat("SFXVolume", out dB))
             {
-                if (dB <= -80f) return 0f;
+                if (dB <= -80f)
+                    return 0f;
+                
                 return Mathf.Pow(10f, dB / 20f);
             }
-            
+
             return 1f;
         }
     }

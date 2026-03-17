@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-using Project.Scripts.Services.ServiceLocatorSystem;
 using UnityEngine;
 
 namespace Project.Scripts.Services.EventBusSystem
 {
-    public class EventBus : IService, IAsyncDisposable
+    public class EventBus : IAsyncDisposable
     {
         private readonly Dictionary<Type, List<Delegate>> _subscribers = new();
 
-
-        public UniTask InitAsync()
-        {
-            Debug.Log("EventBus initialized");
-            return UniTask.CompletedTask;
-        }
 
         public ValueTask DisposeAsync()
         {

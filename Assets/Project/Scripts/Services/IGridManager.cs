@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
-using Project.Scripts.Services.ServiceLocatorSystem;
 using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Services
 {
-    public interface IGridManager : IService
+    public interface IGridManager
     {
         Tile GetTile(Vector2Int pos);
         void SetTile(Vector2Int pos, Tile tile);

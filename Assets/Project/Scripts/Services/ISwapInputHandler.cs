@@ -1,9 +1,8 @@
 using System;
-using Project.Scripts.Services.ServiceLocatorSystem;
 
 namespace Project.Scripts.Services
 {
-    public interface ISwapInputHandler : IService
+    public interface ISwapInputHandler
     {
         event Action<SwapRequest> OnSwapRequested;
     }
