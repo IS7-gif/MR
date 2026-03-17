@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd9f572338954ab46a42b1278e81913a, type: 3}
+  m_Name: AudioMusicConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Services.Audio.AudioSystem.Configs.AudioMusicConfig
+  Groups:
+  - GroupTag: MainMusic
+    Loop: 1
+    Clips:
+    - Clip: {fileID: 8300000, guid: 07ddb78a08eeec742a1cc992ca026d49, type: 3}
+      Tag: Theme_01
+      DefaultVolume: 0.03

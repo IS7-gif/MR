@@ -7,8 +7,8 @@ namespace Project.Scripts.Configs
     public class InputConfig : ScriptableObject
     {
         [SerializeField] private InputActionAsset _inputActionAsset;
-        [SerializeField] private float _screenDragThresholdPixels = 20f;
-        [SerializeField] private float _worldDragThreshold = 0.3f;
+        [SerializeField] private float _screenDragThresholdPixels = 10f;
+        [SerializeField] private float _worldDragThreshold = 0.03f;
 
         
         public InputActionAsset InputActionAsset => _inputActionAsset;

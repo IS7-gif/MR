@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 937080739c412024dac46bfcc3ec1c80, type: 3}
+  m_Name: AudioSFXConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Services.Audio.AudioSystem.Configs.AudioSFXConfig
+  Groups:
+  - GroupTag: Gameplay
+    Loop: 0
+    Clips:
+    - Clip: {fileID: 8300000, guid: 3dbfcc00ae7b6794196c7d9d8648d297, type: 3}
+      Tag: Bomb
+      DefaultVolume: 0.02
+    - Clip: {fileID: 8300000, guid: 6a606ef9c3d902e4cbf4fbcccf545883, type: 3}
+      Tag: Match
+      DefaultVolume: 0.05
