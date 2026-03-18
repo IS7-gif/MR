@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BoardConfig
   _width: 8
   _height: 8
-  _cellSize: 0.85
+  _boardPaddingPercent: 0.05
+  _tileScale: 0.85
+  _framePadding: 0.1
+  _maskTopPadding: 2
   _tilePrefab: {fileID: 1773954573927491530, guid: a5207b55f0bde394299f025baad22fc0, type: 3}
   _regularTiles:
   - {fileID: 11400000, guid: 1119a0ba92910f542a294d24513a6914, type: 2}

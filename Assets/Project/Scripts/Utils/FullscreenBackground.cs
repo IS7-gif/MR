@@ -1,5 +1,4 @@
 using UnityEngine;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,8 +10,21 @@ namespace Project.Scripts.Utils
     {
         private void Awake()
         {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                EditorApplication.delayCall += () =>
+                {
+                    if (this) 
+                        Apply();
+                };
+                
+                return;
+            }
+#endif
             Apply();
         }
+
 
         private void Apply()
         {
@@ -24,15 +36,14 @@ namespace Project.Scripts.Utils
             if (!sr || !sr.sprite)
                 return;
 
-            float aspect = GetAspect(mainCamera);
-            float camHeight = mainCamera.orthographicSize * 2f;
-            float camWidth = camHeight * aspect;
+            var aspect = GetAspect(mainCamera);
+            var camHeight = mainCamera.orthographicSize * 2f;
+            var camWidth = camHeight * aspect;
+            var spriteSize = sr.sprite.bounds.size;
 
-            Vector2 spriteSize = sr.sprite.bounds.size;
-
-            float scaleX = camWidth / spriteSize.x;
-            float scaleY = camHeight / spriteSize.y;
-            float uniformScale = Mathf.Max(scaleX, scaleY);
+            var scaleX = camWidth / spriteSize.x;
+            var scaleY = camHeight / spriteSize.y;
+            var uniformScale = Mathf.Max(scaleX, scaleY);
 
             transform.localScale = new Vector3(uniformScale, uniformScale, 1f);
             transform.position = Vector3.zero;
@@ -63,8 +74,7 @@ namespace Project.Scripts.Utils
                 return Vector2.zero;
 
             var getSizeOfMainGameView = gameViewType.GetMethod(
-                "GetSizeOfMainGameView",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                "GetSizeOfMainGameView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
             if (null == getSizeOfMainGameView)
                 return Vector2.zero;

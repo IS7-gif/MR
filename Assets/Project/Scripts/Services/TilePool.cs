@@ -7,11 +7,13 @@ namespace Project.Scripts.Services
 {
     public class TilePool
     {
+        private readonly float _tileVisualSize;
         private readonly ObjectPool<Tile> _pool;
 
 
-        public TilePool(Tile prefab, Transform parent, AnimationConfig animConfig)
+        public TilePool(Tile prefab, Transform parent, AnimationConfig animConfig, float cellSize, float tileScale)
         {
+            _tileVisualSize = cellSize * tileScale;
             _pool = new ObjectPool<Tile>(
                 createFunc: () =>
                 {
@@ -21,7 +23,8 @@ namespace Project.Scripts.Services
                 },
                 actionOnGet: t =>
                 {
-                    t.transform.localScale = Vector3.one;
+                    t.transform.localScale = Vector3.one * _tileVisualSize;
+                    t.Animator.SetTargetScale(_tileVisualSize);
                     t.gameObject.SetActive(true);
                 },
                 actionOnRelease: t => t.gameObject.SetActive(false),

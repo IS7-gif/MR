@@ -12,8 +12,12 @@ namespace Project.Scripts.Gameplay
 {
     public class GameplayEntryPoint : MonoBehaviour
     {
+        [Tooltip("Parent transform for all instantiated tile objects")]
         [SerializeField] private Transform _tileContainer;
+        [Tooltip("HUD view that displays the current score")]
         [SerializeField] private ScoreHUDView _scoreHUDView;
+        [Tooltip("View component that sizes the board frame and spawn mask at runtime")]
+        [SerializeField] private BoardView _boardView;
 
 
         private EventBus _eventBus;
@@ -27,6 +31,20 @@ namespace Project.Scripts.Gameplay
         private SwapInputHandler _swapHandler;
         private ScoreService _scoreService;
         private GameAudioController _gameAudioController;
+
+
+        public void OnDestroy()
+        {
+            _swapHandler?.Dispose();
+            _inputService?.Dispose();
+            _scoreService?.Dispose();
+        }
+
+
+        private void Start()
+        {
+            InitAsync().Forget();
+        }
 
 
         [Inject]
@@ -47,24 +65,16 @@ namespace Project.Scripts.Gameplay
         }
 
 
-        private void Start()
-        {
-            InitAsync().Forget();
-        }
-        
-        private void OnDestroy()
-        {
-            _swapHandler?.Dispose();
-            _inputService?.Dispose();
-            _scoreService?.Dispose();
-        }
-
         private async UniTaskVoid InitAsync()
         {
-            var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig);
+            var cellSize = ComputeCellSize(_boardConfig);
+            var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
-            var gridManager = new GridManager(_boardConfig, pool);
-            gridManager.SetOrigin(ComputeGridOrigin(_boardConfig));
+            var gridManager = new GridManager(_boardConfig, pool, cellSize);
+            gridManager.SetOrigin(ComputeGridOrigin(_boardConfig, cellSize));
+
+            _boardView.Setup(_boardConfig.Width, _boardConfig.Height, cellSize,
+                _boardConfig.FramePadding, _boardConfig.MaskTopPadding);
 
             var gravityHandler = new GravityHandler(gridManager, pool, _boardConfig);
 
@@ -94,10 +104,20 @@ namespace Project.Scripts.Gameplay
             await orchestrator.StartGame();
         }
 
-        private Vector3 ComputeGridOrigin(BoardConfig config)
+        private float ComputeCellSize(BoardConfig config)
         {
-            var offsetX = -(config.Width - 1) * config.CellSize * 0.5f;
-            var offsetY = -(config.Height - 1) * config.CellSize * 0.5f;
+            var cam = Camera.main;
+            var camHeight = cam.orthographicSize * 2f;
+            var camWidth = camHeight * cam.aspect;
+            var usableWidth = camWidth * (1f - config.BoardPaddingPercent);
+            
+            return usableWidth / config.Width;
+        }
+
+        private Vector3 ComputeGridOrigin(BoardConfig config, float cellSize)
+        {
+            var offsetX = -(config.Width - 1) * cellSize * 0.5f;
+            var offsetY = -(config.Height - 1) * cellSize * 0.5f;
 
             return transform.position + new Vector3(offsetX, offsetY, 0f);
         }

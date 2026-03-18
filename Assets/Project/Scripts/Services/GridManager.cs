@@ -13,13 +13,15 @@ namespace Project.Scripts.Services
         private readonly TilePool _pool;
         private readonly Tile[,] _grid;
         private readonly List<Vector2Int> _scheduledRemovals = new();
+        private readonly float _cellSize;
         private Vector3 _origin;
 
 
-        public GridManager(BoardConfig config, TilePool pool)
+        public GridManager(BoardConfig config, TilePool pool, float cellSize)
         {
             _config = config;
             _pool = pool;
+            _cellSize = cellSize;
             _grid = new Tile[config.Width, config.Height];
         }
 
@@ -38,61 +40,61 @@ namespace Project.Scripts.Services
             pos.x >= 0 && pos.x < _config.Width && pos.y >= 0 && pos.y < _config.Height;
 
         public Vector3 GridToWorld(Vector2Int pos) =>
-            _origin + new Vector3(pos.x * _config.CellSize, pos.y * _config.CellSize, 0f);
+            _origin + new Vector3(pos.x * _cellSize, pos.y * _cellSize, 0f);
 
         public Vector2Int WorldToGrid(Vector3 worldPos)
         {
             var relative = worldPos - _origin;
-            
+
             return new Vector2Int(
-                Mathf.RoundToInt(relative.x / _config.CellSize),
-                Mathf.RoundToInt(relative.y / _config.CellSize)
+                Mathf.RoundToInt(relative.x / _cellSize),
+                Mathf.RoundToInt(relative.y / _cellSize)
             );
         }
 
         public TileType[,] GetGridState()
         {
             var state = new TileType[_config.Width, _config.Height];
-            for (int x = 0; x < _config.Width; x++)
-                for (int y = 0; y < _config.Height; y++)
+            for (var x = 0; x < _config.Width; x++)
+                for (var y = 0; y < _config.Height; y++)
                     state[x, y] = _grid[x, y] ? _grid[x, y].Type : TileType.None;
-            
+
             return state;
         }
 
         public void ScheduleRemove(List<Vector2Int> positions)
         {
-            for (int i = 0; i < positions.Count; i++)
+            for (var i = 0; i < positions.Count; i++)
                 _scheduledRemovals.Add(positions[i]);
         }
 
         public TileConfig ResolveNextTile(SpawnContext context)
         {
             if (null != _config.SpawnRules)
-                for (int i = 0; i < _config.SpawnRules.Length; i++)
+                for (var i = 0; i < _config.SpawnRules.Length; i++)
                 {
                     var result = _config.SpawnRules[i].TryGetSpecialTile(context);
                     if (result)
                         return result;
                 }
-            
+
             return _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
         }
 
         public List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius)
         {
             var result = new List<Vector2Int>();
-            for (int dx = -radius; dx <= radius; dx++)
-                for (int dy = -radius; dy <= radius; dy++)
+            for (var dx = -radius; dx <= radius; dx++)
+                for (var dy = -radius; dy <= radius; dy++)
                 {
-                    if (dx == 0 && dy == 0) 
+                    if (dx == 0 && dy == 0)
                         continue;
-                    
+
                     var pos = new Vector2Int(center.x + dx, center.y + dy);
                     if (IsValidPosition(pos))
                         result.Add(pos);
                 }
-            
+
             return result;
         }
 
@@ -101,8 +103,8 @@ namespace Project.Scripts.Services
             var typeCache = new TileType[_config.Width, _config.Height];
             var tasks = new UniTask[_config.Width * _config.Height];
             var idx = 0;
-            for (int x = 0; x < _config.Width; x++)
-                for (int y = 0; y < _config.Height; y++)
+            for (var x = 0; x < _config.Width; x++)
+                for (var y = 0; y < _config.Height; y++)
                 {
                     var pos = new Vector2Int(x, y);
                     var tileConfig = GetNoMatchConfig(x, y, typeCache);
@@ -113,15 +115,15 @@ namespace Project.Scripts.Services
                     _grid[x, y] = tile;
                     tasks[idx++] = tile.Animator.AnimateSpawn();
                 }
-            
+
             await UniTask.WhenAll(tasks);
         }
 
         public async UniTask RemoveMatches(List<MatchResult> matches)
         {
             var posSet = new HashSet<Vector2Int>();
-            for (int i = 0; i < matches.Count; i++)
-                for (int j = 0; j < matches[i].Positions.Count; j++)
+            for (var i = 0; i < matches.Count; i++)
+                for (var j = 0; j < matches[i].Positions.Count; j++)
                     posSet.Add(matches[i].Positions[j]);
 
             await ProcessRemovals(new List<Vector2Int>(posSet));
@@ -154,9 +156,9 @@ namespace Project.Scripts.Services
             _grid[from.x, from.y] = tileB;
             _grid[to.x, to.y] = tileA;
 
-            if (tileA) 
+            if (tileA)
                 tileA.GridPosition = to;
-            if (tileB) 
+            if (tileB)
                 tileB.GridPosition = from;
 
             await UniTask.WhenAll(
@@ -165,13 +167,12 @@ namespace Project.Scripts.Services
             );
         }
 
-
         public async UniTask ShuffleGrid()
         {
             var positions = new List<Vector2Int>();
             var configs = new List<TileConfig>();
-            for (int x = 0; x < _config.Width; x++)
-                for (int y = 0; y < _config.Height; y++)
+            for (var x = 0; x < _config.Width; x++)
+                for (var y = 0; y < _config.Height; y++)
                 {
                     var tile = _grid[x, y];
                     if (tile)
@@ -181,17 +182,17 @@ namespace Project.Scripts.Services
                     }
                 }
 
-            for (int i = configs.Count - 1; i > 0; i--)
+            for (var i = configs.Count - 1; i > 0; i--)
             {
-                int j = Random.Range(0, i + 1);
+                var j = Random.Range(0, i + 1);
                 (configs[i], configs[j]) = (configs[j], configs[i]);
             }
 
             var assignedTypes = new TileType[_config.Width, _config.Height];
-            for (int i = 0; i < positions.Count; i++)
+            for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
-                for (int j = i; j < configs.Count; j++)
+                for (var j = i; j < configs.Count; j++)
                 {
                     if (false == WouldCreateMatch(pos.x, pos.y, configs[j].Type, assignedTypes))
                     {
@@ -203,7 +204,7 @@ namespace Project.Scripts.Services
             }
 
             var tasks = new List<UniTask>();
-            for (int i = 0; i < positions.Count; i++)
+            for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
                 _grid[pos.x, pos.y].Init(configs[i], pos);
@@ -238,13 +239,13 @@ namespace Project.Scripts.Services
         {
             if (type == TileType.None)
                 return false;
-            
-            if (x >= 2 && assigned[x - 1, y] == type && assigned[x - 2, y] == type) 
+
+            if (x >= 2 && assigned[x - 1, y] == type && assigned[x - 2, y] == type)
                 return true;
-            
-            if (y >= 2 && assigned[x, y - 1] == type && assigned[x, y - 2] == type) 
+
+            if (y >= 2 && assigned[x, y - 1] == type && assigned[x, y - 2] == type)
                 return true;
-            
+
             return false;
         }
 
@@ -256,42 +257,42 @@ namespace Project.Scripts.Services
             if (y >= 2 && types[x, y - 1] == types[x, y - 2] && types[x, y - 1] != TileType.None)
                 forbidden.Add(types[x, y - 1]);
 
-            for (int attempt = 0; attempt < 10; attempt++)
+            for (var attempt = 0; attempt < 10; attempt++)
             {
                 var config = _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
                 if (false == forbidden.Contains(config.Type))
                     return config;
             }
-            
+
             return _config.RegularTiles[0];
         }
 
         private async UniTask ProcessRemovals(List<Vector2Int> positions)
         {
             var toDestroy = new List<(Vector2Int pos, Tile tile)>(positions.Count);
-            for (int i = 0; i < positions.Count; i++)
+            for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
-                if (false == IsValidPosition(pos)) 
+                if (false == IsValidPosition(pos))
                     continue;
-                
+
                 var tile = _grid[pos.x, pos.y];
-                if (!tile) 
+                if (!tile)
                     continue;
-                
+
                 toDestroy.Add((pos, tile));
             }
 
-            if (toDestroy.Count == 0) 
+            if (toDestroy.Count == 0)
                 return;
 
             var tasks = new UniTask[toDestroy.Count];
-            for (int i = 0; i < toDestroy.Count; i++)
+            for (var i = 0; i < toDestroy.Count; i++)
                 tasks[i] = toDestroy[i].tile.Animator.AnimateDestroy();
-            
+
             await UniTask.WhenAll(tasks);
 
-            for (int i = 0; i < toDestroy.Count; i++)
+            for (var i = 0; i < toDestroy.Count; i++)
             {
                 var (pos, tile) = toDestroy[i];
                 _grid[pos.x, pos.y] = null;
