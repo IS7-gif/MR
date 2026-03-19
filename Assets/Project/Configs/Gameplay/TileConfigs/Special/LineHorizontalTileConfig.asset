@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: LineHorizontalTileConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.TileConfig
   _type: 0
-  _sprite: {fileID: 21300000, guid: 71d945fef65fcda408294ac7a1d12305, type: 3}
+  _sprite: {fileID: 21300000, guid: 157ade0e1988af74db76a50dc1cb722e, type: 3}
   _behaviour: {fileID: 11400000, guid: c91374f1188aaa549882bbec3e8c2ba0, type: 2}

@@ -24,12 +24,16 @@ namespace Project.Scripts.Configs
         [Tooltip("Duration in seconds for the tile spawn animation")]
         [SerializeField] private float _spawnDuration = 0.15f;
 
-        
+        [Tooltip("Pause in seconds between successive chain-reaction waves (bomb → line rune → next explosion, etc.)")]
+        [SerializeField] private float _chainReactionWaveDelay = 0.12f;
+
+
         public float SwapDuration => _swapDuration;
         public float FallDuration => _fallDuration;
         public Ease FallEase => _fallEase;
         public float DestroyDuration => _destroyDuration;
         public Ease DestroyEase => _destroyEase;
         public float SpawnDuration => _spawnDuration;
+        public float ChainReactionWaveDelay => _chainReactionWaveDelay;
     }
 }

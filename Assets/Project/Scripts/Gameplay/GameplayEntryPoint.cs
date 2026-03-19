@@ -28,24 +28,22 @@ namespace Project.Scripts.Gameplay
         private InputConfig _inputConfig;
         private IDamageCalculator _damageCalculator;
         private SpecialTileConfig _specialTileConfig;
-
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private GameStateService _gameStateService;
         private GameAudioController _gameAudioController;
 
-
-        public void OnDestroy()
+        
+        private void Start()
+        {
+            InitAsync().Forget();
+        }
+        
+        private void OnDestroy()
         {
             _swapHandler?.Dispose();
             _inputService?.Dispose();
             _gameStateService?.Dispose();
-        }
-
-
-        private void Start()
-        {
-            InitAsync().Forget();
         }
 
 
@@ -74,7 +72,7 @@ namespace Project.Scripts.Gameplay
             var cellSize = ComputeCellSize(_boardConfig);
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
-            var gridManager = new GridManager(_boardConfig, pool, cellSize);
+            var gridManager = new GridManager(_boardConfig, _animConfig, pool, cellSize);
             gridManager.SetOrigin(ComputeGridOrigin(_boardConfig, cellSize));
 
             _boardView.Setup(_boardConfig.Width, _boardConfig.Height, cellSize,
@@ -87,6 +85,7 @@ namespace Project.Scripts.Gameplay
 
             var moveChecker = new MoveChecker(gridManager, matchFinder, _boardConfig);
             var specialTileResolver = new SpecialTileResolver(_specialTileConfig);
+            var swapComboResolver = new SwapComboResolver();
 
             _gameStateService = new GameStateService();
 
@@ -99,7 +98,8 @@ namespace Project.Scripts.Gameplay
                 moveChecker,
                 _damageCalculator,
                 _gameStateService,
-                specialTileResolver);
+                specialTileResolver,
+                swapComboResolver);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus);
             _gameAudioController.StartMusic();

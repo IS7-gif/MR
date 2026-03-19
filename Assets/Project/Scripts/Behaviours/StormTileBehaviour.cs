@@ -8,15 +8,19 @@ namespace Project.Scripts.Behaviours
     public class StormTileBehaviour : TileBehaviour
     {
         public override bool IsActivatedBySwap => true;
+        public override SpecialTileKind SpecialKind => SpecialTileKind.Storm;
 
 
         public override void OnTileDestroyed(Vector2Int gridPos, IGridManager grid)
         {
             var tile = grid.GetTile(gridPos);
-            if (!tile)
+            if (false == tile)
                 return;
 
-            var targetType = tile.PayloadType;
+            var targetType = tile.PayloadType != TileType.None
+                ? tile.PayloadType
+                : grid.GetMostCommonRegularType();
+
             if (targetType == TileType.None)
                 return;
 

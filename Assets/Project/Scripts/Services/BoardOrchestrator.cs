@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Behaviours;
 using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
@@ -24,13 +25,14 @@ namespace Project.Scripts.Services
         private readonly IGameStateService _gameStateService;
         private readonly EventBus _eventBus;
         private readonly SpecialTileResolver _specialTileResolver;
+        private readonly SwapComboResolver _swapComboResolver;
         private bool _isProcessing;
 
 
         public BoardOrchestrator(EventBus eventBus, IGridManager grid, IGravityHandler gravity,
             IMatchFinder matchFinder, ISwapInputHandler swapHandler, IMoveChecker moveChecker,
             IDamageCalculator damageCalculator, IGameStateService gameStateService,
-            SpecialTileResolver specialTileResolver)
+            SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver)
         {
             _eventBus = eventBus;
             _grid = grid;
@@ -41,12 +43,12 @@ namespace Project.Scripts.Services
             _damageCalculator = damageCalculator;
             _gameStateService = gameStateService;
             _specialTileResolver = specialTileResolver;
+            _swapComboResolver = swapComboResolver;
         }
 
         public UniTask InitAsync()
         {
             _swapHandler.OnSwapRequested += OnSwapRequested;
-
             return UniTask.CompletedTask;
         }
 
@@ -69,54 +71,66 @@ namespace Project.Scripts.Services
 
         private async UniTask HandleSwapAsync(SwapRequest request)
         {
-            if (!_grid.GetTile(request.From) || !_grid.GetTile(request.To))
+            var fromTile = _grid.GetTile(request.From);
+            var toTile = _grid.GetTile(request.To);
+
+            if (false == fromTile || false == toTile)
                 return;
 
             _isProcessing = true;
             try
             {
-                await _grid.SwapTiles(request.From, request.To);
+                var fromKind = fromTile.Config.Behaviour.SpecialKind;
+                var toKind = toTile.Config.Behaviour.SpecialKind;
+                var fromIsSpecial = fromKind != SpecialTileKind.None;
+                var toIsSpecial = toKind != SpecialTileKind.None;
 
-                var tileAtTo = _grid.GetTile(request.To);
-                var tileAtFrom = _grid.GetTile(request.From);
+                await _grid.SwapTiles(request.From, request.To);
 
                 var waves = new List<WaveBreakdown>();
                 var bombDamage = 0;
 
-                var bombActivated = false;
-                var anyBomb = (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap) ||
-                              (tileAtFrom && tileAtFrom.Config.Behaviour.IsActivatedBySwap);
-                var tilesBefore = anyBomb ? CountActiveTiles(_grid.GetGridState()) : 0;
-
-                if (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap)
+                if (fromIsSpecial && toIsSpecial)
                 {
-                    await _grid.ActivateBySwap(request.To);
-                    bombActivated = true;
-                }
+                    var tilesBefore = CountActiveTiles(_grid.GetGridState());
 
-                if (tileAtFrom && tileAtFrom.Config.Behaviour.IsActivatedBySwap)
-                {
-                    await _grid.ActivateBySwap(request.From);
-                    bombActivated = true;
-                }
+                    await ExecuteSwapCombo(fromKind, toKind, request.To, request.From, fromTile, toTile);
 
-                if (bombActivated)
-                {
                     _eventBus.Publish(new BombActivatedEvent());
-                    var tilesAfter = CountActiveTiles(_grid.GetGridState());
-                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - tilesAfter);
+                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(_grid.GetGridState()));
 
-                    await _gravity.ApplyGravity();
-                    await _gravity.SpawnNewTiles();
-                    var chainMatches = _matchFinder.FindMatches(_grid.GetGridState());
-                    if (chainMatches.Count > 0)
-                        await ProcessMatchChain(chainMatches, waves, request.PivotPosition);
-                    await EnsureMovesAvailable();
+                    await RunPostActivationFlow(waves, request.PivotPosition);
+                }
+                else if (fromIsSpecial || toIsSpecial)
+                {
+                    Tile specialTile, partnerTile;
+                    Vector2Int specialFinalPos;
+
+                    if (fromIsSpecial)
+                    {
+                        specialTile = fromTile;
+                        specialFinalPos = request.To;
+                        partnerTile = toTile;
+                    }
+                    else
+                    {
+                        specialTile = toTile;
+                        specialFinalPos = request.From;
+                        partnerTile = fromTile;
+                    }
+
+                    var tilesBefore = CountActiveTiles(_grid.GetGridState());
+
+                    await ActivateSpecialWithPartner(specialTile, partnerTile, specialFinalPos);
+
+                    _eventBus.Publish(new BombActivatedEvent());
+                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(_grid.GetGridState()));
+
+                    await RunPostActivationFlow(waves, request.PivotPosition);
                 }
                 else
                 {
-                    var gridState = _grid.GetGridState();
-                    var matches = _matchFinder.FindMatches(gridState);
+                    var matches = _matchFinder.FindMatches(_grid.GetGridState());
 
                     if (matches.Count == 0)
                         await _grid.SwapTiles(request.To, request.From);
@@ -131,6 +145,130 @@ namespace Project.Scripts.Services
             {
                 _isProcessing = false;
             }
+        }
+
+        private async UniTask ActivateSpecialWithPartner(Tile specialTile, Tile partnerTile, Vector2Int specialFinalPos)
+        {
+            if (specialTile.Config.Behaviour.SpecialKind == SpecialTileKind.Storm)
+                specialTile.SetPayloadType(partnerTile.Type);
+
+            await _grid.ActivateBySwap(specialFinalPos);
+        }
+
+        private async UniTask ExecuteSwapCombo(SpecialTileKind kindA, SpecialTileKind kindB,
+            Vector2Int posA, Vector2Int posB, Tile tileA, Tile tileB)
+        {
+            var comboType = _swapComboResolver.Resolve(kindA, kindB);
+
+            switch (comboType)
+            {
+                case SwapComboType.StormStorm:
+                    await ExecuteStormStormCombo(posA, posB);
+                    break;
+
+                case SwapComboType.StormBomb:
+                {
+                    var stormPos = kindA == SpecialTileKind.Storm ? posA : posB;
+                    await ExecuteStormBombCombo(stormPos);
+                    break;
+                }
+
+                case SwapComboType.StormLine:
+                {
+                    var stormPos = kindA == SpecialTileKind.Storm ? posA : posB;
+                    await ExecuteStormLineCombo(stormPos);
+                    break;
+                }
+
+                case SwapComboType.BombBomb:
+                {
+                    var doubleRadius = GetBombDoubleRadius(tileA, tileB);
+                    await ExecuteBombBombCombo(posA, posB, doubleRadius);
+                    break;
+                }
+
+                case SwapComboType.BombLine:
+                {
+                    var bombPos = kindA == SpecialTileKind.Bomb ? posA : posB;
+                    var bombTile = kindA == SpecialTileKind.Bomb ? tileA : tileB;
+                    var radius = GetBombRadius(bombTile);
+                    await ExecuteBombLineCombo(posA, posB, bombPos, radius);
+                    break;
+                }
+
+                case SwapComboType.LineLine:
+                    await ExecuteLineLineCombo(posA, posB);
+                    break;
+            }
+        }
+
+        private async UniTask ExecuteStormStormCombo(Vector2Int posA, Vector2Int posB)
+        {
+            await UniTask.WhenAll(_grid.ConsumeTile(posA), _grid.ConsumeTile(posB));
+            var allPositions = _grid.GetAllOccupied();
+            await _grid.ActivateTiles(allPositions);
+        }
+
+        private async UniTask ExecuteStormBombCombo(Vector2Int stormPos)
+        {
+            await _grid.ConsumeTile(stormPos);
+            var bombPositions = _grid.GetAllSpecialsOfKind(SpecialTileKind.Bomb);
+            if (bombPositions.Count == 0)
+                return;
+
+            await _grid.ActivateTiles(bombPositions);
+        }
+
+        private async UniTask ExecuteStormLineCombo(Vector2Int stormPos)
+        {
+            await _grid.ConsumeTile(stormPos);
+            var linePositions = _grid.GetAllSpecialsOfKind(SpecialTileKind.LineRuneH);
+            linePositions.AddRange(_grid.GetAllSpecialsOfKind(SpecialTileKind.LineRuneV));
+            if (linePositions.Count == 0)
+                return;
+
+            await _grid.ActivateTiles(linePositions);
+        }
+
+        private async UniTask ExecuteBombBombCombo(Vector2Int posA, Vector2Int posB, int doubleRadius)
+        {
+            await UniTask.WhenAll(_grid.ConsumeTile(posA), _grid.ConsumeTile(posB));
+
+            var explosion = new HashSet<Vector2Int>(_grid.GetNeighboursInRadius(posA, doubleRadius));
+            foreach (var p in _grid.GetNeighboursInRadius(posB, doubleRadius))
+                explosion.Add(p);
+
+            await _grid.ActivateTiles(new List<Vector2Int>(explosion));
+        }
+
+        private async UniTask ExecuteBombLineCombo(Vector2Int posA, Vector2Int posB,
+            Vector2Int bombPos, int bombRadius)
+        {
+            await UniTask.WhenAll(_grid.ConsumeTile(posA), _grid.ConsumeTile(posB));
+
+            var area = new HashSet<Vector2Int>(_grid.GetNeighboursInRadius(bombPos, bombRadius));
+            foreach (var p in _grid.GetAllInRow(bombPos.y))
+                area.Add(p);
+            foreach (var p in _grid.GetAllInColumn(bombPos.x))
+                area.Add(p);
+
+            await _grid.ActivateTiles(new List<Vector2Int>(area));
+        }
+
+        private async UniTask ExecuteLineLineCombo(Vector2Int posA, Vector2Int posB)
+        {
+            await _grid.ActivateTiles(new List<Vector2Int> { posA, posB });
+        }
+
+        private async UniTask RunPostActivationFlow(List<WaveBreakdown> waves, Vector2Int pivotPosition)
+        {
+            await _gravity.ApplyGravity();
+            await _gravity.SpawnNewTiles();
+            var chainMatches = _matchFinder.FindMatches(_grid.GetGridState());
+            if (chainMatches.Count > 0)
+                await ProcessMatchChain(chainMatches, waves, pivotPosition);
+
+            await EnsureMovesAvailable();
         }
 
         private async UniTask ProcessMatchChain(List<MatchResult> matches, List<WaveBreakdown> waves, Vector2Int pivotPosition)
@@ -178,6 +316,19 @@ namespace Project.Scripts.Services
                     count++;
 
             return count;
+        }
+
+        private static int GetBombRadius(Tile tile)
+        {
+            return (tile.Config.Behaviour as BombTileBehaviour)?.Radius ?? 1;
+        }
+
+        private static int GetBombDoubleRadius(Tile tileA, Tile tileB)
+        {
+            var bomb = tileA.Config.Behaviour as BombTileBehaviour
+                    ?? tileB.Config.Behaviour as BombTileBehaviour;
+            
+            return bomb?.DoubleRadius ?? 2;
         }
     }
 }

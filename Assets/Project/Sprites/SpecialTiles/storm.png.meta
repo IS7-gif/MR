@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 07274fc356a1af64e9055ad6582613ae
+guid: c1f12610b9990924fa94f1f346b9435d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1073684255878518144
-    second: rune_beige_storm_0
+      213: 2146828524736656195
+    second: storm_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,12 +126,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: rune_beige_storm_0
+      name: storm_0
       rect:
         serializedVersion: 2
-        x: 49
-        y: 6
-        width: 414
+        x: 24
+        y: 10
+        width: 472
         height: 500
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0859190642e76ee00800000000000000
-      internalID: 1073684255878518144
+      spriteID: 343ba9a3b211bcd10800000000000000
+      internalID: 2146828524736656195
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      rune_beige_storm_0: 1073684255878518144
+      storm_0: 2146828524736656195
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

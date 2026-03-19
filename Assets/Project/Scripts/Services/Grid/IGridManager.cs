@@ -16,16 +16,24 @@ namespace Project.Scripts.Services.Grid
         Vector2Int WorldToGrid(Vector3 worldPos);
         TileType[,] GetGridState();
         TileConfig ResolveRegularTile();
-        UniTask PopulateGrid();
-        UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, SpecialTileSpawnData> specialPlacements);
-        UniTask SwapTiles(Vector2Int from, Vector2Int to);
+        void SetOrigin(Vector3 origin);
+
         List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius);
         List<Vector2Int> GetAllInRow(int y);
         List<Vector2Int> GetAllInColumn(int x);
         List<Vector2Int> GetAllOfType(TileType type);
+        List<Vector2Int> GetAllSpecialsOfKind(SpecialTileKind kind);
+        List<Vector2Int> GetAllOccupied();
+        TileType GetMostCommonRegularType();
+
         void ScheduleRemove(List<Vector2Int> positions);
-        void SetOrigin(Vector3 origin);
+
+        UniTask PopulateGrid();
+        UniTask SwapTiles(Vector2Int from, Vector2Int to);
+        UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, SpecialTileSpawnData> specialPlacements);
         UniTask ActivateBySwap(Vector2Int pos);
+        UniTask ActivateTiles(List<Vector2Int> positions);
+        UniTask ConsumeTile(Vector2Int pos);
         UniTask ShuffleGrid();
         void ForceInjectMove();
     }

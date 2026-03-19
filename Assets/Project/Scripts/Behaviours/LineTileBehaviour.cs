@@ -1,4 +1,5 @@
 using Project.Scripts.Services.Grid;
+using Project.Scripts.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -6,11 +7,14 @@ namespace Project.Scripts.Behaviours
     [CreateAssetMenu(fileName = "LineTileBehaviour", menuName = "Configs/Behaviours/Line")]
     public class LineTileBehaviour : TileBehaviour
     {
-        [Tooltip("True → clears the entire row; False → clears the entire column")]
+        [Tooltip("True - clears the entire row; False - clears the entire column")]
         [SerializeField] private bool _isHorizontal;
 
 
         public override bool IsActivatedBySwap => true;
+        public override SpecialTileKind SpecialKind => _isHorizontal ? SpecialTileKind.LineRuneH : SpecialTileKind.LineRuneV;
+
+        public bool IsHorizontal => _isHorizontal;
 
 
         public override void OnTileDestroyed(Vector2Int gridPos, IGridManager grid)

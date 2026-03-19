@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5b37e83374318b3428d04beea487e288
+guid: 157ade0e1988af74db76a50dc1cb722e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1646870838845501634
-    second: rune_blue_vertical_0
+      213: -5112756061860078072
+    second: arrow_horizontal_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: rune_blue_vertical_0
+      name: arrow_horizontal_0
       rect:
         serializedVersion: 2
-        x: 49
-        y: 6
-        width: 414
-        height: 500
+        x: 6
+        y: 196
+        width: 499
+        height: 120
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e3f0aa392b32529e0800000000000000
-      internalID: -1646870838845501634
+      spriteID: 80eda954377db09b0800000000000000
+      internalID: -5112756061860078072
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      rune_blue_vertical_0: -1646870838845501634
+      arrow_horizontal_0: -5112756061860078072
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

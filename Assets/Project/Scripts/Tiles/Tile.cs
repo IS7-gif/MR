@@ -24,5 +24,10 @@ namespace Project.Scripts.Tiles
             PayloadType = payloadType;
             _spriteRenderer.sprite = config.Sprite;
         }
+
+        public void SetPayloadType(TileType type)
+        {
+            PayloadType = type;
+        }
     }
 }
