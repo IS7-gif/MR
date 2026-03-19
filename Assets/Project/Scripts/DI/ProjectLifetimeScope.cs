@@ -1,5 +1,6 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Audio.AudioSystem;
+using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.UISystem;
 using UnityEngine;
@@ -18,9 +19,11 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BoardConfig);
             builder.RegisterInstance(_mainConfig.AnimationConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
-            builder.RegisterInstance(_mainConfig.ScoreConfig);
+            builder.RegisterInstance(_mainConfig.DamageConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);
             builder.RegisterInstance(_mainConfig.AudioSFXConfig);
+
+            builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 
             builder.Register<EventBus>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton);

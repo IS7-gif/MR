@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
+using Project.Scripts.Services.Grid;
+using Project.Scripts.Services.Input;
 using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
+using UnityEngine;
 
 namespace Project.Scripts.Services
 {
@@ -17,15 +21,15 @@ namespace Project.Scripts.Services
         private readonly IMatchFinder _matchFinder;
         private readonly ISwapInputHandler _swapHandler;
         private readonly IMoveChecker _moveChecker;
-        private readonly IScoreService _scoreService;
+        private readonly IDamageCalculator _damageCalculator;
         private readonly IGameStateService _gameStateService;
         private readonly EventBus _eventBus;
         private bool _isProcessing;
 
 
-        public BoardOrchestrator(EventBus eventBus, IGridManager grid, IGravityHandler gravity, IMatchFinder matchFinder,
-            ISwapInputHandler swapHandler, IMoveChecker moveChecker, IScoreService scoreService,
-            IGameStateService gameStateService)
+        public BoardOrchestrator(EventBus eventBus, IGridManager grid, IGravityHandler gravity,
+            IMatchFinder matchFinder, ISwapInputHandler swapHandler, IMoveChecker moveChecker,
+            IDamageCalculator damageCalculator, IGameStateService gameStateService)
         {
             _eventBus = eventBus;
             _grid = grid;
@@ -33,7 +37,7 @@ namespace Project.Scripts.Services
             _matchFinder = matchFinder;
             _swapHandler = swapHandler;
             _moveChecker = moveChecker;
-            _scoreService = scoreService;
+            _damageCalculator = damageCalculator;
             _gameStateService = gameStateService;
         }
 
@@ -74,6 +78,9 @@ namespace Project.Scripts.Services
                 var tileAtTo = _grid.GetTile(request.To);
                 var tileAtFrom = _grid.GetTile(request.From);
 
+                var waves = new List<WaveBreakdown>();
+                int bombDamage = 0;
+
                 bool bombActivated = false;
                 bool anyBomb = (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap) ||
                                (tileAtFrom && tileAtFrom.Config.Behaviour.IsActivatedBySwap);
@@ -95,13 +102,13 @@ namespace Project.Scripts.Services
                 {
                     _eventBus.Publish(new BombActivatedEvent());
                     int tilesAfter = CountActiveTiles(_grid.GetGridState());
-                    _scoreService.AddBombScore(tilesBefore - tilesAfter);
+                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - tilesAfter);
 
                     await _gravity.ApplyGravity();
                     await _gravity.SpawnNewTiles(new SpawnContext());
                     var chainMatches = _matchFinder.FindMatches(_grid.GetGridState());
                     if (chainMatches.Count > 0)
-                        await ProcessMatchChain(chainMatches);
+                        await ProcessMatchChain(chainMatches, waves);
                     await EnsureMovesAvailable();
                 }
                 else
@@ -112,8 +119,11 @@ namespace Project.Scripts.Services
                     if (matches.Count == 0)
                         await _grid.SwapTiles(request.To, request.From);
                     else
-                        await ProcessMatchChain(matches);
+                        await ProcessMatchChain(matches, waves);
                 }
+
+                if (waves.Count > 0 || bombDamage > 0)
+                    Debug.Log(new DamageBreakdown(waves, bombDamage).ToLogString());
             }
             finally
             {
@@ -121,13 +131,13 @@ namespace Project.Scripts.Services
             }
         }
 
-        private async UniTask ProcessMatchChain(List<MatchResult> matches)
+        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<WaveBreakdown> waves)
         {
             int cascadeLevel = 1;
             while (matches.Count > 0)
             {
                 _eventBus.Publish(new MatchPlayedEvent(cascadeLevel));
-                _scoreService.AddMatchScore(matches, cascadeLevel);
+                waves.Add(_damageCalculator.CalculateWave(matches, cascadeLevel));
                 cascadeLevel++;
 
                 var context = BuildContext(matches);
@@ -156,7 +166,7 @@ namespace Project.Scripts.Services
 
             var immediateMatches = _matchFinder.FindMatches(_grid.GetGridState());
             if (immediateMatches.Count > 0)
-                await ProcessMatchChain(immediateMatches);
+                await ProcessMatchChain(immediateMatches, new List<WaveBreakdown>());
         }
 
         private static SpawnContext BuildContext(List<MatchResult> matches)
@@ -186,7 +196,7 @@ namespace Project.Scripts.Services
             int count = 0;
             foreach (var type in state)
                 if (type != TileType.None) count++;
-            
+
             return count;
         }
     }

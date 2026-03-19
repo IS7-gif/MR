@@ -3,8 +3,10 @@ using Project.Scripts.Configs;
 using Project.Scripts.Services;
 using Project.Scripts.Services.Audio;
 using Project.Scripts.Services.Audio.AudioSystem;
+using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
-using Project.Scripts.UI;
+using Project.Scripts.Services.Grid;
+using Project.Scripts.Services.Input;
 using UnityEngine;
 using VContainer;
 
@@ -14,8 +16,7 @@ namespace Project.Scripts.Gameplay
     {
         [Tooltip("Parent transform for all instantiated tile objects")]
         [SerializeField] private Transform _tileContainer;
-        [Tooltip("HUD view that displays the current score")]
-        [SerializeField] private ScoreHUDView _scoreHUDView;
+
         [Tooltip("View component that sizes the board frame and spawn mask at runtime")]
         [SerializeField] private BoardView _boardView;
 
@@ -25,11 +26,10 @@ namespace Project.Scripts.Gameplay
         private BoardConfig _boardConfig;
         private AnimationConfig _animConfig;
         private InputConfig _inputConfig;
-        private ScoreConfig _scoreConfig;
+        private IDamageCalculator _damageCalculator;
 
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
-        private ScoreService _scoreService;
         private GameStateService _gameStateService;
         private GameAudioController _gameAudioController;
 
@@ -38,7 +38,6 @@ namespace Project.Scripts.Gameplay
         {
             _swapHandler?.Dispose();
             _inputService?.Dispose();
-            _scoreService?.Dispose();
             _gameStateService?.Dispose();
         }
 
@@ -56,14 +55,14 @@ namespace Project.Scripts.Gameplay
             BoardConfig boardConfig,
             AnimationConfig animConfig,
             InputConfig inputConfig,
-            ScoreConfig scoreConfig)
+            IDamageCalculator damageCalculator)
         {
             _eventBus = eventBus;
             _audioService = audioService;
             _boardConfig = boardConfig;
             _animConfig = animConfig;
             _inputConfig = inputConfig;
-            _scoreConfig = scoreConfig;
+            _damageCalculator = damageCalculator;
         }
 
 
@@ -85,9 +84,6 @@ namespace Project.Scripts.Gameplay
 
             var moveChecker = new MoveChecker(gridManager, matchFinder, _boardConfig);
 
-            _scoreService = new ScoreService(_scoreConfig);
-            _scoreHUDView.Bind(_scoreService);
-
             _gameStateService = new GameStateService();
 
             var orchestrator = new BoardOrchestrator(
@@ -97,7 +93,7 @@ namespace Project.Scripts.Gameplay
                 matchFinder,
                 _swapHandler,
                 moveChecker,
-                _scoreService,
+                _damageCalculator,
                 _gameStateService);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus);

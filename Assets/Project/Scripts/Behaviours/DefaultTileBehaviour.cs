@@ -1,4 +1,4 @@
-using Project.Scripts.Services;
+using Project.Scripts.Services.Grid;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
