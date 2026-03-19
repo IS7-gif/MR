@@ -5,6 +5,8 @@ namespace Project.Scripts.Configs
         LShape,
         TShape,
         Match4,
+        Match4Horizontal,
+        Match4Vertical,
         Match5
     }
 }

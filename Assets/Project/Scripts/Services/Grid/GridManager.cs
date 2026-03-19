@@ -24,19 +24,35 @@ namespace Project.Scripts.Services.Grid
             _grid = new Tile[config.Width, config.Height];
         }
 
-        public void SetOrigin(Vector3 origin) => _origin = origin;
+        public void SetOrigin(Vector3 origin)
+        {
+            _origin = origin;
+        }
 
-        public Tile GetTile(Vector2Int pos) => _grid[pos.x, pos.y];
+        public Tile GetTile(Vector2Int pos)
+        {
+            return _grid[pos.x, pos.y];
+        }
 
-        public void SetTile(Vector2Int pos, Tile tile) => _grid[pos.x, pos.y] = tile;
+        public void SetTile(Vector2Int pos, Tile tile)
+        {
+            _grid[pos.x, pos.y] = tile;
+        }
 
-        public void ClearTile(Vector2Int pos) => _grid[pos.x, pos.y] = null;
+        public void ClearTile(Vector2Int pos)
+        {
+            _grid[pos.x, pos.y] = null;
+        }
 
-        public bool IsValidPosition(Vector2Int pos) =>
-            pos.x >= 0 && pos.x < _config.Width && pos.y >= 0 && pos.y < _config.Height;
+        public bool IsValidPosition(Vector2Int pos)
+        {
+            return pos.x >= 0 && pos.x < _config.Width && pos.y >= 0 && pos.y < _config.Height;
+        }
 
-        public Vector3 GridToWorld(Vector2Int pos) =>
-            _origin + new Vector3(pos.x * _cellSize, pos.y * _cellSize, 0f);
+        public Vector3 GridToWorld(Vector2Int pos)
+        {
+            return _origin + new Vector3(pos.x * _cellSize, pos.y * _cellSize, 0f);
+        }
 
         public Vector2Int WorldToGrid(Vector3 worldPos)
         {
@@ -58,8 +74,10 @@ namespace Project.Scripts.Services.Grid
             return state;
         }
 
-        public TileConfig ResolveRegularTile() =>
-            _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
+        public TileConfig ResolveRegularTile()
+        {
+            return _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
+        }
 
         public void ScheduleRemove(List<Vector2Int> positions)
         {
@@ -80,6 +98,35 @@ namespace Project.Scripts.Services.Grid
                     if (IsValidPosition(pos))
                         result.Add(pos);
                 }
+
+            return result;
+        }
+
+        public List<Vector2Int> GetAllInRow(int y)
+        {
+            var result = new List<Vector2Int>(_config.Width);
+            for (var x = 0; x < _config.Width; x++)
+                result.Add(new Vector2Int(x, y));
+
+            return result;
+        }
+
+        public List<Vector2Int> GetAllInColumn(int x)
+        {
+            var result = new List<Vector2Int>(_config.Height);
+            for (var y = 0; y < _config.Height; y++)
+                result.Add(new Vector2Int(x, y));
+
+            return result;
+        }
+
+        public List<Vector2Int> GetAllOfType(TileType type)
+        {
+            var result = new List<Vector2Int>();
+            for (var x = 0; x < _config.Width; x++)
+                for (var y = 0; y < _config.Height; y++)
+                    if (_grid[x, y] && _grid[x, y].Type == type)
+                        result.Add(new Vector2Int(x, y));
 
             return result;
         }
@@ -105,7 +152,7 @@ namespace Project.Scripts.Services.Grid
             await UniTask.WhenAll(tasks);
         }
 
-        public async UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, TileConfig> specialPlacements)
+        public async UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, SpecialTileSpawnData> specialPlacements)
         {
             var posSet = new HashSet<Vector2Int>();
             for (var i = 0; i < matches.Count; i++)
@@ -254,7 +301,7 @@ namespace Project.Scripts.Services.Grid
             return _config.RegularTiles[0];
         }
 
-        private async UniTask ProcessRemovals(List<Vector2Int> positions, Dictionary<Vector2Int, TileConfig> specialPlacements)
+        private async UniTask ProcessRemovals(List<Vector2Int> positions, Dictionary<Vector2Int, SpecialTileSpawnData> specialPlacements)
         {
             var toDestroy = new List<(Vector2Int pos, Tile tile)>(positions.Count);
             for (var i = 0; i < positions.Count; i++)
@@ -282,8 +329,8 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < toDestroy.Count; i++)
             {
                 var (pos, tile) = toDestroy[i];
-                _grid[pos.x, pos.y] = null;
                 tile.Config.Behaviour.OnTileDestroyed(pos, this);
+                _grid[pos.x, pos.y] = null;
                 _pool.Release(tile);
             }
 
@@ -300,9 +347,10 @@ namespace Project.Scripts.Services.Grid
                 if (_grid[pos.x, pos.y])
                     continue;
 
+                var data = kvp.Value;
                 var specialTile = _pool.Get();
                 specialTile.transform.position = GridToWorld(pos);
-                specialTile.Init(kvp.Value, pos);
+                specialTile.Init(data.Config, pos, data.PayloadType);
                 _grid[pos.x, pos.y] = specialTile;
                 spawnTasks.Add(specialTile.Animator.AnimateSpawn());
             }

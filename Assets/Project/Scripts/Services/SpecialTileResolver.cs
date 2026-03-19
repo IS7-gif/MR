@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Grid;
+using Project.Scripts.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Services
@@ -13,10 +14,11 @@ namespace Project.Scripts.Services
         public SpecialTileResolver(SpecialTileConfig config) => _config = config;
 
 
-        // Returns a map of grid position - TileConfig for every special tile that should be placed this wave
-        public Dictionary<Vector2Int, TileConfig> Resolve(List<MatchResult> matches, Vector2Int pivotPosition)
+        // Returns a map of grid position → SpecialTileSpawnData for every special tile to be placed this wave.
+        // PayloadType carries the original match colour (used by Storm Rune; ignored by others).
+        public Dictionary<Vector2Int, SpecialTileSpawnData> Resolve(List<MatchResult> matches, Vector2Int pivotPosition)
         {
-            var result = new Dictionary<Vector2Int, TileConfig>();
+            var result = new Dictionary<Vector2Int, SpecialTileSpawnData>();
             var rules = _config.Rules;
 
             for (var i = 0; i < matches.Count; i++)
@@ -32,7 +34,7 @@ namespace Project.Scripts.Services
                     : pivotPosition;
 
                 if (false == result.ContainsKey(spawnPos))
-                    result[spawnPos] = entry.TileToSpawn;
+                    result[spawnPos] = new SpecialTileSpawnData(entry.TileToSpawn, match.TileType);
             }
 
             return result;
@@ -57,11 +59,13 @@ namespace Project.Scripts.Services
         {
             return condition switch
             {
-                SpecialTileCondition.LShape => match.Shape == MatchShape.LShape,
-                SpecialTileCondition.TShape => match.Shape == MatchShape.TShape,
-                SpecialTileCondition.Match4 => match.MaxLineLength == 4 && match.Shape is MatchShape.Horizontal or MatchShape.Vertical,
-                SpecialTileCondition.Match5 => match.MaxLineLength >= 5 && match.Shape is MatchShape.Horizontal or MatchShape.Vertical,
-                _ => false
+                SpecialTileCondition.LShape           => match.Shape == MatchShape.LShape,
+                SpecialTileCondition.TShape           => match.Shape == MatchShape.TShape,
+                SpecialTileCondition.Match4           => match.MaxLineLength == 4 && match.Shape is MatchShape.Horizontal or MatchShape.Vertical,
+                SpecialTileCondition.Match4Horizontal => match.MaxLineLength == 4 && match.Shape == MatchShape.Horizontal,
+                SpecialTileCondition.Match4Vertical   => match.MaxLineLength == 4 && match.Shape == MatchShape.Vertical,
+                SpecialTileCondition.Match5           => match.MaxLineLength >= 5 && match.Shape is MatchShape.Horizontal or MatchShape.Vertical,
+                _                                     => false
             };
         }
     }

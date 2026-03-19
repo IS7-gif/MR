@@ -13,13 +13,15 @@ namespace Project.Scripts.Tiles
         public Vector2Int GridPosition { get; set; }
         public TileConfig Config { get; private set; }
         public TileAnimator Animator => _animator;
+        public TileType PayloadType { get; private set; }
 
-        
-        public void Init(TileConfig config, Vector2Int gridPos)
+
+        public void Init(TileConfig config, Vector2Int gridPos, TileType payloadType = TileType.None)
         {
             Config = config;
             Type = config.Type;
             GridPosition = gridPos;
+            PayloadType = payloadType;
             _spriteRenderer.sprite = config.Sprite;
         }
     }

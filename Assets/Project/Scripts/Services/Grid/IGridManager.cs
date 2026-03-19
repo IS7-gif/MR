@@ -17,9 +17,12 @@ namespace Project.Scripts.Services.Grid
         TileType[,] GetGridState();
         TileConfig ResolveRegularTile();
         UniTask PopulateGrid();
-        UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, TileConfig> specialPlacements);
+        UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, SpecialTileSpawnData> specialPlacements);
         UniTask SwapTiles(Vector2Int from, Vector2Int to);
         List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius);
+        List<Vector2Int> GetAllInRow(int y);
+        List<Vector2Int> GetAllInColumn(int x);
+        List<Vector2Int> GetAllOfType(TileType type);
         void ScheduleRemove(List<Vector2Int> positions);
         void SetOrigin(Vector3 origin);
         UniTask ActivateBySwap(Vector2Int pos);
