@@ -27,6 +27,7 @@ namespace Project.Scripts.Gameplay
         private AnimationConfig _animConfig;
         private InputConfig _inputConfig;
         private IDamageCalculator _damageCalculator;
+        private SpecialTileConfig _specialTileConfig;
 
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
@@ -55,7 +56,8 @@ namespace Project.Scripts.Gameplay
             BoardConfig boardConfig,
             AnimationConfig animConfig,
             InputConfig inputConfig,
-            IDamageCalculator damageCalculator)
+            IDamageCalculator damageCalculator,
+            SpecialTileConfig specialTileConfig)
         {
             _eventBus = eventBus;
             _audioService = audioService;
@@ -63,6 +65,7 @@ namespace Project.Scripts.Gameplay
             _animConfig = animConfig;
             _inputConfig = inputConfig;
             _damageCalculator = damageCalculator;
+            _specialTileConfig = specialTileConfig;
         }
 
 
@@ -83,6 +86,7 @@ namespace Project.Scripts.Gameplay
             _swapHandler = new SwapInputHandler(_inputService, gridManager, _inputConfig.WorldDragThreshold);
 
             var moveChecker = new MoveChecker(gridManager, matchFinder, _boardConfig);
+            var specialTileResolver = new SpecialTileResolver(_specialTileConfig);
 
             _gameStateService = new GameStateService();
 
@@ -94,7 +98,8 @@ namespace Project.Scripts.Gameplay
                 _swapHandler,
                 moveChecker,
                 _damageCalculator,
-                _gameStateService);
+                _gameStateService,
+                specialTileResolver);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus);
             _gameAudioController.StartMusic();

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
-using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
@@ -16,13 +15,13 @@ namespace Project.Scripts.Services.Grid
         Vector3 GridToWorld(Vector2Int gridPos);
         Vector2Int WorldToGrid(Vector3 worldPos);
         TileType[,] GetGridState();
+        TileConfig ResolveRegularTile();
         UniTask PopulateGrid();
-        UniTask RemoveMatches(List<MatchResult> matches);
+        UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, TileConfig> specialPlacements);
         UniTask SwapTiles(Vector2Int from, Vector2Int to);
         List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius);
         void ScheduleRemove(List<Vector2Int> positions);
         void SetOrigin(Vector3 origin);
-        TileConfig ResolveNextTile(SpawnContext context);
         UniTask ActivateBySwap(Vector2Int pos);
         UniTask ShuffleGrid();
         void ForceInjectMove();

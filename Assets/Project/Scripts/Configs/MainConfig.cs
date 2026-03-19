@@ -12,6 +12,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private BoardConfig _boardConfig;
         [SerializeField] private AnimationConfig _animationConfig;
         [SerializeField] private DamageConfig _damageConfig;
+        [SerializeField] private SpecialTileConfig _specialTileConfig;
 
 
         public AudioMusicConfig AudioMusicConfig => _audioMusicConfig;
@@ -20,5 +21,6 @@ namespace Project.Scripts.Configs
         public BoardConfig BoardConfig => _boardConfig;
         public AnimationConfig AnimationConfig => _animationConfig;
         public DamageConfig DamageConfig => _damageConfig;
+        public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
     }
 }

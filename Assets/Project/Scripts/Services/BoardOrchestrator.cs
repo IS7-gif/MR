@@ -5,7 +5,6 @@ using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
-using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
@@ -24,12 +23,14 @@ namespace Project.Scripts.Services
         private readonly IDamageCalculator _damageCalculator;
         private readonly IGameStateService _gameStateService;
         private readonly EventBus _eventBus;
+        private readonly SpecialTileResolver _specialTileResolver;
         private bool _isProcessing;
 
 
         public BoardOrchestrator(EventBus eventBus, IGridManager grid, IGravityHandler gravity,
             IMatchFinder matchFinder, ISwapInputHandler swapHandler, IMoveChecker moveChecker,
-            IDamageCalculator damageCalculator, IGameStateService gameStateService)
+            IDamageCalculator damageCalculator, IGameStateService gameStateService,
+            SpecialTileResolver specialTileResolver)
         {
             _eventBus = eventBus;
             _grid = grid;
@@ -39,6 +40,7 @@ namespace Project.Scripts.Services
             _moveChecker = moveChecker;
             _damageCalculator = damageCalculator;
             _gameStateService = gameStateService;
+            _specialTileResolver = specialTileResolver;
         }
 
         public UniTask InitAsync()
@@ -79,12 +81,12 @@ namespace Project.Scripts.Services
                 var tileAtFrom = _grid.GetTile(request.From);
 
                 var waves = new List<WaveBreakdown>();
-                int bombDamage = 0;
+                var bombDamage = 0;
 
-                bool bombActivated = false;
-                bool anyBomb = (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap) ||
-                               (tileAtFrom && tileAtFrom.Config.Behaviour.IsActivatedBySwap);
-                int tilesBefore = anyBomb ? CountActiveTiles(_grid.GetGridState()) : 0;
+                var bombActivated = false;
+                var anyBomb = (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap) ||
+                              (tileAtFrom && tileAtFrom.Config.Behaviour.IsActivatedBySwap);
+                var tilesBefore = anyBomb ? CountActiveTiles(_grid.GetGridState()) : 0;
 
                 if (tileAtTo && tileAtTo.Config.Behaviour.IsActivatedBySwap)
                 {
@@ -101,14 +103,14 @@ namespace Project.Scripts.Services
                 if (bombActivated)
                 {
                     _eventBus.Publish(new BombActivatedEvent());
-                    int tilesAfter = CountActiveTiles(_grid.GetGridState());
+                    var tilesAfter = CountActiveTiles(_grid.GetGridState());
                     bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - tilesAfter);
 
                     await _gravity.ApplyGravity();
-                    await _gravity.SpawnNewTiles(new SpawnContext());
+                    await _gravity.SpawnNewTiles();
                     var chainMatches = _matchFinder.FindMatches(_grid.GetGridState());
                     if (chainMatches.Count > 0)
-                        await ProcessMatchChain(chainMatches, waves);
+                        await ProcessMatchChain(chainMatches, waves, request.PivotPosition);
                     await EnsureMovesAvailable();
                 }
                 else
@@ -119,7 +121,7 @@ namespace Project.Scripts.Services
                     if (matches.Count == 0)
                         await _grid.SwapTiles(request.To, request.From);
                     else
-                        await ProcessMatchChain(matches, waves);
+                        await ProcessMatchChain(matches, waves, request.PivotPosition);
                 }
 
                 if (waves.Count > 0 || bombDamage > 0)
@@ -131,19 +133,18 @@ namespace Project.Scripts.Services
             }
         }
 
-        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<WaveBreakdown> waves)
+        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<WaveBreakdown> waves, Vector2Int pivotPosition)
         {
-            int cascadeLevel = 1;
             while (matches.Count > 0)
             {
+                var cascadeLevel = waves.Count + 1;
                 _eventBus.Publish(new MatchPlayedEvent(cascadeLevel));
                 waves.Add(_damageCalculator.CalculateWave(matches, cascadeLevel));
-                cascadeLevel++;
 
-                var context = BuildContext(matches);
-                await _grid.RemoveMatches(matches);
+                var specialPlacements = _specialTileResolver.Resolve(matches, pivotPosition);
+                await _grid.RemoveMatches(matches, specialPlacements);
                 await _gravity.ApplyGravity();
-                await _gravity.SpawnNewTiles(context);
+                await _gravity.SpawnNewTiles();
                 matches = _matchFinder.FindMatches(_grid.GetGridState());
             }
 
@@ -155,7 +156,7 @@ namespace Project.Scripts.Services
             if (_moveChecker.HasPossibleMoves())
                 return;
 
-            for (int i = 0; i < ShuffleMaxAttempts; i++)
+            for (var i = 0; i < ShuffleMaxAttempts; i++)
             {
                 await _grid.ShuffleGrid();
                 if (_moveChecker.HasPossibleMoves())
@@ -166,36 +167,14 @@ namespace Project.Scripts.Services
 
             var immediateMatches = _matchFinder.FindMatches(_grid.GetGridState());
             if (immediateMatches.Count > 0)
-                await ProcessMatchChain(immediateMatches, new List<WaveBreakdown>());
-        }
-
-        private static SpawnContext BuildContext(List<MatchResult> matches)
-        {
-            int maxLen = 0;
-            int total = 0;
-            bool hasComplex = false;
-            for (int i = 0; i < matches.Count; i++)
-            {
-                if (matches[i].MaxLineLength > maxLen)
-                    maxLen = matches[i].MaxLineLength;
-                if (matches[i].IsComplex)
-                    hasComplex = true;
-                total += matches[i].Positions.Count;
-            }
-
-            return new SpawnContext
-            {
-                MaxLineLength = maxLen,
-                HasComplexMatch = hasComplex,
-                TotalDestroyed = total
-            };
+                await ProcessMatchChain(immediateMatches, new List<WaveBreakdown>(), Vector2Int.zero);
         }
 
         private static int CountActiveTiles(TileType[,] state)
         {
-            int count = 0;
+            var count = 0;
             foreach (var type in state)
-                if (type != TileType.None) 
+                if (type != TileType.None)
                     count++;
 
             return count;

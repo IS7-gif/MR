@@ -1,4 +1,3 @@
-using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
@@ -33,10 +32,7 @@ namespace Project.Scripts.Configs
         
         [Tooltip("Pool of regular tile configurations available for random spawning")]
         [SerializeField] private TileConfig[] _regularTiles;
-        
-        [Tooltip("Optional spawn rules that override random selection under specific conditions")]
-        [SerializeField] private SpawnRule[] _spawnRules;
-        
+
         [Tooltip("Minimum number of tiles in a row/column required to count as a match")]
         [SerializeField] private int _minMatchLength = 3;
 
@@ -50,7 +46,6 @@ namespace Project.Scripts.Configs
         public float MaskTopPadding => _maskTopPadding;
         public Tile TilePrefab => _tilePrefab;
         public TileConfig[] RegularTiles => _regularTiles;
-        public SpawnRule[] SpawnRules => _spawnRules;
         public int MinMatchLength => _minMatchLength;
     }
 }

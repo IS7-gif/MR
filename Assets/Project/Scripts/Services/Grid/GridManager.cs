@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
-using Project.Scripts.SpawnRules;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
@@ -24,9 +23,6 @@ namespace Project.Scripts.Services.Grid
             _cellSize = cellSize;
             _grid = new Tile[config.Width, config.Height];
         }
-
-
-        public UniTask InitAsync() => UniTask.CompletedTask;
 
         public void SetOrigin(Vector3 origin) => _origin = origin;
 
@@ -62,23 +58,13 @@ namespace Project.Scripts.Services.Grid
             return state;
         }
 
+        public TileConfig ResolveRegularTile() =>
+            _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
+
         public void ScheduleRemove(List<Vector2Int> positions)
         {
             for (var i = 0; i < positions.Count; i++)
                 _scheduledRemovals.Add(positions[i]);
-        }
-
-        public TileConfig ResolveNextTile(SpawnContext context)
-        {
-            if (null != _config.SpawnRules)
-                for (var i = 0; i < _config.SpawnRules.Length; i++)
-                {
-                    var result = _config.SpawnRules[i].TryGetSpecialTile(context);
-                    if (result)
-                        return result;
-                }
-
-            return _config.RegularTiles[Random.Range(0, _config.RegularTiles.Length)];
         }
 
         public List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius)
@@ -119,32 +105,32 @@ namespace Project.Scripts.Services.Grid
             await UniTask.WhenAll(tasks);
         }
 
-        public async UniTask RemoveMatches(List<MatchResult> matches)
+        public async UniTask RemoveMatches(List<MatchResult> matches, Dictionary<Vector2Int, TileConfig> specialPlacements)
         {
             var posSet = new HashSet<Vector2Int>();
             for (var i = 0; i < matches.Count; i++)
                 for (var j = 0; j < matches[i].Positions.Count; j++)
                     posSet.Add(matches[i].Positions[j]);
 
-            await ProcessRemovals(new List<Vector2Int>(posSet));
+            await ProcessRemovals(new List<Vector2Int>(posSet), specialPlacements);
 
             while (_scheduledRemovals.Count > 0)
             {
                 var batch = new List<Vector2Int>(_scheduledRemovals);
                 _scheduledRemovals.Clear();
-                await ProcessRemovals(batch);
+                await ProcessRemovals(batch, null);
             }
         }
 
         public async UniTask ActivateBySwap(Vector2Int pos)
         {
-            await ProcessRemovals(new List<Vector2Int> { pos });
+            await ProcessRemovals(new List<Vector2Int> { pos }, null);
 
             while (_scheduledRemovals.Count > 0)
             {
                 var batch = new List<Vector2Int>(_scheduledRemovals);
                 _scheduledRemovals.Clear();
-                await ProcessRemovals(batch);
+                await ProcessRemovals(batch, null);
             }
         }
 
@@ -210,6 +196,7 @@ namespace Project.Scripts.Services.Grid
                 _grid[pos.x, pos.y].Init(configs[i], pos);
                 tasks.Add(_grid[pos.x, pos.y].Animator.AnimateSpawn());
             }
+            
             await UniTask.WhenAll(tasks);
         }
 
@@ -267,7 +254,7 @@ namespace Project.Scripts.Services.Grid
             return _config.RegularTiles[0];
         }
 
-        private async UniTask ProcessRemovals(List<Vector2Int> positions)
+        private async UniTask ProcessRemovals(List<Vector2Int> positions, Dictionary<Vector2Int, TileConfig> specialPlacements)
         {
             var toDestroy = new List<(Vector2Int pos, Tile tile)>(positions.Count);
             for (var i = 0; i < positions.Count; i++)
@@ -286,11 +273,11 @@ namespace Project.Scripts.Services.Grid
             if (toDestroy.Count == 0)
                 return;
 
-            var tasks = new UniTask[toDestroy.Count];
+            var destroyTasks = new UniTask[toDestroy.Count];
             for (var i = 0; i < toDestroy.Count; i++)
-                tasks[i] = toDestroy[i].tile.Animator.AnimateDestroy();
+                destroyTasks[i] = toDestroy[i].tile.Animator.AnimateDestroy();
 
-            await UniTask.WhenAll(tasks);
+            await UniTask.WhenAll(destroyTasks);
 
             for (var i = 0; i < toDestroy.Count; i++)
             {
@@ -299,6 +286,29 @@ namespace Project.Scripts.Services.Grid
                 tile.Config.Behaviour.OnTileDestroyed(pos, this);
                 _pool.Release(tile);
             }
+
+            if (null == specialPlacements || specialPlacements.Count == 0)
+                return;
+
+            var spawnTasks = new List<UniTask>(specialPlacements.Count);
+            foreach (var kvp in specialPlacements)
+            {
+                var pos = kvp.Key;
+                if (false == IsValidPosition(pos))
+                    continue;
+
+                if (_grid[pos.x, pos.y])
+                    continue;
+
+                var specialTile = _pool.Get();
+                specialTile.transform.position = GridToWorld(pos);
+                specialTile.Init(kvp.Value, pos);
+                _grid[pos.x, pos.y] = specialTile;
+                spawnTasks.Add(specialTile.Animator.AnimateSpawn());
+            }
+
+            if (spawnTasks.Count > 0)
+                await UniTask.WhenAll(spawnTasks);
         }
     }
 }

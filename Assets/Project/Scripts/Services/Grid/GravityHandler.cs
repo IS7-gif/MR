@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
-using Project.Scripts.SpawnRules;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Grid
@@ -20,8 +19,6 @@ namespace Project.Scripts.Services.Grid
             _config = config;
         }
 
-
-        public UniTask InitAsync() => UniTask.CompletedTask;
 
         public async UniTask ApplyGravity()
         {
@@ -51,7 +48,7 @@ namespace Project.Scripts.Services.Grid
             await UniTask.WhenAll(tasks);
         }
 
-        public async UniTask SpawnNewTiles(SpawnContext context)
+        public async UniTask SpawnNewTiles()
         {
             var emptyPositions = new List<Vector2Int>();
             for (var x = 0; x < _config.Width; x++)
@@ -62,8 +59,6 @@ namespace Project.Scripts.Services.Grid
                         emptyPositions.Add(pos);
                 }
 
-            Shuffle(emptyPositions);
-
             var spawnHeights = new int[_config.Width];
             for (var x = 0; x < _config.Width; x++)
                 spawnHeights[x] = _config.Height;
@@ -72,7 +67,7 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < emptyPositions.Count; i++)
             {
                 var pos = emptyPositions[i];
-                var tileConfig = _grid.ResolveNextTile(context);
+                var tileConfig = _grid.ResolveRegularTile();
                 var tile = _pool.Get();
                 tile.transform.position = _grid.GridToWorld(new Vector2Int(pos.x, spawnHeights[pos.x]));
                 tile.Init(tileConfig, pos);
@@ -82,15 +77,6 @@ namespace Project.Scripts.Services.Grid
             }
 
             await UniTask.WhenAll(tasks);
-        }
-
-        private static void Shuffle(List<Vector2Int> list)
-        {
-            for (var i = list.Count - 1; i > 0; i--)
-            {
-                var j = Random.Range(0, i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
-            }
         }
     }
 }

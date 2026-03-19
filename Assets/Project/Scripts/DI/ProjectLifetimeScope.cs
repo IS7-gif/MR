@@ -22,6 +22,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.DamageConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);
             builder.RegisterInstance(_mainConfig.AudioSFXConfig);
+            builder.RegisterInstance(_mainConfig.SpecialTileConfig);
 
             builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 

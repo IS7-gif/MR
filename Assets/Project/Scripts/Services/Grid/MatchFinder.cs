@@ -162,6 +162,14 @@ namespace Project.Scripts.Services.Grid
 
         private static Vector2Int ComputeCenter(HashSet<Vector2Int> positions)
         {
+            foreach (var pos in positions)
+            {
+                var hasH = positions.Contains(pos + Vector2Int.left) || positions.Contains(pos + Vector2Int.right);
+                var hasV = positions.Contains(pos + Vector2Int.up) || positions.Contains(pos + Vector2Int.down);
+                if (hasH && hasV)
+                    return pos;
+            }
+
             int sumX = 0, sumY = 0;
             foreach (var pos in positions)
             {
@@ -169,10 +177,20 @@ namespace Project.Scripts.Services.Grid
                 sumY += pos.y;
             }
             
-            return new Vector2Int(
-                Mathf.RoundToInt((float)sumX / positions.Count),
-                Mathf.RoundToInt((float)sumY / positions.Count)
-            );
+            var centroid = new Vector2((float)sumX / positions.Count, (float)sumY / positions.Count);
+            var best = Vector2Int.zero;
+            var bestDist = float.MaxValue;
+            foreach (var pos in positions)
+            {
+                var dist = (pos - centroid).sqrMagnitude;
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    best = pos;
+                }
+            }
+            
+            return best;
         }
 
 
