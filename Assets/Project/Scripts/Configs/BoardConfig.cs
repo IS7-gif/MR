@@ -33,6 +33,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Pool of regular tile configurations available for random spawning")]
         [SerializeField] private TileConfig[] _regularTiles;
 
+        [Tooltip("All special tile configurations available on this board — used by editor tools and future gameplay systems")]
+        [SerializeField] private TileConfig[] _specialTiles;
+
         [Tooltip("Minimum number of tiles in a row/column required to count as a match")]
         [SerializeField] private int _minMatchLength = 3;
 
@@ -46,6 +49,7 @@ namespace Project.Scripts.Configs
         public float MaskTopPadding => _maskTopPadding;
         public Tile TilePrefab => _tilePrefab;
         public TileConfig[] RegularTiles => _regularTiles;
+        public TileConfig[] SpecialTiles => _specialTiles;
         public int MinMatchLength => _minMatchLength;
     }
 }

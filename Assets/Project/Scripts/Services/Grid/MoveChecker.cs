@@ -47,7 +47,7 @@ namespace Project.Scripts.Services.Grid
         }
 
 
-        private bool IsValidSwap(TileType[,] state, Tiles.Tile tileA, Tiles.Tile tileB, int x1, int y1, int x2, int y2)
+        private bool IsValidSwap(TileKind[,] state, Tiles.Tile tileA, Tiles.Tile tileB, int x1, int y1, int x2, int y2)
         {
             if (tileA.Config.Behaviour.IsActivatedBySwap || tileB.Config.Behaviour.IsActivatedBySwap)
                 return true;

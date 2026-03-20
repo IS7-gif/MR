@@ -52,7 +52,7 @@ namespace Project.Scripts.Services.Damage
                         MatchShape.TShape => "T",
                         _ => "?"
                     };
-                    sb.AppendLine($"   Match-{m.MaxLineLength} {m.TileType} [{shapeTag}] {m.TileCount}t → {m.Damage} dmg +{m.EnergyGenerated} en");
+                    sb.AppendLine($"   Match-{m.MaxLineLength} {m.TileKind} [{shapeTag}] {m.TileCount}t → {m.Damage} dmg +{m.EnergyGenerated} en");
                 }
 
                 sb.AppendLine($"   Subtotal: {wave.Total} dmg, {wave.TotalEnergy} en");

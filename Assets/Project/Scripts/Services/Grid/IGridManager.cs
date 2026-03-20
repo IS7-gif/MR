@@ -14,17 +14,16 @@ namespace Project.Scripts.Services.Grid
         bool IsValidPosition(Vector2Int pos);
         Vector3 GridToWorld(Vector2Int gridPos);
         Vector2Int WorldToGrid(Vector3 worldPos);
-        TileType[,] GetGridState();
+        TileKind[,] GetGridState();
         TileConfig ResolveRegularTile();
         void SetOrigin(Vector3 origin);
 
         List<Vector2Int> GetNeighboursInRadius(Vector2Int center, int radius);
         List<Vector2Int> GetAllInRow(int y);
         List<Vector2Int> GetAllInColumn(int x);
-        List<Vector2Int> GetAllOfType(TileType type);
-        List<Vector2Int> GetAllSpecialsOfKind(SpecialTileKind kind);
+        List<Vector2Int> GetAllOfKind(TileKind kind);
         List<Vector2Int> GetAllOccupied();
-        TileType GetMostCommonRegularType();
+        TileKind GetMostCommonColor();
 
         void ScheduleRemove(List<Vector2Int> positions);
 

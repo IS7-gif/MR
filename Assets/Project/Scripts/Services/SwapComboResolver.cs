@@ -15,24 +15,24 @@ namespace Project.Scripts.Services
 
     public class SwapComboResolver
     {
-        public SwapComboType Resolve(SpecialTileKind kindA, SpecialTileKind kindB)
+        public SwapComboType Resolve(TileKind kindA, TileKind kindB)
         {
-            if (kindA == SpecialTileKind.Storm || kindB == SpecialTileKind.Storm)
+            if (kindA == TileKind.Storm || kindB == TileKind.Storm)
             {
-                var other = kindA == SpecialTileKind.Storm ? kindB : kindA;
+                var other = kindA == TileKind.Storm ? kindB : kindA;
                 return other switch
                 {
-                    SpecialTileKind.Storm => SwapComboType.StormStorm,
-                    SpecialTileKind.Bomb => SwapComboType.StormBomb,
+                    TileKind.Storm => SwapComboType.StormStorm,
+                    TileKind.Bomb => SwapComboType.StormBomb,
                     _ => SwapComboType.StormLine
                 };
             }
 
-            if (kindA == SpecialTileKind.Bomb && kindB == SpecialTileKind.Bomb)
+            if (kindA == TileKind.Bomb && kindB == TileKind.Bomb)
                 return SwapComboType.BombBomb;
 
-            var aIsBomb = kindA == SpecialTileKind.Bomb;
-            var bIsBomb = kindB == SpecialTileKind.Bomb;
+            var aIsBomb = kindA == TileKind.Bomb;
+            var bIsBomb = kindB == TileKind.Bomb;
             if (aIsBomb || bIsBomb)
                 return SwapComboType.BombLine;
 

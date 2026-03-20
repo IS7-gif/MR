@@ -31,7 +31,7 @@ namespace Project.Scripts.Services.Damage
 
                 matchInfos.Add(new MatchInfo(
                     match.Shape,
-                    match.TileType,
+                    match.TileKind,
                     match.MaxLineLength,
                     match.Positions.Count,
                     match.Center,

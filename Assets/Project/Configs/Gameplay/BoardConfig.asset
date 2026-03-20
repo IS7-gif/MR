@@ -26,7 +26,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fe31f31b8f5dc4940b95a40dcc97562a, type: 2}
   - {fileID: 11400000, guid: 45e3651fed728ad4487420bf9819b91a, type: 2}
   - {fileID: 11400000, guid: 265140baee7e0e3468ec33079fa3629b, type: 2}
-  _spawnRules:
-  - {fileID: 11400000, guid: f53342a10df5e7342a78621141804b5f, type: 2}
-  - {fileID: 11400000, guid: 0522e3987a049db46adb9a2e112473c7, type: 2}
+  _specialTiles:
+  - {fileID: 11400000, guid: c8b241e3a4bb0734c8b241f9874f53e2, type: 2}
+  - {fileID: 11400000, guid: dc1cae93b0911fd4facc660a6f3387b9, type: 2}
+  - {fileID: 11400000, guid: 46853c594e257054baaee71fc76fa00b, type: 2}
+  - {fileID: 11400000, guid: 438f2a2ac5c21944a9de839fc3622991, type: 2}
   _minMatchLength: 3

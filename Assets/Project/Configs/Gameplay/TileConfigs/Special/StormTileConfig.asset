@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a6964c0f264d5a48a0193de5b3060fd, type: 3}
   m_Name: StormTileConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.TileConfig
-  _type: 0
+  _kind: 80
   _sprite: {fileID: 21300000, guid: c1f12610b9990924fa94f1f346b9435d, type: 3}
   _behaviour: {fileID: 11400000, guid: 6a6399df1925a544eba851729783a282, type: 2}

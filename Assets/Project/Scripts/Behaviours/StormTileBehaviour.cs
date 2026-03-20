@@ -8,7 +8,6 @@ namespace Project.Scripts.Behaviours
     public class StormTileBehaviour : TileBehaviour
     {
         public override bool IsActivatedBySwap => true;
-        public override SpecialTileKind SpecialKind => SpecialTileKind.Storm;
 
 
         public override void OnTileDestroyed(Vector2Int gridPos, IGridManager grid)
@@ -17,14 +16,14 @@ namespace Project.Scripts.Behaviours
             if (false == tile)
                 return;
 
-            var targetType = tile.PayloadType != TileType.None
-                ? tile.PayloadType
-                : grid.GetMostCommonRegularType();
+            var targetKind = tile.PayloadKind.IsColor()
+                ? tile.PayloadKind
+                : grid.GetMostCommonColor();
 
-            if (targetType == TileType.None)
+            if (false == targetKind.IsColor())
                 return;
 
-            var positions = grid.GetAllOfType(targetType);
+            var positions = grid.GetAllOfKind(targetKind);
             grid.ScheduleRemove(positions);
         }
     }

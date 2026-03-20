@@ -1,5 +1,4 @@
 using Project.Scripts.Services.Grid;
-using Project.Scripts.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -15,7 +14,6 @@ namespace Project.Scripts.Behaviours
 
 
         public override bool IsActivatedBySwap => true;
-        public override SpecialTileKind SpecialKind => SpecialTileKind.Bomb;
 
         public int Radius => _radius;
         public int DoubleRadius => _doubleRadius;

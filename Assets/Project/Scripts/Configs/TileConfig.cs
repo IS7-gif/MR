@@ -7,8 +7,8 @@ namespace Project.Scripts.Configs
     [CreateAssetMenu(fileName = "TileConfig", menuName = "Configs/Tile Config")]
     public class TileConfig : ScriptableObject
     {
-        [Tooltip("Element type of this tile, used for matching and damage calculations")]
-        [SerializeField] private TileType _type;
+        [Tooltip("Identity of this tile — determines both match color (Red/Blue/etc.) and special type (Bomb/Storm/etc.)")]
+        [SerializeField] private TileKind _kind;
 
         [Tooltip("Visual sprite displayed for this tile")]
         [SerializeField] private Sprite _sprite;
@@ -16,8 +16,8 @@ namespace Project.Scripts.Configs
         [Tooltip("Special behaviour applied when this tile is destroyed")]
         [SerializeField] private TileBehaviour _behaviour;
 
-        
-        public TileType Type => _type;
+
+        public TileKind Kind => _kind;
         public Sprite Sprite => _sprite;
         public TileBehaviour Behaviour => _behaviour;
     }

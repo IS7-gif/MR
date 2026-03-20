@@ -80,10 +80,10 @@ namespace Project.Scripts.Services
             _isProcessing = true;
             try
             {
-                var fromKind = fromTile.Config.Behaviour.SpecialKind;
-                var toKind = toTile.Config.Behaviour.SpecialKind;
-                var fromIsSpecial = fromKind != SpecialTileKind.None;
-                var toIsSpecial = toKind != SpecialTileKind.None;
+                var fromKind = fromTile.Config.Kind;
+                var toKind = toTile.Config.Kind;
+                var fromIsSpecial = fromKind.IsSpecial();
+                var toIsSpecial = toKind.IsSpecial();
 
                 await _grid.SwapTiles(request.From, request.To);
 
@@ -149,13 +149,13 @@ namespace Project.Scripts.Services
 
         private async UniTask ActivateSpecialWithPartner(Tile specialTile, Tile partnerTile, Vector2Int specialFinalPos)
         {
-            if (specialTile.Config.Behaviour.SpecialKind == SpecialTileKind.Storm)
-                specialTile.SetPayloadType(partnerTile.Type);
+            if (specialTile.Config.Kind == TileKind.Storm)
+                specialTile.SetPayloadKind(partnerTile.Kind);
 
             await _grid.ActivateBySwap(specialFinalPos);
         }
 
-        private async UniTask ExecuteSwapCombo(SpecialTileKind kindA, SpecialTileKind kindB,
+        private async UniTask ExecuteSwapCombo(TileKind kindA, TileKind kindB,
             Vector2Int posA, Vector2Int posB, Tile tileA, Tile tileB)
         {
             var comboType = _swapComboResolver.Resolve(kindA, kindB);
@@ -168,14 +168,14 @@ namespace Project.Scripts.Services
 
                 case SwapComboType.StormBomb:
                 {
-                    var stormPos = kindA == SpecialTileKind.Storm ? posA : posB;
+                    var stormPos = kindA == TileKind.Storm ? posA : posB;
                     await ExecuteStormBombCombo(stormPos);
                     break;
                 }
 
                 case SwapComboType.StormLine:
                 {
-                    var stormPos = kindA == SpecialTileKind.Storm ? posA : posB;
+                    var stormPos = kindA == TileKind.Storm ? posA : posB;
                     await ExecuteStormLineCombo(stormPos);
                     break;
                 }
@@ -189,8 +189,8 @@ namespace Project.Scripts.Services
 
                 case SwapComboType.BombLine:
                 {
-                    var bombPos = kindA == SpecialTileKind.Bomb ? posA : posB;
-                    var bombTile = kindA == SpecialTileKind.Bomb ? tileA : tileB;
+                    var bombPos = kindA == TileKind.Bomb ? posA : posB;
+                    var bombTile = kindA == TileKind.Bomb ? tileA : tileB;
                     var radius = GetBombRadius(bombTile);
                     await ExecuteBombLineCombo(posA, posB, bombPos, radius);
                     break;
@@ -212,7 +212,7 @@ namespace Project.Scripts.Services
         private async UniTask ExecuteStormBombCombo(Vector2Int stormPos)
         {
             await _grid.ConsumeTile(stormPos);
-            var bombPositions = _grid.GetAllSpecialsOfKind(SpecialTileKind.Bomb);
+            var bombPositions = _grid.GetAllOfKind(TileKind.Bomb);
             if (bombPositions.Count == 0)
                 return;
 
@@ -222,8 +222,8 @@ namespace Project.Scripts.Services
         private async UniTask ExecuteStormLineCombo(Vector2Int stormPos)
         {
             await _grid.ConsumeTile(stormPos);
-            var linePositions = _grid.GetAllSpecialsOfKind(SpecialTileKind.LineRuneH);
-            linePositions.AddRange(_grid.GetAllSpecialsOfKind(SpecialTileKind.LineRuneV));
+            var linePositions = _grid.GetAllOfKind(TileKind.LineRuneH);
+            linePositions.AddRange(_grid.GetAllOfKind(TileKind.LineRuneV));
             if (linePositions.Count == 0)
                 return;
 
@@ -308,11 +308,11 @@ namespace Project.Scripts.Services
                 await ProcessMatchChain(immediateMatches, new List<WaveBreakdown>(), Vector2Int.zero);
         }
 
-        private static int CountActiveTiles(TileType[,] state)
+        private static int CountActiveTiles(TileKind[,] state)
         {
             var count = 0;
-            foreach (var type in state)
-                if (type != TileType.None)
+            foreach (var kind in state)
+                if (kind != TileKind.None)
                     count++;
 
             return count;
@@ -327,7 +327,7 @@ namespace Project.Scripts.Services
         {
             var bomb = tileA.Config.Behaviour as BombTileBehaviour
                     ?? tileB.Config.Behaviour as BombTileBehaviour;
-            
+
             return bomb?.DoubleRadius ?? 2;
         }
     }

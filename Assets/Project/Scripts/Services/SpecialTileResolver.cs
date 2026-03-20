@@ -34,11 +34,11 @@ namespace Project.Scripts.Services
                 if (result.ContainsKey(spawnPos))
                     continue;
 
-                var payloadType = entry.TileToSpawn.Behaviour.SpecialKind == SpecialTileKind.Storm
-                    ? TileType.None
-                    : match.TileType;
+                var payloadKind = entry.TileToSpawn.Kind == TileKind.Storm
+                    ? TileKind.None
+                    : match.TileKind;
 
-                result[spawnPos] = new SpecialTileSpawnData(entry.TileToSpawn, payloadType);
+                result[spawnPos] = new SpecialTileSpawnData(entry.TileToSpawn, payloadKind);
             }
 
             return result;

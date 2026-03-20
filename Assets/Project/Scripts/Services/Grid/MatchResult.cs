@@ -9,7 +9,7 @@ namespace Project.Scripts.Services.Grid
         public List<Vector2Int> Positions;
         public int MaxLineLength;
         public bool IsComplex;
-        public TileType TileType;
+        public TileKind TileKind;
         public MatchShape Shape;
         public Vector2Int Center;
     }

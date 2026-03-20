@@ -7,27 +7,27 @@ namespace Project.Scripts.Tiles
     {
         [SerializeField] private SpriteRenderer _spriteRenderer;
         [SerializeField] private TileAnimator _animator;
-        
-        
-        public TileType Type { get; private set; }
+
+
+        public TileKind Kind { get; private set; }
         public Vector2Int GridPosition { get; set; }
         public TileConfig Config { get; private set; }
         public TileAnimator Animator => _animator;
-        public TileType PayloadType { get; private set; }
+        public TileKind PayloadKind { get; private set; }
 
 
-        public void Init(TileConfig config, Vector2Int gridPos, TileType payloadType = TileType.None)
+        public void Init(TileConfig config, Vector2Int gridPos, TileKind payloadKind = TileKind.None)
         {
             Config = config;
-            Type = config.Type;
+            Kind = config.Kind;
             GridPosition = gridPos;
-            PayloadType = payloadType;
+            PayloadKind = payloadKind;
             _spriteRenderer.sprite = config.Sprite;
         }
 
-        public void SetPayloadType(TileType type)
+        public void SetPayloadKind(TileKind kind)
         {
-            PayloadType = type;
+            PayloadKind = kind;
         }
     }
 }

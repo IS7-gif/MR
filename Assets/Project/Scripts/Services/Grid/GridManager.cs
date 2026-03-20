@@ -67,12 +67,12 @@ namespace Project.Scripts.Services.Grid
             );
         }
 
-        public TileType[,] GetGridState()
+        public TileKind[,] GetGridState()
         {
-            var state = new TileType[_boardConfig.Width, _boardConfig.Height];
+            var state = new TileKind[_boardConfig.Width, _boardConfig.Height];
             for (var x = 0; x < _boardConfig.Width; x++)
                 for (var y = 0; y < _boardConfig.Height; y++)
-                    state[x, y] = _grid[x, y] ? _grid[x, y].Type : TileType.None;
+                    state[x, y] = _grid[x, y] ? _grid[x, y].Kind : TileKind.None;
 
             return state;
         }
@@ -123,27 +123,13 @@ namespace Project.Scripts.Services.Grid
             return result;
         }
 
-        public List<Vector2Int> GetAllOfType(TileType type)
+        public List<Vector2Int> GetAllOfKind(TileKind kind)
         {
             var result = new List<Vector2Int>();
             for (var x = 0; x < _boardConfig.Width; x++)
                 for (var y = 0; y < _boardConfig.Height; y++)
-                    if (_grid[x, y] && _grid[x, y].Type == type)
+                    if (_grid[x, y] && _grid[x, y].Kind == kind)
                         result.Add(new Vector2Int(x, y));
-
-            return result;
-        }
-
-        public List<Vector2Int> GetAllSpecialsOfKind(SpecialTileKind kind)
-        {
-            var result = new List<Vector2Int>();
-            for (var x = 0; x < _boardConfig.Width; x++)
-                for (var y = 0; y < _boardConfig.Height; y++)
-                {
-                    var tile = _grid[x, y];
-                    if (tile && tile.Config.Behaviour.SpecialKind == kind)
-                        result.Add(new Vector2Int(x, y));
-                }
 
             return result;
         }
@@ -159,9 +145,9 @@ namespace Project.Scripts.Services.Grid
             return result;
         }
 
-        public TileType GetMostCommonRegularType()
+        public TileKind GetMostCommonColor()
         {
-            var counts = new Dictionary<TileType, int>();
+            var counts = new Dictionary<TileKind, int>();
             for (var x = 0; x < _boardConfig.Width; x++)
                 for (var y = 0; y < _boardConfig.Height; y++)
                 {
@@ -169,42 +155,39 @@ namespace Project.Scripts.Services.Grid
                     if (false == tile)
                         continue;
 
-                    if (tile.Config.Behaviour.SpecialKind != SpecialTileKind.None)
+                    var kind = tile.Kind;
+                    if (false == kind.IsColor())
                         continue;
 
-                    var type = tile.Type;
-                    if (type == TileType.None)
-                        continue;
-
-                    counts.TryGetValue(type, out var count);
-                    counts[type] = count + 1;
+                    counts.TryGetValue(kind, out var count);
+                    counts[kind] = count + 1;
                 }
 
-            var bestType = TileType.None;
+            var bestKind = TileKind.None;
             var bestCount = 0;
             foreach (var kvp in counts)
             {
                 if (kvp.Value > bestCount)
                 {
                     bestCount = kvp.Value;
-                    bestType = kvp.Key;
+                    bestKind = kvp.Key;
                 }
             }
 
-            return bestType;
+            return bestKind;
         }
 
         public async UniTask PopulateGrid()
         {
-            var typeCache = new TileType[_boardConfig.Width, _boardConfig.Height];
+            var kindCache = new TileKind[_boardConfig.Width, _boardConfig.Height];
             var tasks = new UniTask[_boardConfig.Width * _boardConfig.Height];
             var idx = 0;
             for (var x = 0; x < _boardConfig.Width; x++)
                 for (var y = 0; y < _boardConfig.Height; y++)
                 {
                     var pos = new Vector2Int(x, y);
-                    var tileConfig = GetNoMatchConfig(x, y, typeCache);
-                    typeCache[x, y] = tileConfig.Type;
+                    var tileConfig = GetNoMatchConfig(x, y, kindCache);
+                    kindCache[x, y] = tileConfig.Kind;
                     var tile = _pool.Get();
                     tile.transform.position = GridToWorld(pos);
                     tile.Init(tileConfig, pos);
@@ -295,19 +278,19 @@ namespace Project.Scripts.Services.Grid
                 (configs[i], configs[j]) = (configs[j], configs[i]);
             }
 
-            var assignedTypes = new TileType[_boardConfig.Width, _boardConfig.Height];
+            var assignedKinds = new TileKind[_boardConfig.Width, _boardConfig.Height];
             for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
                 for (var j = i; j < configs.Count; j++)
                 {
-                    if (false == WouldCreateMatch(pos.x, pos.y, configs[j].Type, assignedTypes))
+                    if (false == WouldCreateMatch(pos.x, pos.y, configs[j].Kind, assignedKinds))
                     {
                         if (j != i) (configs[i], configs[j]) = (configs[j], configs[i]);
                         break;
                     }
                 }
-                assignedTypes[pos.x, pos.y] = configs[i].Type;
+                assignedKinds[pos.x, pos.y] = configs[i].Kind;
             }
 
             var tasks = new List<UniTask>();
@@ -395,7 +378,7 @@ namespace Project.Scripts.Services.Grid
                 var data = kvp.Value;
                 var specialTile = _pool.Get();
                 specialTile.transform.position = GridToWorld(pos);
-                specialTile.Init(data.Config, pos, data.PayloadType);
+                specialTile.Init(data.Config, pos, data.PayloadKind);
                 _grid[pos.x, pos.y] = specialTile;
                 spawnTasks.Add(specialTile.Animator.AnimateSpawn());
             }
@@ -411,32 +394,32 @@ namespace Project.Scripts.Services.Grid
                 tile.Init(config, new Vector2Int(x, y));
         }
 
-        private bool WouldCreateMatch(int x, int y, TileType type, TileType[,] assigned)
+        private bool WouldCreateMatch(int x, int y, TileKind kind, TileKind[,] assigned)
         {
-            if (type == TileType.None)
+            if (false == kind.IsColor())
                 return false;
 
-            if (x >= 2 && assigned[x - 1, y] == type && assigned[x - 2, y] == type)
+            if (x >= 2 && assigned[x - 1, y] == kind && assigned[x - 2, y] == kind)
                 return true;
 
-            if (y >= 2 && assigned[x, y - 1] == type && assigned[x, y - 2] == type)
+            if (y >= 2 && assigned[x, y - 1] == kind && assigned[x, y - 2] == kind)
                 return true;
 
             return false;
         }
 
-        private TileConfig GetNoMatchConfig(int x, int y, TileType[,] types)
+        private TileConfig GetNoMatchConfig(int x, int y, TileKind[,] kinds)
         {
-            var forbidden = new HashSet<TileType>();
-            if (x >= 2 && types[x - 1, y] == types[x - 2, y] && types[x - 1, y] != TileType.None)
-                forbidden.Add(types[x - 1, y]);
-            if (y >= 2 && types[x, y - 1] == types[x, y - 2] && types[x, y - 1] != TileType.None)
-                forbidden.Add(types[x, y - 1]);
+            var forbidden = new HashSet<TileKind>();
+            if (x >= 2 && kinds[x - 1, y] == kinds[x - 2, y] && kinds[x - 1, y].IsColor())
+                forbidden.Add(kinds[x - 1, y]);
+            if (y >= 2 && kinds[x, y - 1] == kinds[x, y - 2] && kinds[x, y - 1].IsColor())
+                forbidden.Add(kinds[x, y - 1]);
 
             for (var attempt = 0; attempt < 10; attempt++)
             {
                 var config = _boardConfig.RegularTiles[UnityEngine.Random.Range(0, _boardConfig.RegularTiles.Length)];
-                if (false == forbidden.Contains(config.Type))
+                if (false == forbidden.Contains(config.Kind))
                     return config;
             }
 

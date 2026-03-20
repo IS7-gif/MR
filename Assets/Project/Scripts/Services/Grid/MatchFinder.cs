@@ -20,7 +20,7 @@ namespace Project.Scripts.Services.Grid
             _minLength = minLength;
         }
 
-        public List<MatchResult> FindMatches(TileType[,] grid)
+        public List<MatchResult> FindMatches(TileKind[,] grid)
         {
             var width = grid.GetLength(0);
             var height = grid.GetLength(1);
@@ -31,26 +31,26 @@ namespace Project.Scripts.Services.Grid
                 var x = 0;
                 while (x < width)
                 {
-                    var type = grid[x, y];
-                    if (type == TileType.None)
+                    var kind = grid[x, y];
+                    if (false == kind.IsColor())
                     {
-                        x++; 
+                        x++;
                         continue;
                     }
 
                     var start = x;
-                    while (x < width && grid[x, y] == type) 
+                    while (x < width && grid[x, y] == kind)
                         x++;
-                    
+
                     var len = x - start;
-                    if (len < _minLength) 
+                    if (len < _minLength)
                         continue;
 
                     var set = new HashSet<Vector2Int>(len);
                     for (var i = start; i < x; i++)
                         set.Add(new Vector2Int(i, y));
 
-                    runs.Add(new Run(set, len, hasH: true, hasV: false, type));
+                    runs.Add(new Run(set, len, hasH: true, hasV: false, kind));
                 }
             }
 
@@ -59,31 +59,31 @@ namespace Project.Scripts.Services.Grid
                 var y = 0;
                 while (y < height)
                 {
-                    var type = grid[x, y];
-                    if (type == TileType.None) 
-                    { 
-                        y++; 
-                        continue; 
+                    var kind = grid[x, y];
+                    if (false == kind.IsColor())
+                    {
+                        y++;
+                        continue;
                     }
 
                     var start = y;
-                    while (y < height && grid[x, y] == type) 
+                    while (y < height && grid[x, y] == kind)
                         y++;
-                    
+
                     var len = y - start;
-                    if (len < _minLength) 
+                    if (len < _minLength)
                         continue;
 
                     var set = new HashSet<Vector2Int>(len);
                     for (var i = start; i < y; i++)
                         set.Add(new Vector2Int(x, i));
 
-                    runs.Add(new Run(set, len, hasH: false, hasV: true, type));
+                    runs.Add(new Run(set, len, hasH: false, hasV: true, kind));
                 }
             }
 
             Merge(runs);
-            
+
             return BuildResults(runs);
         }
 
@@ -108,7 +108,7 @@ namespace Project.Scripts.Services.Grid
                             Mathf.Max(runs[i].Len, runs[j].Len),
                             runs[i].HasH || runs[j].HasH,
                             runs[i].HasV || runs[j].HasV,
-                            runs[i].Type
+                            runs[i].Kind
                         );
                         runs.RemoveAt(j);
                         anyMerge = true;
@@ -129,21 +129,21 @@ namespace Project.Scripts.Services.Grid
                     Positions = new List<Vector2Int>(run.Pos),
                     MaxLineLength = run.Len,
                     IsComplex = run.HasH && run.HasV,
-                    TileType = run.Type,
+                    TileKind = run.Kind,
                     Shape = ComputeShape(run.Pos, run.HasH, run.HasV),
                     Center = ComputeCenter(run.Pos)
                 });
             }
-            
+
             return results;
         }
 
         private static MatchShape ComputeShape(HashSet<Vector2Int> positions, bool hasH, bool hasV)
         {
-            if (false == hasV) 
+            if (false == hasV)
                 return MatchShape.Horizontal;
-            
-            if (false == hasH) 
+
+            if (false == hasH)
                 return MatchShape.Vertical;
 
             foreach (var pos in positions)
@@ -176,7 +176,7 @@ namespace Project.Scripts.Services.Grid
                 sumX += pos.x;
                 sumY += pos.y;
             }
-            
+
             var centroid = new Vector2((float)sumX / positions.Count, (float)sumY / positions.Count);
             var best = Vector2Int.zero;
             var bestDist = float.MaxValue;
@@ -189,7 +189,7 @@ namespace Project.Scripts.Services.Grid
                     best = pos;
                 }
             }
-            
+
             return best;
         }
 
@@ -200,16 +200,16 @@ namespace Project.Scripts.Services.Grid
             public readonly int Len;
             public readonly bool HasH;
             public readonly bool HasV;
-            public readonly TileType Type;
+            public readonly TileKind Kind;
 
-            
-            public Run(HashSet<Vector2Int> pos, int len, bool hasH, bool hasV, TileType type)
+
+            public Run(HashSet<Vector2Int> pos, int len, bool hasH, bool hasV, TileKind kind)
             {
                 Pos = pos;
                 Len = len;
                 HasH = hasH;
                 HasV = hasV;
-                Type = type;
+                Kind = kind;
             }
         }
     }

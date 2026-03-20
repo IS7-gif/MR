@@ -5,13 +5,13 @@ namespace Project.Scripts.Tiles
     public readonly struct SpecialTileSpawnData
     {
         public readonly TileConfig Config;
-        public readonly TileType PayloadType;
+        public readonly TileKind PayloadKind;
 
 
-        public SpecialTileSpawnData(TileConfig config, TileType payloadType = TileType.None)
+        public SpecialTileSpawnData(TileConfig config, TileKind payloadKind = TileKind.None)
         {
             Config = config;
-            PayloadType = payloadType;
+            PayloadKind = payloadKind;
         }
     }
 }

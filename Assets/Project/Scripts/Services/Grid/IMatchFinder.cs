@@ -5,6 +5,6 @@ namespace Project.Scripts.Services.Grid
 {
     public interface IMatchFinder
     {
-        List<MatchResult> FindMatches(TileType[,] grid);
+        List<MatchResult> FindMatches(TileKind[,] grid);
     }
 }
