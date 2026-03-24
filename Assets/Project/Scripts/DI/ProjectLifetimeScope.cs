@@ -1,5 +1,4 @@
 using Project.Scripts.Configs;
-using Project.Scripts.Services;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
@@ -26,6 +25,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.SpecialTileConfig);
             builder.RegisterInstance(_mainConfig.LevelDatabase);
             builder.RegisterInstance(_mainConfig.UIConfig);
+            builder.RegisterInstance(_mainConfig.EnergyConfig);
 
             builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 

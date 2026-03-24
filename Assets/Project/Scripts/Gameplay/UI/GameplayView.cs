@@ -3,6 +3,7 @@ using Project.Scripts.Services.UISystem;
 using R3;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Project.Scripts.Gameplay.UI
 {
@@ -19,6 +20,21 @@ namespace Project.Scripts.Gameplay.UI
         
         [Tooltip("Text element displaying the last dealt damage")]
         [SerializeField] private TMP_Text _damageText;
+
+        [Tooltip("Fill image for Fire energy bar (0..1 fill amount)")]
+        [SerializeField] private Image _fireEnergyBar;
+
+        [Tooltip("Fill image for Water energy bar (0..1 fill amount)")]
+        [SerializeField] private Image _waterEnergyBar;
+
+        [Tooltip("Fill image for Nature energy bar (0..1 fill amount)")]
+        [SerializeField] private Image _natureEnergyBar;
+
+        [Tooltip("Fill image for Light energy bar (0..1 fill amount)")]
+        [SerializeField] private Image _lightEnergyBar;
+
+        [Tooltip("Fill image for Void energy bar (0..1 fill amount)")]
+        [SerializeField] private Image _voidEnergyBar;
 
 
         protected override UniTask OnBindViewModel()

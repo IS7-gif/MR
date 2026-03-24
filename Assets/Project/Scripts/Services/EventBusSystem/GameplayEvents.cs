@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Project.Scripts.Tiles;
+
 namespace Project.Scripts.Services.EventBusSystem
 {
     namespace Events
@@ -66,6 +69,32 @@ namespace Project.Scripts.Services.EventBusSystem
         public readonly struct EnemyDefeatedEvent
         {
 
+        }
+
+        public readonly struct EnergyGeneratedEvent
+        {
+            public IReadOnlyDictionary<TileKind, int> EnergyByKind { get; }
+
+
+            public EnergyGeneratedEvent(IReadOnlyDictionary<TileKind, int> energyByKind)
+            {
+                EnergyByKind = energyByKind;
+            }
+        }
+
+        public readonly struct EnergyChangedEvent
+        {
+            public TileKind Kind { get; }
+            public int Current { get; }
+            public int Max { get; }
+
+
+            public EnergyChangedEvent(TileKind kind, int current, int max)
+            {
+                Kind = kind;
+                Current = current;
+                Max = max;
+            }
         }
     }
 }

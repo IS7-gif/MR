@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Behaviours;
 using Project.Scripts.Services.Damage;
-using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Services.Grid;
@@ -89,17 +88,21 @@ namespace Project.Scripts.Services
                 await _grid.SwapTiles(request.From, request.To);
 
                 var waves = new List<WaveBreakdown>();
+                var energyByKind = new Dictionary<TileKind, int>();
                 var bombDamage = 0;
                 var moveUsed = false;
 
                 if (fromIsSpecial && toIsSpecial)
                 {
-                    var tilesBefore = CountActiveTiles(_grid.GetGridState());
+                    var stateBefore = _grid.GetGridState();
+                    var tilesBefore = CountActiveTiles(stateBefore);
 
                     await ExecuteSwapCombo(fromKind, toKind, request.To, request.From, fromTile, toTile);
 
+                    var stateAfter = _grid.GetGridState();
                     _eventBus.Publish(new BombActivatedEvent());
-                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(_grid.GetGridState()));
+                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(stateAfter));
+                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
                     await RunPostActivationFlow(waves, request.PivotPosition);
                     moveUsed = true;
@@ -122,12 +125,15 @@ namespace Project.Scripts.Services
                         partnerTile = fromTile;
                     }
 
-                    var tilesBefore = CountActiveTiles(_grid.GetGridState());
+                    var stateBefore = _grid.GetGridState();
+                    var tilesBefore = CountActiveTiles(stateBefore);
 
                     await ActivateSpecialWithPartner(specialTile, partnerTile, specialFinalPos);
 
+                    var stateAfter = _grid.GetGridState();
                     _eventBus.Publish(new BombActivatedEvent());
-                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(_grid.GetGridState()));
+                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(stateAfter));
+                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
                     await RunPostActivationFlow(waves, request.PivotPosition);
                     moveUsed = true;
@@ -145,11 +151,19 @@ namespace Project.Scripts.Services
                     }
                 }
 
+                AccumulateMatchEnergy(waves, energyByKind);
+
                 if (waves.Count > 0 || bombDamage > 0)
                 {
                     var breakdown = new DamageBreakdown(waves, bombDamage);
                     _eventBus.Publish(new DamageDealtEvent(breakdown.Total));
                     Debug.Log(breakdown.ToLogString());
+                }
+
+                if (energyByKind.Count > 0)
+                {
+                    _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
+                    Debug.Log(BuildEnergyLogString(energyByKind));
                 }
 
                 if (moveUsed)
@@ -357,6 +371,64 @@ namespace Project.Scripts.Services
                     ?? tileB.Config.Behaviour as BombTileBehaviour;
 
             return bomb?.DoubleRadius ?? 2;
+        }
+
+        private static void AccumulateMatchEnergy(List<WaveBreakdown> waves, Dictionary<TileKind, int> energy)
+        {
+            for (var i = 0; i < waves.Count; i++)
+            {
+                var matches = waves[i].Matches;
+                for (var j = 0; j < matches.Count; j++)
+                {
+                    var match = matches[j];
+                    if (false == match.TileKind.IsColor())
+                        continue;
+
+                    energy.TryGetValue(match.TileKind, out var current);
+                    energy[match.TileKind] = current + match.TileCount;
+                }
+            }
+        }
+
+        private static string BuildEnergyLogString(Dictionary<TileKind, int> energyByKind)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("[Energy] Move result:");
+
+            var total = 0;
+            foreach (var pair in energyByKind)
+            {
+                if (pair.Value <= 0)
+                    continue;
+
+                sb.AppendLine($"  {pair.Key}: +{pair.Value}");
+                total += pair.Value;
+            }
+
+            sb.Append($"  Total: +{total}");
+            return sb.ToString();
+        }
+
+        private static void AccumulateGridDiffEnergy(TileKind[,] before, TileKind[,] after, Dictionary<TileKind, int> energy)
+        {
+            var width = before.GetLength(0);
+            var height = before.GetLength(1);
+
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = 0; y < height; y++)
+                {
+                    var kindBefore = before[x, y];
+                    if (false == kindBefore.IsColor())
+                        continue;
+
+                    if (after[x, y] != kindBefore)
+                    {
+                        energy.TryGetValue(kindBefore, out var current);
+                        energy[kindBefore] = current + 1;
+                    }
+                }
+            }
         }
     }
 }

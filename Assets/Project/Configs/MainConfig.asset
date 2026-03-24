@@ -21,3 +21,4 @@ MonoBehaviour:
   _specialTileConfig: {fileID: 11400000, guid: bf43509404b084149a8b2978f4619c2d, type: 2}
   _levelDatabase: {fileID: 11400000, guid: 528394c8e2714e3489a9a33180a6de4c, type: 2}
   _uiConfig: {fileID: 11400000, guid: 63526929da5930348899f6e6bbc1be6c, type: 2}
+  _energyConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}

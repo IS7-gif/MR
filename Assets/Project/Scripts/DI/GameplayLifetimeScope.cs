@@ -21,6 +21,7 @@ namespace Project.Scripts.DI
             builder.Register<IMoveCounterService, MoveCounterService>(Lifetime.Singleton);
             builder.Register<IEnemyStateService, EnemyStateService>(Lifetime.Singleton);
             builder.Register<ILevelProgressionService, LevelProgressionService>(Lifetime.Singleton);
+            builder.Register<IEnergyService, EnergyService>(Lifetime.Singleton);
 
             builder.Register<GameplayViewModel>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Singleton);

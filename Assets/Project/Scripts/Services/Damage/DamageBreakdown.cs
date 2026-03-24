@@ -52,16 +52,16 @@ namespace Project.Scripts.Services.Damage
                         MatchShape.TShape => "T",
                         _ => "?"
                     };
-                    sb.AppendLine($"   Match-{m.MaxLineLength} {m.TileKind} [{shapeTag}] {m.TileCount}t → {m.Damage} dmg +{m.EnergyGenerated} en");
+                    sb.AppendLine($"   Match-{m.MaxLineLength} {m.TileKind} [{shapeTag}] {m.TileCount}t → {m.Damage} dmg");
                 }
 
-                sb.AppendLine($"   Subtotal: {wave.Total} dmg, {wave.TotalEnergy} en");
+                sb.AppendLine($"   Subtotal: {wave.Total} dmg");
             }
 
             if (BombDamage > 0)
                 sb.AppendLine($" Bomb: {BombDamage} dmg");
 
-            sb.Append($" TOTAL: {Total} dmg, {TotalEnergy} en");
+            sb.Append($" TOTAL: {Total} dmg");
             return sb.ToString();
         }
     }
