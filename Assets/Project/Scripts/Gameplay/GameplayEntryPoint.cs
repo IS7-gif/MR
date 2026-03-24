@@ -3,12 +3,14 @@ using Project.Scripts.Configs;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services;
 using Project.Scripts.Services.Audio;
+using Project.Scripts.Shared.Rules;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.Grid;
 using UnityEngine;
 using VContainer;
 #if UNITY_EDITOR
@@ -105,17 +107,19 @@ namespace Project.Scripts.Gameplay
             _boardView.Setup(_levelConfig.Width, _levelConfig.Height, cellSize,
                 _boardConfig.FramePadding, _boardConfig.MaskTopPadding);
 
-            var gravityHandler = new GravityHandler(gridManager, pool, _levelConfig);
+            var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig);
 
             _inputService = new InputService(_inputConfig);
-            _swapHandler = new SwapInputHandler(_inputService, gridManager, _inputConfig.WorldDragThreshold);
+            _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold);
 
-            var moveChecker = new MoveChecker(gridManager, matchFinder, _levelConfig);
+            var moveChecker = new MoveChecker(gridManager.State, gridManager, matchFinder, _levelConfig);
             var specialTileResolver = new SpecialTileResolver(_specialTileConfig, _levelConfig);
             var swapComboResolver = new SwapComboResolver();
 
             var orchestrator = new BoardOrchestrator(
                 _eventBus,
+                gridManager.State,
+                gridManager,
                 gridManager,
                 gravityHandler,
                 matchFinder,
@@ -133,7 +137,7 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
             var editHandler = gameObject.AddComponent<BoardEditClickHandler>();
-            editHandler.Init(gridManager, _levelConfig, cellSize);
+            editHandler.Init(gridManager.State, gridManager, _levelConfig, cellSize);
 #endif
 
             await _inputService.InitAsync();

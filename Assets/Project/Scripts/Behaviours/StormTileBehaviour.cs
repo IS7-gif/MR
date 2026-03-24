@@ -1,6 +1,5 @@
-using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -11,21 +10,17 @@ namespace Project.Scripts.Behaviours
         public override bool IsActivatedBySwap => true;
 
 
-        public override void OnTileDestroyed(GridPoint gridPos, IGridManager grid)
+        public override void OnTileDestroyed(GridPoint gridPos, IGridState state, TileKind payloadKind)
         {
-            var tile = grid.GetTile(gridPos);
-            if (false == tile)
-                return;
-
-            var targetKind = tile.PayloadKind.IsColor()
-                ? tile.PayloadKind
-                : grid.GetMostCommonColor();
+            var targetKind = payloadKind.IsColor()
+                ? payloadKind
+                : state.GetMostCommonColor();
 
             if (false == targetKind.IsColor())
                 return;
 
-            var positions = grid.GetAllOfKind(targetKind);
-            grid.ScheduleRemove(positions);
+            var positions = state.GetAllOfKind(targetKind);
+            state.ScheduleRemove(positions);
         }
     }
 }

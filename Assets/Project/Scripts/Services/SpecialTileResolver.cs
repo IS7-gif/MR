@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Project.Scripts.Configs;
-using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Grid;
+using Project.Scripts.Shared.Tiles;
 using Project.Scripts.Tiles;
 
 namespace Project.Scripts.Services

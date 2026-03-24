@@ -4,7 +4,7 @@ using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Services.UISystem;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 using R3;
 
 namespace Project.Scripts.Gameplay.UI

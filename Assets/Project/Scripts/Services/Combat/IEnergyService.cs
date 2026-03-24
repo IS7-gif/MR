@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 
 namespace Project.Scripts.Services.Combat
 {

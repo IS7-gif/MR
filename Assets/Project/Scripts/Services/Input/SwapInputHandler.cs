@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Input;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Input
@@ -12,17 +13,19 @@ namespace Project.Scripts.Services.Input
 
 
         private readonly IInputService _input;
-        private readonly IGridManager _grid;
+        private readonly IGridState _state;
+        private readonly IGridView _view;
         private readonly float _worldThreshold;
         private Camera _camera;
         private GridPoint _startGridPos;
         private bool _hasPendingSwap;
 
 
-        public SwapInputHandler(IInputService input, IGridManager grid, float worldThreshold)
+        public SwapInputHandler(IInputService input, IGridState state, IGridView view, float worldThreshold)
         {
             _input = input;
-            _grid = grid;
+            _state = state;
+            _view = view;
             _worldThreshold = worldThreshold;
         }
 
@@ -47,12 +50,12 @@ namespace Project.Scripts.Services.Input
         private void HandleDragStarted(Vector2 screenPos)
         {
 #if UNITY_EDITOR
-            if (Project.Scripts.Services.BoardEdit.BoardEditMode.IsActive)
+            if (BoardEdit.BoardEditMode.IsActive)
                 return;
 #endif
             var worldPos = ScreenToWorld(screenPos);
-            _startGridPos = _grid.WorldToGrid(worldPos);
-            _hasPendingSwap = _grid.IsValidPosition(_startGridPos) && _grid.GetTile(_startGridPos) != null;
+            _startGridPos = _view.WorldToGrid(worldPos);
+            _hasPendingSwap = _state.IsValidPosition(_startGridPos) && _view.GetTile(_startGridPos) != null;
         }
 
         private void HandleDragDelta(Vector2 screenDelta)
@@ -67,10 +70,10 @@ namespace Project.Scripts.Services.Input
             _hasPendingSwap = false;
             var dir = GetDirection(worldDelta);
             var target = _startGridPos + dir;
-            if (false == _grid.IsValidPosition(target))
+            if (false == _state.IsValidPosition(target))
                 return;
 
-            if (false == _grid.GetTile(target))
+            if (false == _view.GetTile(target))
                 return;
 
             OnSwapRequested?.Invoke(new SwapRequest(_startGridPos, target));

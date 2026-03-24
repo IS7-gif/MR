@@ -10,16 +10,18 @@ namespace Project.Scripts.Services.BoardEdit
 {
     public class BoardEditClickHandler : MonoBehaviour
     {
-        private IGridManager _grid;
+        private IGridState _state;
+        private IGridView _view;
         private LevelConfig _levelConfig;
         private float _cellSize;
         private GameObject _overlayGo;
         private LineRenderer _overlay;
 
 
-        public void Init(IGridManager grid, LevelConfig levelConfig, float cellSize)
+        public void Init(IGridState state, IGridView view, LevelConfig levelConfig, float cellSize)
         {
-            _grid = grid;
+            _state = state;
+            _view = view;
             _levelConfig = levelConfig;
             _cellSize = cellSize;
             BoardEditMode.OnToggled += OnEditModeToggled;
@@ -44,20 +46,20 @@ namespace Project.Scripts.Services.BoardEdit
             if (false == Mouse.current.leftButton.wasPressedThisFrame)
                 return;
 
-            if (null == _grid)
+            if (null == _state)
                 return;
 
             var screenPos = Mouse.current.position.ReadValue();
             var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(Camera.main.transform.position.z)));
-            var gridPos = _grid.WorldToGrid(worldPos);
+            var gridPos = _view.WorldToGrid(worldPos);
 
-            if (false == _grid.IsValidPosition(gridPos))
+            if (false == _state.IsValidPosition(gridPos))
                 return;
 
-            if (false == _grid.GetTile(gridPos))
+            if (false == _view.GetTile(gridPos))
                 return;
 
-            _grid.ReplaceForEdit(gridPos, BoardEditMode.SelectedKind);
+            _view.ReplaceForEdit(gridPos, BoardEditMode.SelectedKind);
         }
 
 
@@ -72,10 +74,10 @@ namespace Project.Scripts.Services.BoardEdit
         private void CreateOverlay()
         {
             var half = _cellSize * 0.5f;
-            var bl = _grid.GridToWorld(new GridPoint(0, 0)) + new Vector3(-half, -half, 0f);
-            var br = _grid.GridToWorld(new GridPoint(_levelConfig.Width - 1, 0)) + new Vector3( half, -half, 0f);
-            var tr = _grid.GridToWorld(new GridPoint(_levelConfig.Width - 1, _levelConfig.Height - 1)) + new Vector3( half,  half, 0f);
-            var tl = _grid.GridToWorld(new GridPoint(0, _levelConfig.Height - 1)) + new Vector3(-half,  half, 0f);
+            var bl = _view.GridToWorld(new GridPoint(0, 0)) + new Vector3(-half, -half, 0f);
+            var br = _view.GridToWorld(new GridPoint(_levelConfig.Width - 1, 0)) + new Vector3( half, -half, 0f);
+            var tr = _view.GridToWorld(new GridPoint(_levelConfig.Width - 1, _levelConfig.Height - 1)) + new Vector3( half,  half, 0f);
+            var tl = _view.GridToWorld(new GridPoint(0, _levelConfig.Height - 1)) + new Vector3(-half,  half, 0f);
 
             _overlayGo = new GameObject("BoardEditOverlay");
             _overlay = _overlayGo.AddComponent<LineRenderer>();

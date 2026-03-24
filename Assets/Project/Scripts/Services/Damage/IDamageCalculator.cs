@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Project.Scripts.Services.Grid;
+using Project.Scripts.Shared.Damage;
+using Project.Scripts.Shared.Grid;
 
 namespace Project.Scripts.Services.Damage
 {

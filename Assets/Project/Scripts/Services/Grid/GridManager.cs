@@ -3,20 +3,25 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Grid;
+using Project.Scripts.Shared.Tiles;
 using Project.Scripts.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Grid
 {
-    public class GridManager : IGridManager
+    public class GridManager : IGridView, IGridOperations
     {
         private readonly LevelConfig _levelConfig;
         private readonly AnimationConfig _animConfig;
         private readonly TilePool _pool;
-        private readonly Tile[,] _grid;
-        private readonly HashSet<GridPoint> _scheduledRemovals = new();
+        private readonly Tile[,] _tiles;
+        private readonly GridState _state;
         private readonly float _cellSize;
         private Vector3 _origin;
+
+
+        public IGridState State => _state;
 
 
         public GridManager(LevelConfig levelConfig, AnimationConfig animConfig, TilePool pool, float cellSize)
@@ -25,159 +30,75 @@ namespace Project.Scripts.Services.Grid
             _animConfig = animConfig;
             _pool = pool;
             _cellSize = cellSize;
-            _grid = new Tile[levelConfig.Width, levelConfig.Height];
+            _tiles = new Tile[levelConfig.Width, levelConfig.Height];
+            _state = new GridState(levelConfig.Width, levelConfig.Height);
         }
 
-        public void SetOrigin(Vector3 origin)
-        {
-            _origin = origin;
-        }
 
-        public Tile GetTile(GridPoint pos)
-        {
-            return _grid[pos.X, pos.Y];
-        }
+        // IGridView
+        public void SetOrigin(Vector3 origin) => _origin = origin;
 
-        public void SetTile(GridPoint pos, Tile tile)
-        {
-            _grid[pos.X, pos.Y] = tile;
-        }
-
-        public void ClearTile(GridPoint pos)
-        {
-            _grid[pos.X, pos.Y] = null;
-        }
-
-        public bool IsValidPosition(GridPoint pos)
-        {
-            return pos.X >= 0 && pos.X < _levelConfig.Width && pos.Y >= 0 && pos.Y < _levelConfig.Height;
-        }
-
-        public Vector3 GridToWorld(GridPoint pos)
-        {
-            return _origin + new Vector3(pos.X * _cellSize, pos.Y * _cellSize, 0f);
-        }
+        public Vector3 GridToWorld(GridPoint pos) =>
+            _origin + new Vector3(pos.X * _cellSize, pos.Y * _cellSize, 0f);
 
         public GridPoint WorldToGrid(Vector3 worldPos)
         {
             var relative = worldPos - _origin;
-
             return new GridPoint(
                 Mathf.RoundToInt(relative.x / _cellSize),
                 Mathf.RoundToInt(relative.y / _cellSize)
             );
         }
 
-        public TileKind[,] GetGridState()
-        {
-            var state = new TileKind[_levelConfig.Width, _levelConfig.Height];
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
-                    state[x, y] = _grid[x, y] ? _grid[x, y].Kind : TileKind.None;
+        public Tile GetTile(GridPoint pos) => _tiles[pos.X, pos.Y];
 
-            return state;
+        public void SetTile(GridPoint pos, Tile tile)
+        {
+            _tiles[pos.X, pos.Y] = tile;
+            _state.SetKind(pos, tile ? tile.Kind : TileKind.None);
         }
 
-        public TileConfig ResolveRegularTile()
+        public void ClearTile(GridPoint pos)
         {
-            return _levelConfig.RegularTiles[UnityEngine.Random.Range(0, _levelConfig.RegularTiles.Length)];
+            _tiles[pos.X, pos.Y] = null;
+            _state.ClearCell(pos);
         }
 
-        public void ScheduleRemove(List<GridPoint> positions)
+        public TileConfig ResolveRegularTile() =>
+            _levelConfig.RegularTiles[UnityEngine.Random.Range(0, _levelConfig.RegularTiles.Length)];
+
+#if UNITY_EDITOR
+        public void ReplaceForEdit(GridPoint pos, TileKind kind)
         {
-            for (var i = 0; i < positions.Count; i++)
-                _scheduledRemovals.Add(positions[i]);
+            var tile = _tiles[pos.X, pos.Y];
+            if (false == tile)
+                return;
+
+            var config = FindConfigForKind(kind);
+            if (!config)
+                return;
+
+            tile.Init(config, pos);
+            _state.SetKind(pos, config.Kind);
         }
 
-        public List<GridPoint> GetNeighboursInRadius(GridPoint center, int radius)
+        private TileConfig FindConfigForKind(TileKind kind)
         {
-            var result = new List<GridPoint>();
-            for (var dx = -radius; dx <= radius; dx++)
-                for (var dy = -radius; dy <= radius; dy++)
-                {
-                    if (dx == 0 && dy == 0)
-                        continue;
+            for (var i = 0; i < _levelConfig.RegularTiles.Length; i++)
+                if (_levelConfig.RegularTiles[i].Kind == kind)
+                    return _levelConfig.RegularTiles[i];
 
-                    var pos = new GridPoint(center.X + dx, center.Y + dy);
-                    if (IsValidPosition(pos))
-                        result.Add(pos);
-                }
+            if (_levelConfig.SpecialTiles != null)
+                for (var i = 0; i < _levelConfig.SpecialTiles.Length; i++)
+                    if (_levelConfig.SpecialTiles[i].Kind == kind)
+                        return _levelConfig.SpecialTiles[i];
 
-            return result;
+            return null;
         }
+#endif
 
-        public List<GridPoint> GetAllInRow(int y)
-        {
-            var result = new List<GridPoint>(_levelConfig.Width);
-            for (var x = 0; x < _levelConfig.Width; x++)
-                result.Add(new GridPoint(x, y));
 
-            return result;
-        }
-
-        public List<GridPoint> GetAllInColumn(int x)
-        {
-            var result = new List<GridPoint>(_levelConfig.Height);
-            for (var y = 0; y < _levelConfig.Height; y++)
-                result.Add(new GridPoint(x, y));
-
-            return result;
-        }
-
-        public List<GridPoint> GetAllOfKind(TileKind kind)
-        {
-            var result = new List<GridPoint>();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
-                    if (_grid[x, y] && _grid[x, y].Kind == kind)
-                        result.Add(new GridPoint(x, y));
-
-            return result;
-        }
-
-        public List<GridPoint> GetAllOccupied()
-        {
-            var result = new List<GridPoint>();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
-                    if (_grid[x, y])
-                        result.Add(new GridPoint(x, y));
-
-            return result;
-        }
-
-        public TileKind GetMostCommonColor()
-        {
-            var counts = new Dictionary<TileKind, int>();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
-                {
-                    var tile = _grid[x, y];
-                    if (false == tile)
-                        continue;
-
-                    var kind = tile.Kind;
-                    if (false == kind.IsColor())
-                        continue;
-
-                    counts.TryGetValue(kind, out var count);
-                    counts[kind] = count + 1;
-                }
-
-            var bestKind = TileKind.None;
-            var bestCount = 0;
-            foreach (var kvp in counts)
-            {
-                if (kvp.Value > bestCount)
-                {
-                    bestCount = kvp.Value;
-                    bestKind = kvp.Key;
-                }
-            }
-
-            return bestKind;
-        }
-
+        // IGridOperations
         public async UniTask PopulateGrid()
         {
             var kindCache = new TileKind[_levelConfig.Width, _levelConfig.Height];
@@ -192,7 +113,8 @@ namespace Project.Scripts.Services.Grid
                     var tile = _pool.Get();
                     tile.transform.position = GridToWorld(pos);
                     tile.Init(tileConfig, pos);
-                    _grid[x, y] = tile;
+                    _tiles[x, y] = tile;
+                    _state.SetKind(pos, tileConfig.Kind);
                     tasks[idx++] = tile.Animator.AnimateSpawn();
                 }
 
@@ -227,25 +149,28 @@ namespace Project.Scripts.Services.Grid
 
         public async UniTask ConsumeTile(GridPoint pos)
         {
-            if (false == IsValidPosition(pos))
+            if (false == _state.IsValidPosition(pos))
                 return;
 
-            var tile = _grid[pos.X, pos.Y];
+            var tile = _tiles[pos.X, pos.Y];
             if (false == tile)
                 return;
 
             await tile.Animator.AnimateDestroy();
-            _grid[pos.X, pos.Y] = null;
+            _tiles[pos.X, pos.Y] = null;
+            _state.ClearCell(pos);
             _pool.Release(tile);
         }
 
         public async UniTask SwapTiles(GridPoint from, GridPoint to)
         {
-            var tileA = _grid[from.X, from.Y];
-            var tileB = _grid[to.X, to.Y];
+            var tileA = _tiles[from.X, from.Y];
+            var tileB = _tiles[to.X, to.Y];
 
-            _grid[from.X, from.Y] = tileB;
-            _grid[to.X, to.Y] = tileA;
+            _tiles[from.X, from.Y] = tileB;
+            _tiles[to.X, to.Y] = tileA;
+            _state.SetKind(from, tileB ? tileB.Kind : TileKind.None);
+            _state.SetKind(to, tileA ? tileA.Kind : TileKind.None);
 
             if (tileA)
                 tileA.GridPosition = to;
@@ -265,7 +190,7 @@ namespace Project.Scripts.Services.Grid
             for (var x = 0; x < _levelConfig.Width; x++)
                 for (var y = 0; y < _levelConfig.Height; y++)
                 {
-                    var tile = _grid[x, y];
+                    var tile = _tiles[x, y];
                     if (tile)
                     {
                         positions.Add(new GridPoint(x, y));
@@ -298,8 +223,9 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
-                _grid[pos.X, pos.Y].Init(configs[i], pos);
-                tasks.Add(_grid[pos.X, pos.Y].Animator.AnimateSpawn());
+                _tiles[pos.X, pos.Y].Init(configs[i], pos);
+                _state.SetKind(pos, configs[i].Kind);
+                tasks.Add(_tiles[pos.X, pos.Y].Animator.AnimateSpawn());
             }
 
             await UniTask.WhenAll(tasks);
@@ -319,42 +245,14 @@ namespace Project.Scripts.Services.Grid
             ReInitTileAt(3, 0, configT);
         }
 
-#if UNITY_EDITOR
-        public void ReplaceForEdit(GridPoint pos, TileKind kind)
-        {
-            var tile = _grid[pos.X, pos.Y];
-            if (false == tile)
-                return;
-
-            var config = FindConfigForKind(kind);
-            if (!config)
-                return;
-
-            tile.Init(config, pos);
-        }
-
-        private TileConfig FindConfigForKind(TileKind kind)
-        {
-            for (var i = 0; i < _levelConfig.RegularTiles.Length; i++)
-                if (_levelConfig.RegularTiles[i].Kind == kind)
-                    return _levelConfig.RegularTiles[i];
-
-            if (_levelConfig.SpecialTiles != null)
-                for (var i = 0; i < _levelConfig.SpecialTiles.Length; i++)
-                    if (_levelConfig.SpecialTiles[i].Kind == kind)
-                        return _levelConfig.SpecialTiles[i];
-
-            return null;
-        }
-#endif
 
         private async UniTask ProcessScheduledRemovals()
         {
-            while (_scheduledRemovals.Count > 0)
+            while (_state.ScheduledRemovals.Count > 0)
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(_animConfig.ChainReactionWaveDelay));
-                var batch = new List<GridPoint>(_scheduledRemovals);
-                _scheduledRemovals.Clear();
+                var batch = new List<GridPoint>(_state.ScheduledRemovals);
+                _state.ClearScheduledRemovals();
                 await ProcessRemovals(batch, null);
             }
         }
@@ -365,10 +263,10 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
-                if (false == IsValidPosition(pos))
+                if (false == _state.IsValidPosition(pos))
                     continue;
 
-                var tile = _grid[pos.X, pos.Y];
+                var tile = _tiles[pos.X, pos.Y];
                 if (false == tile)
                     continue;
 
@@ -387,8 +285,9 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < toDestroy.Count; i++)
             {
                 var (pos, tile) = toDestroy[i];
-                tile.Config.Behaviour.OnTileDestroyed(pos, this);
-                _grid[pos.X, pos.Y] = null;
+                tile.Config.Behaviour.OnTileDestroyed(pos, _state, tile.PayloadKind);
+                _tiles[pos.X, pos.Y] = null;
+                _state.ClearCell(pos);
                 _pool.Release(tile);
             }
 
@@ -399,17 +298,18 @@ namespace Project.Scripts.Services.Grid
             foreach (var kvp in specialPlacements)
             {
                 var pos = kvp.Key;
-                if (false == IsValidPosition(pos))
+                if (false == _state.IsValidPosition(pos))
                     continue;
 
-                if (_grid[pos.X, pos.Y])
+                if (_tiles[pos.X, pos.Y])
                     continue;
 
                 var data = kvp.Value;
                 var specialTile = _pool.Get();
                 specialTile.transform.position = GridToWorld(pos);
                 specialTile.Init(data.Config, pos, data.PayloadKind);
-                _grid[pos.X, pos.Y] = specialTile;
+                _tiles[pos.X, pos.Y] = specialTile;
+                _state.SetKind(pos, data.Config.Kind);
                 spawnTasks.Add(specialTile.Animator.AnimateSpawn());
             }
 
@@ -419,9 +319,12 @@ namespace Project.Scripts.Services.Grid
 
         private void ReInitTileAt(int x, int y, TileConfig config)
         {
-            var tile = _grid[x, y];
+            var tile = _tiles[x, y];
             if (tile)
+            {
                 tile.Init(config, new GridPoint(x, y));
+                _state.SetKind(new GridPoint(x, y), config.Kind);
+            }
         }
 
         private bool WouldCreateMatch(int x, int y, TileKind kind, TileKind[,] assigned)

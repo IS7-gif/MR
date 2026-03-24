@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Scripts.Configs;
-using Project.Scripts.Services.Grid;
+using Project.Scripts.Shared.Damage;
+using Project.Scripts.Shared.Grid;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Damage

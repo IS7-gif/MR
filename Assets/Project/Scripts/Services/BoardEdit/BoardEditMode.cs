@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 using System;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 
 namespace Project.Scripts.Services.BoardEdit
 {

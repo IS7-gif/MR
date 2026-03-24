@@ -1,5 +1,5 @@
-using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -16,10 +16,10 @@ namespace Project.Scripts.Behaviours
         public bool IsHorizontal => _isHorizontal;
 
 
-        public override void OnTileDestroyed(GridPoint gridPos, IGridManager grid)
+        public override void OnTileDestroyed(GridPoint gridPos, IGridState state, TileKind payloadKind)
         {
-            var positions = _isHorizontal ? grid.GetAllInRow(gridPos.Y) : grid.GetAllInColumn(gridPos.X);
-            grid.ScheduleRemove(positions);
+            var positions = _isHorizontal ? state.GetAllInRow(gridPos.Y) : state.GetAllInColumn(gridPos.X);
+            state.ScheduleRemove(positions);
         }
     }
 }

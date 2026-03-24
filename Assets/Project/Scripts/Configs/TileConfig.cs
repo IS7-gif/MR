@@ -1,5 +1,5 @@
 using Project.Scripts.Behaviours;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Configs

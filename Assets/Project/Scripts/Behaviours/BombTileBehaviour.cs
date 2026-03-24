@@ -1,5 +1,5 @@
-using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -20,10 +20,10 @@ namespace Project.Scripts.Behaviours
         public int DoubleRadius => _doubleRadius;
 
 
-        public override void OnTileDestroyed(GridPoint gridPos, IGridManager grid)
+        public override void OnTileDestroyed(GridPoint gridPos, IGridState state, TileKind payloadKind)
         {
-            var neighbours = grid.GetNeighboursInRadius(gridPos, _radius);
-            grid.ScheduleRemove(neighbours);
+            var neighbours = state.GetNeighboursInRadius(gridPos, _radius);
+            state.ScheduleRemove(neighbours);
         }
     }
 }

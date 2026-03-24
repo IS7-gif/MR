@@ -1,5 +1,5 @@
 using System;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Configs

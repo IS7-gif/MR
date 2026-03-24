@@ -4,7 +4,7 @@ using System.Reflection;
 using Project.Scripts.Configs;
 using Project.Scripts.Constants;
 using Project.Scripts.Services.BoardEdit;
-using Project.Scripts.Tiles;
+using Project.Scripts.Shared.Tiles;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;

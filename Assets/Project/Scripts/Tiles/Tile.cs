@@ -1,5 +1,6 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Tiles

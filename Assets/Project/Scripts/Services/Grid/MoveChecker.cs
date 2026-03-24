@@ -1,43 +1,47 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Grid;
+using Project.Scripts.Shared.Tiles;
 using Project.Scripts.Tiles;
 
 namespace Project.Scripts.Services.Grid
 {
     public class MoveChecker : IMoveChecker
     {
-        private readonly IGridManager _grid;
+        private readonly IGridState _state;
+        private readonly IGridView _view;
         private readonly IMatchFinder _matchFinder;
         private readonly LevelConfig _config;
 
 
-        public MoveChecker(IGridManager grid, IMatchFinder matchFinder, LevelConfig config)
+        public MoveChecker(IGridState state, IGridView view, IMatchFinder matchFinder, LevelConfig config)
         {
-            _grid = grid;
+            _state = state;
+            _view = view;
             _matchFinder = matchFinder;
             _config = config;
         }
 
         public bool HasPossibleMoves()
         {
-            var state = _grid.GetGridState();
+            var state = _state.GetGridState();
             for (var x = 0; x < _config.Width; x++)
                 for (var y = 0; y < _config.Height; y++)
                 {
-                    var tileA = _grid.GetTile(new GridPoint(x, y));
+                    var tileA = _view.GetTile(new GridPoint(x, y));
                     if (!tileA)
                         continue;
 
                     if (x + 1 < _config.Width)
                     {
-                        var tileB = _grid.GetTile(new GridPoint(x + 1, y));
+                        var tileB = _view.GetTile(new GridPoint(x + 1, y));
                         if (tileB && IsValidSwap(state, tileA, tileB, x, y, x + 1, y))
                             return true;
                     }
 
                     if (y + 1 < _config.Height)
                     {
-                        var tileB = _grid.GetTile(new GridPoint(x, y + 1));
+                        var tileB = _view.GetTile(new GridPoint(x, y + 1));
                         if (tileB && IsValidSwap(state, tileA, tileB, x, y, x, y + 1))
                             return true;
                     }

@@ -7,14 +7,16 @@ namespace Project.Scripts.Services.Grid
 {
     public class GravityHandler : IGravityHandler
     {
-        private readonly IGridManager _grid;
+        private readonly IGridState _state;
+        private readonly IGridView _view;
         private readonly TilePool _pool;
         private readonly LevelConfig _config;
 
 
-        public GravityHandler(IGridManager grid, TilePool pool, LevelConfig config)
+        public GravityHandler(IGridState state, IGridView view, TilePool pool, LevelConfig config)
         {
-            _grid = grid;
+            _state = state;
+            _view = view;
             _pool = pool;
             _config = config;
         }
@@ -28,7 +30,7 @@ namespace Project.Scripts.Services.Grid
                 var writeY = 0;
                 for (var readY = 0; readY < _config.Height; readY++)
                 {
-                    var tile = _grid.GetTile(new GridPoint(x, readY));
+                    var tile = _view.GetTile(new GridPoint(x, readY));
                     if (!tile)
                         continue;
 
@@ -36,10 +38,10 @@ namespace Project.Scripts.Services.Grid
                     {
                         var from = new GridPoint(x, readY);
                         var to = new GridPoint(x, writeY);
-                        _grid.ClearTile(from);
-                        _grid.SetTile(to, tile);
+                        _view.ClearTile(from);
+                        _view.SetTile(to, tile);
                         tile.GridPosition = to;
-                        tasks.Add(tile.Animator.AnimateFallTo(_grid.GridToWorld(to)));
+                        tasks.Add(tile.Animator.AnimateFallTo(_view.GridToWorld(to)));
                     }
                     writeY++;
                 }
@@ -55,7 +57,7 @@ namespace Project.Scripts.Services.Grid
                 for (var y = _config.Height - 1; y >= 0; y--)
                 {
                     var pos = new GridPoint(x, y);
-                    if (!_grid.GetTile(pos))
+                    if (!_view.GetTile(pos))
                         emptyPositions.Add(pos);
                 }
 
@@ -67,12 +69,12 @@ namespace Project.Scripts.Services.Grid
             for (var i = 0; i < emptyPositions.Count; i++)
             {
                 var pos = emptyPositions[i];
-                var tileConfig = _grid.ResolveRegularTile();
+                var tileConfig = _view.ResolveRegularTile();
                 var tile = _pool.Get();
-                tile.transform.position = _grid.GridToWorld(new GridPoint(pos.X, spawnHeights[pos.X]));
+                tile.transform.position = _view.GridToWorld(new GridPoint(pos.X, spawnHeights[pos.X]));
                 tile.Init(tileConfig, pos);
-                _grid.SetTile(pos, tile);
-                tasks.Add(tile.Animator.AnimateFallTo(_grid.GridToWorld(pos)));
+                _view.SetTile(pos, tile);
+                tasks.Add(tile.Animator.AnimateFallTo(_view.GridToWorld(pos)));
                 spawnHeights[pos.X]++;
             }
 

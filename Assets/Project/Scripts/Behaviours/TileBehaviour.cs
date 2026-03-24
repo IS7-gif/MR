@@ -1,5 +1,5 @@
-using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
+using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
 namespace Project.Scripts.Behaviours
@@ -9,6 +9,6 @@ namespace Project.Scripts.Behaviours
         public virtual bool IsActivatedBySwap => false;
 
 
-        public abstract void OnTileDestroyed(GridPoint gridPos, IGridManager grid);
+        public abstract void OnTileDestroyed(GridPoint gridPos, IGridState state, TileKind payloadKind);
     }
 }
