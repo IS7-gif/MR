@@ -5,6 +5,7 @@ using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Services.Grid;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Damage;
@@ -21,7 +22,7 @@ namespace Project.Scripts.Services
     {
         private const int ShuffleMaxAttempts = 10;
 
-
+        
         private readonly IGridState _state;
         private readonly IGridView _view;
         private readonly IGridOperations _gridOps;
@@ -31,6 +32,7 @@ namespace Project.Scripts.Services
         private readonly IMoveChecker _moveChecker;
         private readonly IDamageCalculator _damageCalculator;
         private readonly IGameStateService _gameStateService;
+        private readonly IMoveBarService _moveBarService;
         private readonly EventBus _eventBus;
         private readonly SpecialTileResolver _specialTileResolver;
         private readonly SwapComboResolver _swapComboResolver;
@@ -40,7 +42,8 @@ namespace Project.Scripts.Services
         public BoardOrchestrator(EventBus eventBus, IGridState state, IGridView view, IGridOperations gridOps,
             IGravityHandler gravity, IMatchFinder matchFinder, ISwapInputHandler swapHandler,
             IMoveChecker moveChecker, IDamageCalculator damageCalculator, IGameStateService gameStateService,
-            SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver)
+            IMoveBarService moveBarService, SpecialTileResolver specialTileResolver,
+            SwapComboResolver swapComboResolver)
         {
             _eventBus = eventBus;
             _state = state;
@@ -52,6 +55,7 @@ namespace Project.Scripts.Services
             _moveChecker = moveChecker;
             _damageCalculator = damageCalculator;
             _gameStateService = gameStateService;
+            _moveBarService = moveBarService;
             _specialTileResolver = specialTileResolver;
             _swapComboResolver = swapComboResolver;
         }
@@ -75,6 +79,12 @@ namespace Project.Scripts.Services
 
             if (false == _gameStateService.IsPlaying)
                 return;
+
+            if (false == _moveBarService.HasMoves)
+            {
+                _eventBus.Publish(new SwapRejectedEvent());
+                return;
+            }
 
             HandleSwapAsync(request).Forget();
         }
@@ -104,6 +114,8 @@ namespace Project.Scripts.Services
 
                 if (fromIsSpecial && toIsSpecial)
                 {
+                    _moveBarService.TryConsume();
+
                     var stateBefore = _state.GetGridState();
                     var tilesBefore = CountActiveTiles(stateBefore);
 
@@ -119,6 +131,8 @@ namespace Project.Scripts.Services
                 }
                 else if (fromIsSpecial || toIsSpecial)
                 {
+                    _moveBarService.TryConsume();
+
                     Tile specialTile, partnerTile;
                     GridPoint specialFinalPos;
 
@@ -156,6 +170,7 @@ namespace Project.Scripts.Services
                         await _gridOps.SwapTiles(request.To, request.From);
                     else
                     {
+                        _moveBarService.TryConsume();
                         await ProcessMatchChain(matches, waves, request.PivotPosition, true);
                         moveUsed = true;
                     }

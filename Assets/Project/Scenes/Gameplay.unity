@@ -146,7 +146,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 479.99997, y: 585, z: 1}
+  m_LocalScale: {x: 479.99997, y: 623.3333, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1842070634}
@@ -691,7 +691,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.GameplayEntryPoint
   _tileContainer: {fileID: 1840790692}
   _boardView: {fileID: 1842070633}
-  _gameplayViewPrefab: {fileID: 6275239582545134292, guid: e5f9abd2eea24674188e3562b2a3980f, type: 3}
 --- !u!4 &1346406440
 Transform:
   m_ObjectHideFlags: 0

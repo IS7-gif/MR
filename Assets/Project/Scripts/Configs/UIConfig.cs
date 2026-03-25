@@ -14,9 +14,13 @@ namespace Project.Scripts.Configs
         [Tooltip("Prefab containing the LoseView component — shown when the player runs out of moves")]
         [SerializeField] private GameObject _loseViewPrefab;
 
+        [Tooltip("Prefab containing the MoveBarView component — docked to the bottom of the screen")]
+        [SerializeField] private GameObject _moveBarViewPrefab;
+
 
         public GameObject GameplayViewPrefab => _gameplayViewPrefab;
         public GameObject WinViewPrefab => _winViewPrefab;
         public GameObject LoseViewPrefab => _loseViewPrefab;
+        public GameObject MoveBarViewPrefab => _moveBarViewPrefab;
     }
 }

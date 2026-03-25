@@ -22,3 +22,4 @@ MonoBehaviour:
   _levelDatabase: {fileID: 11400000, guid: 528394c8e2714e3489a9a33180a6de4c, type: 2}
   _uiConfig: {fileID: 11400000, guid: 63526929da5930348899f6e6bbc1be6c, type: 2}
   _energyConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
+  _moveBarConfig: {fileID: 11400000, guid: 1d120bb07ff23a948a01c2604afe52b3, type: 2}

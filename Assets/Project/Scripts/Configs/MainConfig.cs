@@ -16,6 +16,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private LevelDatabase _levelDatabase;
         [SerializeField] private UIConfig _uiConfig;
         [SerializeField] private EnergyConfig _energyConfig;
+        [SerializeField] private MoveBarConfig _moveBarConfig;
 
 
         public AudioMusicConfig AudioMusicConfig => _audioMusicConfig;
@@ -28,5 +29,6 @@ namespace Project.Scripts.Configs
         public LevelDatabase LevelDatabase => _levelDatabase;
         public UIConfig UIConfig => _uiConfig;
         public EnergyConfig EnergyConfig => _energyConfig;
+        public MoveBarConfig MoveBarConfig => _moveBarConfig;
     }
 }

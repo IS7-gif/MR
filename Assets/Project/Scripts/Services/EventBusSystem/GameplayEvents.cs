@@ -96,5 +96,25 @@ namespace Project.Scripts.Services.EventBusSystem
                 Max = max;
             }
         }
+
+        public readonly struct SwapRejectedEvent
+        {
+
+        }
+
+        public readonly struct MoveBarChangedEvent
+        {
+            public int CurrentMoves { get; }
+            public float FillProgress { get; }
+            public bool IsAtMax { get; }
+
+
+            public MoveBarChangedEvent(int currentMoves, float fillProgress, bool isAtMax)
+            {
+                CurrentMoves = currentMoves;
+                FillProgress = fillProgress;
+                IsAtMax = isAtMax;
+            }
+        }
     }
 }

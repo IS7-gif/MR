@@ -3,6 +3,7 @@ using Project.Scripts.Configs;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services;
 using Project.Scripts.Services.Audio;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Shared.Rules;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Damage;
@@ -38,7 +39,9 @@ namespace Project.Scripts.Gameplay
         private UIConfig _uiConfig;
         private UIService _uiService;
         private GameplayViewModel _gameplayViewModel;
+        private MoveBarViewModel _moveBarViewModel;
         private IGameStateService _gameStateService;
+        private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
@@ -50,9 +53,21 @@ namespace Project.Scripts.Gameplay
             InitAsync().Forget();
         }
 
+        private void Update()
+        {
+            if (null == _moveBarService)
+                return;
+
+            if (false == _gameStateService.IsPlaying)
+                return;
+
+            _moveBarService.Tick(Time.deltaTime);
+        }
+
         private void OnDestroy()
         {
             _uiService?.Close<GameplayView>();
+            _uiService?.Close<MoveBarView>();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
         }
@@ -71,7 +86,9 @@ namespace Project.Scripts.Gameplay
             UIConfig uiConfig,
             UIService uiService,
             GameplayViewModel gameplayViewModel,
+            MoveBarViewModel moveBarViewModel,
             IGameStateService gameStateService,
+            IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter)
         {
             _eventBus = eventBus;
@@ -85,15 +102,22 @@ namespace Project.Scripts.Gameplay
             _uiConfig = uiConfig;
             _uiService = uiService;
             _gameplayViewModel = gameplayViewModel;
+            _moveBarViewModel = moveBarViewModel;
             _gameStateService = gameStateService;
+            _moveBarService = moveBarService;
             _gameResultPresenter = gameResultPresenter;
         }
 
 
         private async UniTaskVoid InitAsync()
         {
+            _moveBarService.Initialize();
+
             _uiService.RegisterView<GameplayView>(_uiConfig.GameplayViewPrefab, UILayer.Main);
+            _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.Main);
+
             await _uiService.Show<GameplayView, GameplayViewModel>(_gameplayViewModel);
+            await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
             var cellSize = ComputeCellSize();
             var boardCenter = ComputeBoardCenter(cellSize);
@@ -127,6 +151,7 @@ namespace Project.Scripts.Gameplay
                 moveChecker,
                 _damageCalculator,
                 _gameStateService,
+                _moveBarService,
                 specialTileResolver,
                 swapComboResolver);
 

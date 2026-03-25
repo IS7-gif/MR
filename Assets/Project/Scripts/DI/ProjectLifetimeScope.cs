@@ -26,6 +26,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.LevelDatabase);
             builder.RegisterInstance(_mainConfig.UIConfig);
             builder.RegisterInstance(_mainConfig.EnergyConfig);
+            builder.RegisterInstance(_mainConfig.MoveBarConfig);
 
             builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47be888b0fd2ff5489e99af8b44761f6, type: 3}
+  m_Name: MoveBarConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.MoveBarConfig
+  _maxMoves: 10
+  _secondsPerMove: 4
+  _startMoves: 4
+  _gapFraction: 0.01
+  _punchStrength: 0.15
+  _punchDuration: 0.2
+  _fullBlinkMinAlpha: 0.35
+  _fullBlinkHalfDuration: 0.45
+  _emptyShakeDuration: 0.3
+  _emptyShakeStrength: 8
