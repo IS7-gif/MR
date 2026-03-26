@@ -13,7 +13,6 @@ namespace Project.Scripts.Services.UISystem
         [SerializeField] private Canvas _popupCanvas;
         [SerializeField] private Canvas _systemCanvas;
 
-
         private readonly Dictionary<Type, GameObject> _registeredViews = new();
         private readonly Dictionary<Type, IView> _activeViews = new();
         private readonly Dictionary<Type, UILayer> _viewLayers = new();
@@ -59,8 +58,7 @@ namespace Project.Scripts.Services.UISystem
                 return null;
             }
 
-            var canvas = GetCanvasForLayer(_viewLayers[viewType]);
-            var viewObject = Instantiate(prefab, canvas.transform);
+            var viewObject = Instantiate(prefab, GetParentForLayer(_viewLayers[viewType]));
             var view = viewObject.GetComponent<TView>();
             if (!view)
             {
@@ -105,8 +103,7 @@ namespace Project.Scripts.Services.UISystem
                 return null;
             }
 
-            var canvas = GetCanvasForLayer(_viewLayers[viewType]);
-            var viewObject = Instantiate(prefab, canvas.transform);
+            var viewObject = Instantiate(prefab, GetParentForLayer(_viewLayers[viewType]));
             var view = viewObject.GetComponent<TView>();
             if (!view)
             {
@@ -191,6 +188,11 @@ namespace Project.Scripts.Services.UISystem
             }
 
             canvas.sortingOrder = (int)layer;
+        }
+
+        private Transform GetParentForLayer(UILayer layer)
+        {
+            return GetCanvasForLayer(layer).transform;
         }
 
         private Canvas GetCanvasForLayer(UILayer layer)

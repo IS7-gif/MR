@@ -38,10 +38,9 @@ namespace Project.Scripts.Gameplay
 
         private Vector3 ComputeBoardCenter(Camera cam, float cellSize)
         {
-            var camHeight = cam.orthographicSize * 2f;
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
             var boardHeight = _levelConfig.Height * cellSize;
-            var bottomPadding = camHeight * _boardConfig.BoardBottomPaddingPercent;
+            var bottomPadding = _boardConfig.BoardBottomPaddingCells * cellSize;
 
             return new Vector3(
                 cam.transform.position.x,

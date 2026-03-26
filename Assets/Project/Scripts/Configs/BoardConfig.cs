@@ -21,11 +21,14 @@ namespace Project.Scripts.Configs
         [Tooltip("How many extra tile rows the spawn mask reveals above the board (hides tiles appearing from above)")]
         [SerializeField] private float _maskTopPadding = 2f;
 
-        [Tooltip("Fraction of screen height between the bottom edge and the first tile row")]
-        [SerializeField] [Range(0f, 0.3f)] private float _boardBottomPaddingPercent = 0.05f;
+        [Tooltip("Fixed gap between the bottom of the screen and the bottom board edge, expressed in cell units (1 = one tile height). Consistent across all screen sizes.")]
+        [SerializeField] [Range(0f, 5f)] private float _boardBottomPaddingCells = 0.5f;
 
         [Tooltip("Minimum number of tiles in a row/column to count as a match")]
         [SerializeField] [Range(2, 6)] private int _minMatchLength = 3;
+
+        [Tooltip("Maximum width-to-height ratio for the game area. On wider screens the content is pillarboxed to this ratio (0.5 = 1:2)")]
+        [SerializeField] [Range(0.3f, 1f)] private float _maxAspectRatio = 0.5f;
 
         [Tooltip("Prefab used to instantiate each tile")]
         [SerializeField] private Tile _tilePrefab;
@@ -36,8 +39,9 @@ namespace Project.Scripts.Configs
         public float TileScale => _tileScale;
         public float FramePadding => _framePadding;
         public float MaskTopPadding => _maskTopPadding;
-        public float BoardBottomPaddingPercent => _boardBottomPaddingPercent;
+        public float BoardBottomPaddingCells => _boardBottomPaddingCells;
         public int MinMatchLength => _minMatchLength;
+        public float MaxAspectRatio => _maxAspectRatio;
         public Tile TilePrefab => _tilePrefab;
     }
 }

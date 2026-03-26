@@ -28,8 +28,13 @@ namespace Project.Scripts.Gameplay.UI
         [Tooltip("Fill image for the player HP bar (Type=Filled, Method=Horizontal)")]
         [SerializeField] private Image _playerHPBar;
 
+        [Header("Layout")]
         [Tooltip("Extra vertical offset in canvas units added above the board top edge (positive = higher)")]
         [SerializeField] private float _playerPanelPadding = 50f;
+
+#if UNITY_EDITOR
+        private RectTransform _cachedReferenceRect;
+#endif
 
 
         protected override UniTask OnBindViewModel()
@@ -55,34 +60,48 @@ namespace Project.Scripts.Gameplay.UI
                 .Subscribe(v => _playerHPBar.fillAmount = v)
                 .AddTo(Disposables);
 
-            PositionPlayerPanel(ViewModel.BoardTopWorldY);
+            var referenceRect = _playerPanel.parent as RectTransform;
+#if UNITY_EDITOR
+            _cachedReferenceRect = referenceRect;
+#endif
+            PositionPlayerPanel(ViewModel.BoardTopWorldY, referenceRect);
 
             return UniTask.CompletedTask;
         }
 
 
-        private void PositionPlayerPanel(float boardTopWorldY)
+#if UNITY_EDITOR
+        private void Update()
+        {
+            if (!Application.isPlaying || ViewModel == null || !_cachedReferenceRect)
+                return;
+
+            PositionPlayerPanel(ViewModel.BoardTopWorldY, _cachedReferenceRect);
+        }
+#endif
+
+        private void PositionPlayerPanel(float boardTopWorldY, RectTransform referenceRect)
         {
             var cam = Camera.main;
             if (!cam)
                 return;
 
+            var canvas = GetComponentInParent<Canvas>();
+            if (!canvas || !referenceRect)
+                return;
+
             var worldPos = new Vector3(cam.transform.position.x, boardTopWorldY, 0f);
             var screenPoint = (Vector2)cam.WorldToScreenPoint(worldPos);
 
-            var canvas = GetComponentInParent<Canvas>();
-            if (!canvas)
-                return;
-
             var isOverlay = canvas.renderMode == RenderMode.ScreenSpaceOverlay;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                (RectTransform)canvas.transform,
+                referenceRect,
                 screenPoint,
                 isOverlay ? null : canvas.worldCamera,
                 out var localPoint);
 
-            var canvasHeight = ((RectTransform)canvas.transform).rect.height;
-            _playerPanel.anchoredPosition = new Vector2(0f, localPoint.y + canvasHeight * 0.5f + _playerPanelPadding);
+            var referenceHeight = referenceRect.rect.height;
+            _playerPanel.anchoredPosition = new Vector2(0f, localPoint.y + referenceHeight * 0.5f + _playerPanelPadding);
         }
     }
 }

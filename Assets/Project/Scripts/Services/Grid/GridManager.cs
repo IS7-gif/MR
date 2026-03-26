@@ -68,6 +68,17 @@ namespace Project.Scripts.Services.Grid
             _levelConfig.RegularTiles[UnityEngine.Random.Range(0, _levelConfig.RegularTiles.Length)];
 
 #if UNITY_EDITOR
+        public void RepositionAllTiles()
+        {
+            for (var x = 0; x < _levelConfig.Width; x++)
+                for (var y = 0; y < _levelConfig.Height; y++)
+                {
+                    var tile = _tiles[x, y];
+                    if (tile)
+                        tile.transform.position = GridToWorld(new GridPoint(x, y));
+                }
+        }
+
         public void ReplaceForEdit(GridPoint pos, TileKind kind)
         {
             var tile = _tiles[pos.X, pos.Y];

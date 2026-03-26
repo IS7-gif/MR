@@ -2,26 +2,17 @@ using UnityEngine;
 
 namespace Project.Scripts.Utils
 {
+#if UNITY_EDITOR
+    [DefaultExecutionOrder(-50)]
+#endif
     [ExecuteAlways]
     public class FullscreenBackground : MonoBehaviour
     {
-        private void Update()
-        {
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                Apply();
-                return;
-            }
-#endif
-        }
-
-        private void Awake()
+        private void Start()
         {
             if (Application.isPlaying)
                 Apply();
         }
-
 
         private void Apply()
         {
@@ -48,9 +39,15 @@ namespace Project.Scripts.Utils
         private static float GetAspect(Camera cam)
         {
             var h = UnityEngine.Device.Screen.height;
-            return h > 0
-                ? (float)UnityEngine.Device.Screen.width / h
-                : cam.aspect;
+            return h > 0 ? (float)UnityEngine.Device.Screen.width / h : cam.aspect;
         }
+
+
+#if UNITY_EDITOR
+        private void Update()
+        {
+            Apply();
+        }
+#endif
     }
 }

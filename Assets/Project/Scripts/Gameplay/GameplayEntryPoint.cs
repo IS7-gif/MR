@@ -48,6 +48,13 @@ namespace Project.Scripts.Gameplay
         private SwapInputHandler _swapHandler;
         private GameAudioController _gameAudioController;
 
+#if UNITY_EDITOR
+        private GridManager _gridManager;
+        private float _cellSize;
+        private int _lastWidth;
+        private int _lastHeight;
+#endif
+
 
         private void Start()
         {
@@ -63,6 +70,18 @@ namespace Project.Scripts.Gameplay
                 return;
 
             _moveBarService.Tick(Time.deltaTime);
+
+#if UNITY_EDITOR
+            if (_gridManager == null)
+                return;
+
+            if (Screen.width == _lastWidth && Screen.height == _lastHeight)
+                return;
+
+            _lastWidth = Screen.width;
+            _lastHeight = Screen.height;
+            ApplyLiveResize();
+#endif
         }
 
         private void OnDestroy()
@@ -137,6 +156,13 @@ namespace Project.Scripts.Gameplay
             var gridManager = new GridManager(_levelConfig, _animConfig, pool, cellSize);
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
 
+#if UNITY_EDITOR
+            _gridManager = gridManager;
+            _cellSize = cellSize;
+            _lastWidth = Screen.width;
+            _lastHeight = Screen.height;
+#endif
+
             _boardView.Setup(_levelConfig.Width, _levelConfig.Height, cellSize,
                 _boardConfig.FramePadding, _boardConfig.MaskTopPadding);
 
@@ -180,13 +206,29 @@ namespace Project.Scripts.Gameplay
             await orchestrator.StartGame();
         }
 
+#if UNITY_EDITOR
+        private void ApplyLiveResize()
+        {
+            var boardCenter = ComputeBoardCenter(_cellSize);
+            _boardView.transform.position = boardCenter;
+
+            var newOrigin = ComputeGridOrigin(boardCenter, _cellSize);
+            _gridManager.SetOrigin(newOrigin);
+            _gridManager.RepositionAllTiles();
+
+            var boardTopWorldY = boardCenter.y + _levelConfig.Height * _cellSize * 0.5f;
+            _battleHUDViewModel.SetBoardTopWorldY(boardTopWorldY);
+        }
+#endif
+
         private float ComputeCellSize()
         {
             var cam = Camera.main;
             var camHeight = cam.orthographicSize * 2f;
             var camWidth = camHeight * cam.aspect;
+            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var cellSizeByWidth = camWidth * (1f - _boardConfig.BoardPaddingPercent) / _levelConfig.Width;
+            var cellSizeByWidth = effectiveWidth * (1f - _boardConfig.BoardPaddingPercent) / _levelConfig.Width;
             var cellSizeByHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
 
             return Mathf.Min(cellSizeByWidth, cellSizeByHeight);
@@ -195,10 +237,9 @@ namespace Project.Scripts.Gameplay
         private Vector3 ComputeBoardCenter(float cellSize)
         {
             var cam = Camera.main;
-            var camHeight = cam.orthographicSize * 2f;
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
             var boardHeight = _levelConfig.Height * cellSize;
-            var bottomPadding = camHeight * _boardConfig.BoardBottomPaddingPercent;
+            var bottomPadding = _boardConfig.BoardBottomPaddingCells * cellSize;
 
             return new Vector3(
                 cam.transform.position.x,

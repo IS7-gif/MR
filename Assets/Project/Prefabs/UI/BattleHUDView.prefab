@@ -321,11 +321,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.UI.BattleHUDView
   _enemyPanel: {fileID: 5922192402656711279}
   _enemyAvatar: {fileID: 1590269457612796299}
+  _enemyHPBarBg: {fileID: 6567334432237145240}
   _enemyHPBar: {fileID: 181175974428384343}
   _playerPanel: {fileID: 1015467899658685981}
   _playerAvatar: {fileID: 8242621516318934435}
+  _playerHPBarBg: {fileID: 3650243054190054620}
   _playerHPBar: {fileID: 4307498705848327359}
   _playerPanelPadding: 50
+  _avatarCellsWide: 1
+  _avatarCellsHigh: 1
+  _hpBarCellsHigh: 0.25
 --- !u!1 &3148835812865434907
 GameObject:
   m_ObjectHideFlags: 0

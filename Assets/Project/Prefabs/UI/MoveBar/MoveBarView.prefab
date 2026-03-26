@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -40, y: 60}
+  m_SizeDelta: {x: 0, y: 70}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &4161912335169870351
 MonoBehaviour:
@@ -55,10 +55,6 @@ MonoBehaviour:
   _fill: {fileID: 6809559667987615569}
   _segmentsContainer: {fileID: 5212719882327298881}
   _segmentPrefab: {fileID: 1827859552322884099, guid: b822d8a2ff7fa3b47b827df39e982fd0, type: 3}
-  _punchStrength: 0.25
-  _punchDuration: 0.2
-  _blinkMinAlpha: 0.35
-  _blinkHalfDuration: 0.45
 --- !u!1 &7057955144972349664
 GameObject:
   m_ObjectHideFlags: 0
