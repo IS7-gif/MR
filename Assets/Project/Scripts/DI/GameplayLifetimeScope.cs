@@ -24,6 +24,7 @@ namespace Project.Scripts.DI
             builder.Register<ILevelProgressionService, LevelProgressionService>(Lifetime.Singleton);
             builder.Register<IEnergyService, EnergyService>(Lifetime.Singleton);
             builder.Register<IMoveBarService, MoveBarService>(Lifetime.Singleton);
+            builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
 
             builder.Register<GameplayViewModel>(Lifetime.Singleton);
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);

@@ -9,7 +9,7 @@ namespace Project.Scripts.Gameplay.UI
     public class BattleHUDView : BaseView<BattleHUDViewModel>
     {
         [Header("Enemy")]
-        [Tooltip("RectTransform of the enemy avatar panel — anchor to top of screen")]
+        [Tooltip("RectTransform of the enemy avatar panel — anchored to top of screen")]
         [SerializeField] private RectTransform _enemyPanel;
 
         [Tooltip("Image displaying the enemy avatar portrait")]
@@ -17,6 +17,10 @@ namespace Project.Scripts.Gameplay.UI
 
         [Tooltip("Fill image for the enemy HP bar (Type=Filled, Method=Horizontal)")]
         [SerializeField] private Image _enemyHPBar;
+
+        [Header("Enemy Heroes")]
+        [Tooltip("Four HeroSlotView components for the enemy side, ordered left to right")]
+        [SerializeField] private HeroSlotView[] _enemyHeroSlots;
 
         [Header("Player")]
         [Tooltip("RectTransform of the player avatar panel — positioned at board top edge at runtime")]
@@ -28,9 +32,15 @@ namespace Project.Scripts.Gameplay.UI
         [Tooltip("Fill image for the player HP bar (Type=Filled, Method=Horizontal)")]
         [SerializeField] private Image _playerHPBar;
 
+        [Header("Player Heroes")]
+        [Tooltip("Four HeroSlotView components for the player side, ordered left to right")]
+        [SerializeField] private HeroSlotView[] _playerHeroSlots;
+
         [Header("Layout")]
         [Tooltip("Extra vertical offset in canvas units added above the board top edge (positive = higher)")]
         [SerializeField] private float _playerPanelPadding = 50f;
+
+        private Vector2 _enemyPanelBasePosition;
 
 #if UNITY_EDITOR
         private RectTransform _cachedReferenceRect;
@@ -60,6 +70,12 @@ namespace Project.Scripts.Gameplay.UI
                 .Subscribe(v => _playerHPBar.fillAmount = v)
                 .AddTo(Disposables);
 
+            BindHeroSlots(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
+            BindHeroSlots(_playerHeroSlots, ViewModel.PlayerHeroSlots);
+
+            _enemyPanelBasePosition = _enemyPanel.anchoredPosition;
+            ApplyEnemySafeAreaOffset();
+
             var referenceRect = _playerPanel.parent as RectTransform;
 #if UNITY_EDITOR
             _cachedReferenceRect = referenceRect;
@@ -76,9 +92,24 @@ namespace Project.Scripts.Gameplay.UI
             if (!Application.isPlaying || ViewModel == null || !_cachedReferenceRect)
                 return;
 
+            ApplyEnemySafeAreaOffset();
             PositionPlayerPanel(ViewModel.BoardTopWorldY, _cachedReferenceRect);
         }
 #endif
+
+        private void ApplyEnemySafeAreaOffset()
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (!canvas) 
+                return;
+
+            var topInsetPx = Screen.height - Screen.safeArea.yMax;
+            var topInsetCanvas = topInsetPx / canvas.scaleFactor;
+
+            _enemyPanel.anchoredPosition = new Vector2(
+                _enemyPanelBasePosition.x,
+                _enemyPanelBasePosition.y - topInsetCanvas);
+        }
 
         private void PositionPlayerPanel(float boardTopWorldY, RectTransform referenceRect)
         {
@@ -102,6 +133,19 @@ namespace Project.Scripts.Gameplay.UI
 
             var referenceHeight = referenceRect.rect.height;
             _playerPanel.anchoredPosition = new Vector2(0f, localPoint.y + referenceHeight * 0.5f + _playerPanelPadding);
+        }
+
+        private void BindHeroSlots(HeroSlotView[] views, HeroSlotViewModel[] viewModels)
+        {
+            if (null == views || null == viewModels)
+                return;
+
+            var count = Mathf.Min(views.Length, viewModels.Length);
+            for (var i = 0; i < count; i++)
+            {
+                if (views[i])
+                    views[i].Bind(viewModels[i]);
+            }
         }
     }
 }

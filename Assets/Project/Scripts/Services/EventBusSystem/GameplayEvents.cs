@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 
 namespace Project.Scripts.Services.EventBusSystem
@@ -102,6 +103,40 @@ namespace Project.Scripts.Services.EventBusSystem
             {
                 Current = current;
                 Max = max;
+            }
+        }
+
+        public readonly struct HeroEnergyChangedEvent
+        {
+            public BattleSide Side { get; }
+            public int SlotIndex { get; }
+            public int Current { get; }
+            public int Max { get; }
+
+
+            public HeroEnergyChangedEvent(BattleSide side, int slotIndex, int current, int max)
+            {
+                Side = side;
+                SlotIndex = slotIndex;
+                Current = current;
+                Max = max;
+            }
+        }
+
+        public readonly struct HeroActivatedEvent
+        {
+            public BattleSide Side { get; }
+            public int SlotIndex { get; }
+            public HeroActionType ActionType { get; }
+            public int ActionValue { get; }
+
+
+            public HeroActivatedEvent(BattleSide side, int slotIndex, HeroActionType actionType, int actionValue)
+            {
+                Side = side;
+                SlotIndex = slotIndex;
+                ActionType = actionType;
+                ActionValue = actionValue;
             }
         }
 

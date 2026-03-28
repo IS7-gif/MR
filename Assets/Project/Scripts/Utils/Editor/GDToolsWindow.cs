@@ -25,6 +25,12 @@ namespace Project.Scripts.Utils.Editor
 
         private void OnGUI()
         {
+            EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
+            EditorGUILayout.Space(4);
+            if (GUILayout.Button("Toggle Obj"))
+                ToggleObject();
+
+            EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Board Edit", EditorStyles.boldLabel);
             EditorGUILayout.Space(4);
 
@@ -79,7 +85,6 @@ namespace Project.Scripts.Utils.Editor
             Repaint();
         }
 
-
         private Sprite GetSpriteForKind(TileKind kind)
         {
             if (!_levelDatabase)
@@ -108,6 +113,21 @@ namespace Project.Scripts.Utils.Editor
             return null;
         }
 
+        private void ToggleObject()
+        {
+            var selectedObjects = Selection.gameObjects;
+            for (var i = 0; i < selectedObjects.Length; i++)
+            {
+                var obj = selectedObjects[i];
+                if (obj)
+                {
+                    Undo.RecordObject(obj, "Toggle Active State");
+                    obj.SetActive(!obj.activeSelf);
+                    if (PrefabUtility.IsPartOfPrefabInstance(obj) || PrefabUtility.IsPartOfPrefabAsset(obj))
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
+                }
+            }
+        }
 
         private void CopyConsole()
         {

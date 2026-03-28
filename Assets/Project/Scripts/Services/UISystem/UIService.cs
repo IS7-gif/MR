@@ -8,11 +8,22 @@ namespace Project.Scripts.Services.UISystem
 {
     public class UIService : MonoBehaviour
     {
+        [Tooltip("Background layer canvas (Sort Order 0). For background screens.")]
         [SerializeField] private Canvas _backgroundCanvas;
+        
+        [Tooltip("Main static layer canvas (Sort Order 100). For static HUD elements: buttons, labels.")]
         [SerializeField] private Canvas _mainCanvas;
+        
+        [Tooltip("Main dynamic layer canvas (Sort Order 150). For animated elements: avatars, heroes, HP bars, effects.")]
+        [SerializeField] private Canvas _mainDynamicCanvas;
+        
+        [Tooltip("Popup layer canvas (Sort Order 200). For popups and overlays.")]
         [SerializeField] private Canvas _popupCanvas;
+        
+        [Tooltip("System layer canvas (Sort Order 300). For system UI: loading screens, alerts.")]
         [SerializeField] private Canvas _systemCanvas;
 
+        
         private readonly Dictionary<Type, GameObject> _registeredViews = new();
         private readonly Dictionary<Type, IView> _activeViews = new();
         private readonly Dictionary<Type, UILayer> _viewLayers = new();
@@ -22,6 +33,7 @@ namespace Project.Scripts.Services.UISystem
         {
             SetupCanvasLayers();
         }
+        
 
         public void RegisterView<TView>(GameObject prefab, UILayer layer) where TView : MonoBehaviour, IView
         {
@@ -175,6 +187,7 @@ namespace Project.Scripts.Services.UISystem
         {
             SetupCanvas(_backgroundCanvas, UILayer.Background);
             SetupCanvas(_mainCanvas, UILayer.Main);
+            SetupCanvas(_mainDynamicCanvas, UILayer.MainDynamic);
             SetupCanvas(_popupCanvas, UILayer.Popup);
             SetupCanvas(_systemCanvas, UILayer.System);
         }
@@ -195,12 +208,18 @@ namespace Project.Scripts.Services.UISystem
             return GetCanvasForLayer(layer).transform;
         }
 
+        public Transform GetLayerRoot(UILayer layer)
+        {
+            return GetCanvasForLayer(layer).transform;
+        }
+
         private Canvas GetCanvasForLayer(UILayer layer)
         {
             return layer switch
             {
                 UILayer.Background => _backgroundCanvas,
                 UILayer.Main => _mainCanvas,
+                UILayer.MainDynamic => _mainDynamicCanvas,
                 UILayer.Popup => _popupCanvas,
                 UILayer.System => _systemCanvas,
                 _ => _mainCanvas

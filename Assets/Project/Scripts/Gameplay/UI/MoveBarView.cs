@@ -26,6 +26,9 @@ namespace Project.Scripts.Gameplay.UI
         private readonly List<Image> _segments = new();
         private readonly List<Tween> _blinkTweens = new();
         private int _previousMoves;
+#if UNITY_EDITOR
+        private bool _rebuildPending;
+#endif
 
 
         protected override async UniTask OnBindViewModel()
@@ -66,7 +69,28 @@ namespace Project.Scripts.Gameplay.UI
         {
             KillBlinkTweens();
         }
+        
 
+#if UNITY_EDITOR
+        private void OnRectTransformDimensionsChange()
+        {
+            if (null == ViewModel || _rebuildPending)
+                return;
+
+            _rebuildPending = true;
+            RebuildOnResizeAsync().Forget();
+        }
+
+        private async UniTaskVoid RebuildOnResizeAsync()
+        {
+            await UniTask.NextFrame();
+            _rebuildPending = false;
+
+            BuildSegments(ViewModel.MaxMoves);
+            SetSegmentsImmediate(_previousMoves);
+            UpdateBlink(ViewModel.IsAtMax.CurrentValue);
+        }
+#endif
 
         private void BuildSegments(int count)
         {
@@ -163,7 +187,6 @@ namespace Project.Scripts.Gameplay.UI
 
         private void ShakeBar()
         {
-            // Kill any in-progress shake so it resets to origin before starting new one
             DOTween.Kill(transform, complete: true);
             transform.DOShakePosition(
                 ViewModel.Config.EmptyShakeDuration,

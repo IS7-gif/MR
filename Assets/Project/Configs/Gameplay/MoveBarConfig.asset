@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MoveBarConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.MoveBarConfig
   _maxMoves: 10
-  _secondsPerMove: 4
+  _secondsPerMove: 2.5
   _startMoves: 4
   _gapFraction: 0.01
   _punchStrength: 0.15

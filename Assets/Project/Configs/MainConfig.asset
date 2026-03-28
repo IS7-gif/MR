@@ -24,3 +24,4 @@ MonoBehaviour:
   _energyConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
   _moveBarConfig: {fileID: 11400000, guid: 1d120bb07ff23a948a01c2604afe52b3, type: 2}
   _battleHUDConfig: {fileID: 11400000, guid: 45c9ff60227b1c741b257cc9fe86a26e, type: 2}
+  _tileKindPaletteConfig: {fileID: 11400000, guid: d100b8948d0a59f4cbe9d90dd813cb63, type: 2}

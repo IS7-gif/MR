@@ -2,6 +2,8 @@ using System;
 using Project.Scripts.Configs;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
+using Project.Scripts.Shared.Heroes;
+using R3;
 
 namespace Project.Scripts.Services.Combat
 {
@@ -12,7 +14,7 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
-        private IDisposable _subscription;
+        private readonly CompositeDisposable _subscriptions = new();
 
 
         public EnemyStateService(EventBus eventBus, LevelConfig levelConfig)
@@ -20,26 +22,41 @@ namespace Project.Scripts.Services.Combat
             _eventBus = eventBus;
             MaxHP = levelConfig.EnemyHP;
             CurrentHP = levelConfig.EnemyHP;
-            _subscription = _eventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
+
+            _subscriptions.Add(_eventBus.Subscribe<DamageDealtEvent>(OnDamageDealt));
+            _subscriptions.Add(_eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated));
+        }
+
+
+        public void Dispose()
+        {
+            _subscriptions.Dispose();
         }
 
 
         private void OnDamageDealt(DamageDealtEvent e)
         {
+            ApplyDamage(e.Total);
+        }
+
+        private void OnHeroActivated(HeroActivatedEvent e)
+        {
+            if (e.Side != BattleSide.Player || e.ActionType != HeroActionType.DealDamage)
+                return;
+
+            ApplyDamage(e.ActionValue);
+        }
+
+        private void ApplyDamage(int amount)
+        {
             if (CurrentHP <= 0)
                 return;
 
-            CurrentHP = Math.Max(0, CurrentHP - e.Total);
+            CurrentHP = Math.Max(0, CurrentHP - amount);
             _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
 
             if (CurrentHP == 0)
                 _eventBus.Publish(new EnemyDefeatedEvent());
-        }
-
-        public void Dispose()
-        {
-            _subscription?.Dispose();
-            _subscription = null;
         }
     }
 }

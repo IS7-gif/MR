@@ -136,9 +136,9 @@ namespace Project.Scripts.Gameplay
         {
             _moveBarService.Initialize();
 
-            _uiService.RegisterView<GameplayView>(_uiConfig.GameplayViewPrefab, UILayer.Main);
-            _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.Main);
-            _uiService.RegisterView<BattleHUDView>(_uiConfig.BattleHUDViewPrefab, UILayer.Main);
+            _uiService.RegisterView<GameplayView>(_uiConfig.GameplayViewPrefab, UILayer.MainDynamic);
+            _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.MainDynamic);
+            _uiService.RegisterView<BattleHUDView>(_uiConfig.BattleHUDViewPrefab, UILayer.MainDynamic);
 
             await _uiService.Show<GameplayView, GameplayViewModel>(_gameplayViewModel);
             await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);

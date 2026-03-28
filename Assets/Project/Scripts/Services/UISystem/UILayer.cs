@@ -4,6 +4,7 @@
     {
         Background = 0,
         Main = 100,
+        MainDynamic = 150,
         Popup = 200,
         System = 300
     }

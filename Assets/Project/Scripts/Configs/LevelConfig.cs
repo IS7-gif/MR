@@ -34,8 +34,16 @@ namespace Project.Scripts.Configs
         [Tooltip("Starting HP of the enemy avatar for this level")]
         [SerializeField] private int _enemyHP = 100;
 
-        [Tooltip("Win condition type — DamageBased means the player wins by reducing enemy HP to zero")]
+        [Tooltip("Win condition type - DamageBased means the player wins by reducing enemy HP to zero")]
         [SerializeField] private LevelGoalType _goalType = LevelGoalType.DamageBased;
+
+        // TODO: replace with lobby loadout when PvP is implemented
+        [Header("Heroes (temporary - will be replaced by lobby loadout)")]
+        [Tooltip("Four hero configs for the player side (null slot = empty)")]
+        [SerializeField] private HeroConfig[] _playerHeroes = new HeroConfig[4];
+
+        [Tooltip("Four hero configs for the enemy side (null slot = empty)")]
+        [SerializeField] private HeroConfig[] _enemyHeroes = new HeroConfig[4];
 
 
         public int LevelId => _levelId;
@@ -46,5 +54,7 @@ namespace Project.Scripts.Configs
         public int PlayerHP => _playerHP;
         public int EnemyHP => _enemyHP;
         public LevelGoalType GoalType => _goalType;
+        public HeroConfig[] PlayerHeroes => _playerHeroes;
+        public HeroConfig[] EnemyHeroes => _enemyHeroes;
     }
 }

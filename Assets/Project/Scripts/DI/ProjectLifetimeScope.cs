@@ -28,6 +28,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.EnergyConfig);
             builder.RegisterInstance(_mainConfig.MoveBarConfig);
             builder.RegisterInstance(_mainConfig.BattleHUDConfig);
+            builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
 
             builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 

@@ -18,6 +18,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private EnergyConfig _energyConfig;
         [SerializeField] private MoveBarConfig _moveBarConfig;
         [SerializeField] private BattleHUDConfig _battleHUDConfig;
+        [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
 
 
         public AudioMusicConfig AudioMusicConfig => _audioMusicConfig;
@@ -32,5 +33,6 @@ namespace Project.Scripts.Configs
         public EnergyConfig EnergyConfig => _energyConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
         public BattleHUDConfig BattleHUDConfig => _battleHUDConfig;
+        public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
     }
 }

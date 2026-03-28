@@ -1,6 +1,5 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Constants;
-using Project.Scripts.Services.UISystem;
 using UnityEngine.SceneManagement;
 
 namespace Project.Scripts.Services
@@ -11,13 +10,11 @@ namespace Project.Scripts.Services
 
 
         private readonly LevelDatabase _levelDatabase;
-        private readonly UIService _uiService;
 
 
-        public LevelProgressionService(LevelDatabase levelDatabase, UIService uiService)
+        public LevelProgressionService(LevelDatabase levelDatabase)
         {
             _levelDatabase = levelDatabase;
-            _uiService = uiService;
         }
 
 
@@ -35,7 +32,6 @@ namespace Project.Scripts.Services
 
         private void LoadScene()
         {
-            _uiService.CloseAll();
             SceneManager.LoadScene(SceneNames.GamePlay);
         }
     }

@@ -1,9 +1,11 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
 
@@ -15,6 +17,12 @@ namespace Project.Scripts.Gameplay.UI
         private readonly IEnemyStateService _enemyState;
         private readonly IPlayerStateService _playerState;
         private readonly BattleHUDConfig _config;
+        private readonly IHeroService _heroService;
+        private readonly TileKindPaletteConfig _palette;
+        private readonly LevelConfig _levelConfig;
+
+        private HeroSlotViewModel[] _playerHeroSlots;
+        private HeroSlotViewModel[] _enemyHeroSlots;
 
 
         public ReactiveProperty<float> EnemyHPFill { get; } = new(1f);
@@ -25,14 +33,26 @@ namespace Project.Scripts.Gameplay.UI
         public Color PlayerHPBarColor { get; private set; }
         public float BoardTopWorldY { get; private set; }
 
+        public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
+        public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
 
-        public BattleHUDViewModel(EventBus eventBus, IEnemyStateService enemyState,
-            IPlayerStateService playerState, BattleHUDConfig config)
+
+        public BattleHUDViewModel(
+            EventBus eventBus,
+            IEnemyStateService enemyState,
+            IPlayerStateService playerState,
+            BattleHUDConfig config,
+            IHeroService heroService,
+            TileKindPaletteConfig palette,
+            LevelConfig levelConfig)
         {
             _eventBus = eventBus;
             _enemyState = enemyState;
             _playerState = playerState;
             _config = config;
+            _heroService = heroService;
+            _palette = palette;
+            _levelConfig = levelConfig;
         }
 
 
@@ -51,8 +71,21 @@ namespace Project.Scripts.Gameplay.UI
             PlayerHPFill.Value = _playerState.MaxHP > 0
                 ? (float)_playerState.CurrentHP / _playerState.MaxHP : 1f;
 
+            _playerHeroSlots = CreateHeroSlotViewModels(
+                BattleSide.Player,
+                _heroService.GetSlots(BattleSide.Player),
+                _levelConfig.PlayerHeroes,
+                _heroService.TryActivate);
+
+            _enemyHeroSlots = CreateHeroSlotViewModels(
+                BattleSide.Enemy,
+                _heroService.GetSlots(BattleSide.Enemy),
+                _levelConfig.EnemyHeroes,
+                null);
+
             Disposables.Add(_eventBus.Subscribe<EnemyHPChangedEvent>(OnEnemyHPChanged));
             Disposables.Add(_eventBus.Subscribe<PlayerHPChangedEvent>(OnPlayerHPChanged));
+            Disposables.Add(_eventBus.Subscribe<HeroEnergyChangedEvent>(OnHeroEnergyChanged));
 
             return UniTask.CompletedTask;
         }
@@ -61,13 +94,57 @@ namespace Project.Scripts.Gameplay.UI
         {
             EnemyHPFill.Dispose();
             PlayerHPFill.Dispose();
+
+            if (null != _playerHeroSlots)
+                for (var i = 0; i < _playerHeroSlots.Length; i++)
+                    _playerHeroSlots[i]?.Dispose();
+
+            if (null != _enemyHeroSlots)
+                for (var i = 0; i < _enemyHeroSlots.Length; i++)
+                    _enemyHeroSlots[i]?.Dispose();
         }
 
 
-        private void OnEnemyHPChanged(EnemyHPChangedEvent e) =>
+        private void OnEnemyHPChanged(EnemyHPChangedEvent e)
+        {
             EnemyHPFill.Value = e.Max > 0 ? (float)e.Current / e.Max : 0f;
+        }
 
-        private void OnPlayerHPChanged(PlayerHPChangedEvent e) =>
+        private void OnPlayerHPChanged(PlayerHPChangedEvent e)
+        {
             PlayerHPFill.Value = e.Max > 0 ? (float)e.Current / e.Max : 0f;
+        }
+
+        private void OnHeroEnergyChanged(HeroEnergyChangedEvent e)
+        {
+            var slots = e.Side == BattleSide.Player ? _playerHeroSlots : _enemyHeroSlots;
+            if (null == slots || e.SlotIndex < 0 || e.SlotIndex >= slots.Length)
+                return;
+
+            slots[e.SlotIndex]?.UpdateEnergy(e.Current, e.Max);
+        }
+
+        private HeroSlotViewModel[] CreateHeroSlotViewModels(
+            BattleSide side,
+            System.Collections.Generic.IReadOnlyList<HeroSlotState> states,
+            HeroConfig[] configs,
+            Action<int> onActivate)
+        {
+            var slots = new HeroSlotViewModel[4];
+
+            for (var i = 0; i < 4; i++)
+            {
+                var state = states[i];
+                var config = (configs != null && i < configs.Length) ? configs[i] : null;
+                var color = state.IsAssigned
+                    ? _palette.GetColor(state.Kind, Color.gray)
+                    : Color.gray;
+                var portrait = config ? config.Portrait : null;
+
+                slots[i] = new HeroSlotViewModel(i, side, state, color, portrait, onActivate);
+            }
+
+            return slots;
+        }
     }
 }
