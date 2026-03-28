@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
+using Project.Scripts.Services;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
@@ -17,22 +18,29 @@ namespace Project.Scripts.Gameplay.UI
         private readonly IEnemyStateService _enemyState;
         private readonly IPlayerStateService _playerState;
         private readonly BattleHUDConfig _config;
+        private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
         private readonly TileKindPaletteConfig _palette;
         private readonly LevelConfig _levelConfig;
-
+        private readonly IBoardBoundsProvider _boardBounds;
         private HeroSlotViewModel[] _playerHeroSlots;
         private HeroSlotViewModel[] _enemyHeroSlots;
+        private readonly Subject<int> _enemyHit = new();
+        private readonly Subject<int> _playerHit = new();
+        private int _prevEnemyHP;
+        private int _prevPlayerHP;
 
 
         public ReactiveProperty<float> EnemyHPFill { get; } = new(1f);
         public ReactiveProperty<float> PlayerHPFill { get; } = new(1f);
+        public Observable<int> EnemyHit => _enemyHit;
+        public Observable<int> PlayerHit => _playerHit;
         public Sprite EnemyAvatarSprite { get; private set; }
         public Sprite PlayerAvatarSprite { get; private set; }
-        public Color EnemyHPBarColor { get; private set; }
-        public Color PlayerHPBarColor { get; private set; }
-        public float BoardTopWorldY { get; private set; }
-
+        public BattleAnimationConfig BattleAnimConfig => _battleAnimationConfig;
+        public float BoardTopWorldY => _boardBounds.BoardTopWorldY;
+        public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
+        public float BoardCenterX => _boardBounds.BoardCenterX;
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
 
@@ -42,29 +50,31 @@ namespace Project.Scripts.Gameplay.UI
             IEnemyStateService enemyState,
             IPlayerStateService playerState,
             BattleHUDConfig config,
+            BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
             TileKindPaletteConfig palette,
-            LevelConfig levelConfig)
+            LevelConfig levelConfig,
+            IBoardBoundsProvider boardBounds)
         {
             _eventBus = eventBus;
             _enemyState = enemyState;
             _playerState = playerState;
             _config = config;
+            _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
             _palette = palette;
             _levelConfig = levelConfig;
+            _boardBounds = boardBounds;
         }
-
-
-        public void SetBoardTopWorldY(float worldY) => BoardTopWorldY = worldY;
 
 
         protected override UniTask OnInitializeAsync()
         {
             EnemyAvatarSprite = _config.EnemyAvatarSprite;
             PlayerAvatarSprite = _config.PlayerAvatarSprite;
-            EnemyHPBarColor = _config.EnemyHPBarColor;
-            PlayerHPBarColor = _config.PlayerHPBarColor;
+
+            _prevEnemyHP = _enemyState.CurrentHP;
+            _prevPlayerHP = _playerState.CurrentHP;
 
             EnemyHPFill.Value = _enemyState.MaxHP > 0
                 ? (float)_enemyState.CurrentHP / _enemyState.MaxHP : 1f;
@@ -94,6 +104,8 @@ namespace Project.Scripts.Gameplay.UI
         {
             EnemyHPFill.Dispose();
             PlayerHPFill.Dispose();
+            _enemyHit.Dispose();
+            _playerHit.Dispose();
 
             if (null != _playerHeroSlots)
                 for (var i = 0; i < _playerHeroSlots.Length; i++)
@@ -107,11 +119,17 @@ namespace Project.Scripts.Gameplay.UI
 
         private void OnEnemyHPChanged(EnemyHPChangedEvent e)
         {
+            if (e.Current < _prevEnemyHP)
+                _enemyHit.OnNext(_prevEnemyHP - e.Current);
+            _prevEnemyHP = e.Current;
             EnemyHPFill.Value = e.Max > 0 ? (float)e.Current / e.Max : 0f;
         }
 
         private void OnPlayerHPChanged(PlayerHPChangedEvent e)
         {
+            if (e.Current < _prevPlayerHP)
+                _playerHit.OnNext(_prevPlayerHP - e.Current);
+            _prevPlayerHP = e.Current;
             PlayerHPFill.Value = e.Max > 0 ? (float)e.Current / e.Max : 0f;
         }
 

@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 31063616239676025}
   - component: {fileID: 8765121134542506311}
   - component: {fileID: 563403053028072182}
+  - component: {fileID: 4672357111057021317}
   m_Layer: 5
   m_Name: HeroSlotView
   m_TagString: Untagged
@@ -214,6 +215,21 @@ MonoBehaviour:
   _portrait: {fileID: 6613056300140818271}
   _energyBarFill: {fileID: 6115172802206264805}
   _activateButton: {fileID: 8765121134542506311}
+  _pulseDuration: 0.8
+--- !u!114 &4672357111057021317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2481495671063614240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e89dc2885de4af4184e15b428cd10b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.UI.HitReactionComponent
+  _portrait: {fileID: 6613056300140818271}
+  _knockbackDirectionSign: 1
 --- !u!1 &7515570733132760051
 GameObject:
   m_ObjectHideFlags: 0

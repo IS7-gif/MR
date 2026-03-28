@@ -17,6 +17,7 @@ namespace Project.Scripts.Gameplay
         private readonly IMoveCounterService _moveCounter;
         private readonly IEnemyStateService _enemyState;
         private readonly ILevelProgressionService _progression;
+        private readonly BattleAnimationConfig _battleAnimConfig;
 
 
         private IDisposable _stateSub;
@@ -28,7 +29,8 @@ namespace Project.Scripts.Gameplay
             UIConfig uiConfig,
             IMoveCounterService moveCounter,
             IEnemyStateService enemyState,
-            ILevelProgressionService progression)
+            ILevelProgressionService progression,
+            BattleAnimationConfig battleAnimConfig)
         {
             _gameStateService = gameStateService;
             _uiService = uiService;
@@ -36,6 +38,7 @@ namespace Project.Scripts.Gameplay
             _moveCounter = moveCounter;
             _enemyState = enemyState;
             _progression = progression;
+            _battleAnimConfig = battleAnimConfig;
         }
 
 
@@ -63,6 +66,7 @@ namespace Project.Scripts.Gameplay
 
         private async UniTaskVoid ShowWin()
         {
+            await UniTask.Delay(TimeSpan.FromSeconds(_battleAnimConfig.ResultScreenDelay));
             var viewModel = new WinViewModel(_moveCounter, _enemyState, _progression,
                 () => _uiService.Close<WinView>());
             await _uiService.Show<WinView, WinViewModel>(viewModel);
@@ -70,6 +74,7 @@ namespace Project.Scripts.Gameplay
 
         private async UniTaskVoid ShowLose()
         {
+            await UniTask.Delay(TimeSpan.FromSeconds(_battleAnimConfig.ResultScreenDelay));
             var viewModel = new LoseViewModel(_progression,
                 () => _uiService.Close<LoseView>());
             await _uiService.Show<LoseView, LoseViewModel>(viewModel);

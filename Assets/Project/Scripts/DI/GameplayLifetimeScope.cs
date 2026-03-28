@@ -30,6 +30,8 @@ namespace Project.Scripts.DI
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);
             builder.Register<BattleHUDViewModel>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Singleton);
+
+            builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
         }
     }
 }

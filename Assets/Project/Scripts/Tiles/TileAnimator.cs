@@ -7,13 +7,19 @@ namespace Project.Scripts.Tiles
 {
     public class TileAnimator : MonoBehaviour
     {
-        private AnimationConfig _config;
+        private BoardAnimationConfig _config;
         private Vector3 _targetScale = Vector3.one;
 
 
-        public void Init(AnimationConfig config) => _config = config;
+        public void Init(BoardAnimationConfig config)
+        {
+            _config = config;
+        }
 
-        public void SetTargetScale(float cellSize) => _targetScale = Vector3.one * cellSize;
+        public void SetTargetScale(float cellSize)
+        {
+            _targetScale = Vector3.one * cellSize;
+        }
 
         public UniTask AnimateSwapTo(Vector3 target)
         {

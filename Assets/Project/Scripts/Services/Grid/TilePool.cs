@@ -11,7 +11,7 @@ namespace Project.Scripts.Services.Grid
         private readonly ObjectPool<Tile> _pool;
 
 
-        public TilePool(Tile prefab, Transform parent, AnimationConfig animConfig, float cellSize, float tileScale)
+        public TilePool(Tile prefab, Transform parent, BoardAnimationConfig animConfig, float cellSize, float tileScale)
         {
             _tileVisualSize = cellSize * tileScale;
             _pool = new ObjectPool<Tile>(
@@ -33,8 +33,7 @@ namespace Project.Scripts.Services.Grid
                     t.gameObject.SetActive(false);
                 },
                 actionOnDestroy: t => Object.Destroy(t.gameObject),
-                // TODO: disable collectionCheck after confirming that the hole bug is fixed
-                collectionCheck: true,
+                collectionCheck: false,
                 defaultCapacity: 36,
                 maxSize: 100
             );

@@ -27,8 +27,10 @@ namespace Project.Scripts.Utils.Editor
         {
             EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
             EditorGUILayout.Space(4);
-            if (GUILayout.Button("Toggle Obj"))
+            if (GUILayout.Button(new GUIContent("Toggle Obj", "Toggle active state of selected objects")))
                 ToggleObject();
+            if (GUILayout.Button(new GUIContent("Toggle Gzms", "Toggle Gizmos visibility in the Scene view")))
+                ToggleGizmos();
 
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Board Edit", EditorStyles.boldLabel);
@@ -127,6 +129,19 @@ namespace Project.Scripts.Utils.Editor
                         PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
                 }
             }
+        }
+        
+        private void ToggleGizmos()
+        {
+            var sceneView = SceneView.lastActiveSceneView;
+            if (!sceneView)
+            {
+                Debug.LogWarning("No active Scene view found");
+                return;
+            }
+
+            sceneView.drawGizmos = !sceneView.drawGizmos;
+            sceneView.Repaint();
         }
 
         private void CopyConsole()

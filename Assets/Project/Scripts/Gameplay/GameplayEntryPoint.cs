@@ -32,7 +32,7 @@ namespace Project.Scripts.Gameplay
         private AudioService _audioService;
         private BoardConfig _boardConfig;
         private LevelConfig _levelConfig;
-        private AnimationConfig _animConfig;
+        private BoardAnimationConfig _animConfig;
         private InputConfig _inputConfig;
         private IDamageCalculator _damageCalculator;
         private SpecialTileConfig _specialTileConfig;
@@ -44,6 +44,7 @@ namespace Project.Scripts.Gameplay
         private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
         private BattleHUDViewModel _battleHUDViewModel;
+        private IBoardBoundsProvider _boardBoundsProvider;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private GameAudioController _gameAudioController;
@@ -100,7 +101,7 @@ namespace Project.Scripts.Gameplay
             AudioService audioService,
             BoardConfig boardConfig,
             LevelConfig levelConfig,
-            AnimationConfig animConfig,
+            BoardAnimationConfig animConfig,
             InputConfig inputConfig,
             IDamageCalculator damageCalculator,
             SpecialTileConfig specialTileConfig,
@@ -111,7 +112,8 @@ namespace Project.Scripts.Gameplay
             IGameStateService gameStateService,
             IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter,
-            BattleHUDViewModel battleHUDViewModel)
+            BattleHUDViewModel battleHUDViewModel,
+            IBoardBoundsProvider boardBoundsProvider)
         {
             _eventBus = eventBus;
             _audioService = audioService;
@@ -129,6 +131,7 @@ namespace Project.Scripts.Gameplay
             _moveBarService = moveBarService;
             _gameResultPresenter = gameResultPresenter;
             _battleHUDViewModel = battleHUDViewModel;
+            _boardBoundsProvider = boardBoundsProvider;
         }
 
 
@@ -148,7 +151,8 @@ namespace Project.Scripts.Gameplay
             _boardView.transform.position = boardCenter;
 
             var boardTopWorldY = boardCenter.y + _levelConfig.Height * cellSize * 0.5f;
-            _battleHUDViewModel.SetBoardTopWorldY(boardTopWorldY);
+            var boardHalfWidth = _levelConfig.Width * cellSize * 0.5f;
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth);
             await _uiService.Show<BattleHUDView, BattleHUDViewModel>(_battleHUDViewModel);
 
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
@@ -217,7 +221,8 @@ namespace Project.Scripts.Gameplay
             _gridManager.RepositionAllTiles();
 
             var boardTopWorldY = boardCenter.y + _levelConfig.Height * _cellSize * 0.5f;
-            _battleHUDViewModel.SetBoardTopWorldY(boardTopWorldY);
+            var boardHalfWidth = _levelConfig.Width * _cellSize * 0.5f;
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth);
         }
 #endif
 

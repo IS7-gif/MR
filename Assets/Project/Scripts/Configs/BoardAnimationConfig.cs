@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Project.Scripts.Configs
 {
-    [CreateAssetMenu(fileName = "AnimationConfig", menuName = "Configs/Animation Config")]
-    public class AnimationConfig : ScriptableObject
+    [CreateAssetMenu(fileName = "BoardAnimationConfig", menuName = "Configs/Board Animation Config")]
+    public class BoardAnimationConfig : ScriptableObject
     {
         [Tooltip("Duration in seconds for the tile swap animation")]
         [SerializeField] private float _swapDuration = 0.2f;

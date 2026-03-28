@@ -10,7 +10,8 @@ namespace Project.Scripts.Configs
         [SerializeField] private AudioSFXConfig _audioSFXConfig;
         [SerializeField] private InputConfig _inputConfig;
         [SerializeField] private BoardConfig _boardConfig;
-        [SerializeField] private AnimationConfig _animationConfig;
+        [SerializeField] private BoardAnimationConfig _boardAnimationConfig;
+        [SerializeField] private BattleAnimationConfig _battleAnimationConfig;
         [SerializeField] private DamageConfig _damageConfig;
         [SerializeField] private SpecialTileConfig _specialTileConfig;
         [SerializeField] private LevelDatabase _levelDatabase;
@@ -25,7 +26,8 @@ namespace Project.Scripts.Configs
         public AudioSFXConfig AudioSFXConfig => _audioSFXConfig;
         public InputConfig InputConfig => _inputConfig;
         public BoardConfig BoardConfig => _boardConfig;
-        public AnimationConfig AnimationConfig => _animationConfig;
+        public BoardAnimationConfig BoardAnimationConfig => _boardAnimationConfig;
+        public BattleAnimationConfig BattleAnimationConfig => _battleAnimationConfig;
         public DamageConfig DamageConfig => _damageConfig;
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;

@@ -17,7 +17,8 @@ namespace Project.Scripts.DI
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(_mainConfig.BoardConfig);
-            builder.RegisterInstance(_mainConfig.AnimationConfig);
+            builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
+            builder.RegisterInstance(_mainConfig.BattleAnimationConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
             builder.RegisterInstance(_mainConfig.DamageConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);

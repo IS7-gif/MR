@@ -26,6 +26,9 @@ namespace Project.Scripts.Gameplay.UI
         private readonly List<Image> _segments = new();
         private readonly List<Tween> _blinkTweens = new();
         private int _previousMoves;
+        private Canvas _canvas;
+        private bool _isOverlay;
+        private RectTransform _referenceRect;
 #if UNITY_EDITOR
         private bool _rebuildPending;
 #endif
@@ -33,9 +36,14 @@ namespace Project.Scripts.Gameplay.UI
 
         protected override async UniTask OnBindViewModel()
         {
+            _canvas = GetComponentInParent<Canvas>();
+            _isOverlay = _canvas && _canvas.renderMode == RenderMode.ScreenSpaceOverlay;
+            _referenceRect = transform.parent as RectTransform;
+
             await UniTask.NextFrame();
 
             BuildSegments(ViewModel.MaxMoves);
+            ApplyBoardWidth();
 
             var initialMoves = ViewModel.CurrentMoves.CurrentValue;
             SetSegmentsImmediate(initialMoves);
@@ -87,18 +95,39 @@ namespace Project.Scripts.Gameplay.UI
             _rebuildPending = false;
 
             BuildSegments(ViewModel.MaxMoves);
+            ApplyBoardWidth();
             SetSegmentsImmediate(_previousMoves);
             UpdateBlink(ViewModel.IsAtMax.CurrentValue);
         }
 #endif
 
+        private void ApplyBoardWidth()
+        {
+            var cam = Camera.main;
+            if (!cam || !_canvas || !_referenceRect)
+                return;
+
+            var camForCanvas = _isOverlay ? null : _canvas.worldCamera;
+            var centerX = ViewModel.BoardCenterX;
+            var halfWidth = ViewModel.BoardHalfWidth;
+
+            var leftWorld = new Vector3(centerX - halfWidth, 0f, 0f);
+            var rightWorld = new Vector3(centerX + halfWidth, 0f, 0f);
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _referenceRect, cam.WorldToScreenPoint(leftWorld), camForCanvas, out var leftLocal);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _referenceRect, cam.WorldToScreenPoint(rightWorld), camForCanvas, out var rightLocal);
+
+            var rt = (RectTransform)transform;
+            rt.sizeDelta = new Vector2(rightLocal.x - leftLocal.x, rt.sizeDelta.y);
+        }
+
         private void BuildSegments(int count)
         {
             for (var i = 0; i < _segments.Count; i++)
-            {
                 if (_segments[i])
                     Destroy(_segments[i].gameObject);
-            }
 
             _segments.Clear();
 

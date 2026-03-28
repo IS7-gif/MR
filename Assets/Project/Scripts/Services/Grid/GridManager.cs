@@ -13,7 +13,7 @@ namespace Project.Scripts.Services.Grid
     public class GridManager : IGridView, IGridOperations
     {
         private readonly LevelConfig _levelConfig;
-        private readonly AnimationConfig _animConfig;
+        private readonly BoardAnimationConfig _animConfig;
         private readonly TilePool _pool;
         private readonly Tile[,] _tiles;
         private readonly GridState _state;
@@ -24,7 +24,7 @@ namespace Project.Scripts.Services.Grid
         public IGridState State => _state;
 
 
-        public GridManager(LevelConfig levelConfig, AnimationConfig animConfig, TilePool pool, float cellSize)
+        public GridManager(LevelConfig levelConfig, BoardAnimationConfig animConfig, TilePool pool, float cellSize)
         {
             _levelConfig = levelConfig;
             _animConfig = animConfig;

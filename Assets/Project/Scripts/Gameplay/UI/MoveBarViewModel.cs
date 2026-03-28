@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
+using Project.Scripts.Services;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.EventBusSystem;
 using Project.Scripts.Services.EventBusSystem.Events;
@@ -13,6 +14,7 @@ namespace Project.Scripts.Gameplay.UI
         private readonly EventBus _eventBus;
         private readonly MoveBarConfig _config;
         private readonly IMoveBarService _moveBarService;
+        private readonly IBoardBoundsProvider _boardBounds;
         private readonly Subject<Unit> _swapRejectedSubject = new();
 
 
@@ -22,13 +24,16 @@ namespace Project.Scripts.Gameplay.UI
         public int MaxMoves { get; private set; }
         public MoveBarConfig Config => _config;
         public Observable<Unit> OnSwapRejected => _swapRejectedSubject;
+        public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
+        public float BoardCenterX => _boardBounds.BoardCenterX;
 
 
-        public MoveBarViewModel(EventBus eventBus, MoveBarConfig config, IMoveBarService moveBarService)
+        public MoveBarViewModel(EventBus eventBus, MoveBarConfig config, IMoveBarService moveBarService, IBoardBoundsProvider boardBounds)
         {
             _eventBus = eventBus;
             _config = config;
             _moveBarService = moveBarService;
+            _boardBounds = boardBounds;
         }
 
 
