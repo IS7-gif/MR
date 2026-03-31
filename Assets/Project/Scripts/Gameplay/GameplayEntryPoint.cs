@@ -197,7 +197,7 @@ namespace Project.Scripts.Gameplay
                 specialTileResolver,
                 swapComboResolver);
 
-            _gameAudioController = new GameAudioController(_audioService, _eventBus);
+            _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 
             _gameResultPresenter.Initialize();

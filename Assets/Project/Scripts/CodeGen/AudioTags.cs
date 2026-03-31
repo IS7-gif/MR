@@ -8,8 +8,14 @@ namespace Scripts.Services.Audio.AudioSystem.Configs
         public const string Group_MainMusic = "MainMusic";
 
         // Sounds
-        public const string Sound_Bomb = "Bomb";
-        public const string Sound_Match = "Match";
+        public const string Sound_Bomb_01 = "bomb_01";
+        public const string Sound_Fanfares_01 = "fanfares_01";
+        public const string Sound_Heal_01 = "heal_01";
+        public const string Sound_Hit_01 = "hit_01";
+        public const string Sound_Hit_02 = "hit_02";
+        public const string Sound_Laser_01 = "laser_01";
+        public const string Sound_Lose_01 = "lose_01";
+        public const string Sound_Match_01 = "match_01";
         public const string Sound_Theme_01 = "Theme_01";
     }
 }

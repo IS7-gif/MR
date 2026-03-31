@@ -10,8 +10,9 @@ namespace Project.Scripts.Services.Audio.AudioSystem.Configs
 #if UNITY_EDITOR
     public class AudioTagsGenerator
     {
-        private const string OutputPath = "Assets/Scripts/CodeGen/AudioTags.cs";
+        private const string OutputPath = "Assets/Project/Scripts/CodeGen/AudioTags.cs";
 
+        
         [MenuItem("Tools/CodeGen/Generate AudioTags")]
         public static void GenerateAudioTagsFromMenu()
         {
@@ -98,6 +99,7 @@ namespace Project.Scripts.Services.Audio.AudioSystem.Configs
             Debug.Log($"AudioTags.cs generated at {OutputPath} with {groupTags.Count} groups and {soundTags.Count} sounds.");
         }
 
+        
         private static string SanitizeName(string original, string prefix)
         {
             var sanitized = new string(original
