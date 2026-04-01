@@ -17,6 +17,7 @@ namespace Project.Scripts.Gameplay.UI
         private readonly EventBus _eventBus;
         private readonly IEnemyStateService _enemyState;
         private readonly IPlayerStateService _playerState;
+        private readonly IPlayerAvatarChargeService _playerCharge;
         private readonly BattleHUDConfig _config;
         private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
@@ -44,12 +45,16 @@ namespace Project.Scripts.Gameplay.UI
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
         public string EnemyName => _levelConfig.BotConfig ? _levelConfig.BotConfig.OpponentName : string.Empty;
+        public AvatarChargeBarViewModel PlayerChargeBar { get; private set; }
+        public AvatarChargeBarViewModel EnemyChargeBar { get; private set; }
+        public EventBus EventBus => _eventBus;
 
 
         public BattleHUDViewModel(
             EventBus eventBus,
             IEnemyStateService enemyState,
             IPlayerStateService playerState,
+            IPlayerAvatarChargeService playerCharge,
             BattleHUDConfig config,
             BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
@@ -60,6 +65,7 @@ namespace Project.Scripts.Gameplay.UI
             _eventBus = eventBus;
             _enemyState = enemyState;
             _playerState = playerState;
+            _playerCharge = playerCharge;
             _config = config;
             _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
@@ -73,6 +79,9 @@ namespace Project.Scripts.Gameplay.UI
         {
             EnemyAvatarSprite = _config.EnemyAvatarSprite;
             PlayerAvatarSprite = _config.PlayerAvatarSprite;
+
+            PlayerChargeBar = new AvatarChargeBarViewModel(_eventBus, BattleSide.Player);
+            EnemyChargeBar = new AvatarChargeBarViewModel(_eventBus, BattleSide.Enemy);
 
             _prevEnemyHP = _enemyState.CurrentHP;
             _prevPlayerHP = _playerState.CurrentHP;
@@ -107,6 +116,9 @@ namespace Project.Scripts.Gameplay.UI
             PlayerHPFill.Dispose();
             _enemyHit.Dispose();
             _playerHit.Dispose();
+
+            PlayerChargeBar?.Dispose();
+            EnemyChargeBar?.Dispose();
 
             if (null != _playerHeroSlots)
                 for (var i = 0; i < _playerHeroSlots.Length; i++)

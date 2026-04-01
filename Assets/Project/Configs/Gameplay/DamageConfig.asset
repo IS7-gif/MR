@@ -16,6 +16,12 @@ MonoBehaviour:
   _match4Damage: 18
   _match5PlusDamage: 30
   _extraTileDamage: 5
+  _lShapeBonus: 15
+  _tShapeBonus: 25
   _cascadeMultiplierStep: 0.2
   _multiMatchBonus: 0.2
   _bombDamagePerTile: 3
+  _maxAvatarCharge: 150
+  _match3Energy: 1
+  _match4Energy: 3
+  _match5PlusEnergy: 5

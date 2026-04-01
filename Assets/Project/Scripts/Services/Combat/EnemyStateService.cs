@@ -23,7 +23,7 @@ namespace Project.Scripts.Services.Combat
             MaxHP = levelConfig.EnemyHP;
             CurrentHP = levelConfig.EnemyHP;
 
-            _subscriptions.Add(_eventBus.Subscribe<DamageDealtEvent>(OnDamageDealt));
+            _subscriptions.Add(_eventBus.Subscribe<PlayerDischargeEvent>(OnPlayerDischarge));
             _subscriptions.Add(_eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated));
         }
 
@@ -34,9 +34,9 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private void OnDamageDealt(DamageDealtEvent e)
+        private void OnPlayerDischarge(PlayerDischargeEvent e)
         {
-            ApplyDamage(e.Total);
+            ApplyDamage(e.DamageAmount);
         }
 
         private void OnHeroActivated(HeroActivatedEvent e)

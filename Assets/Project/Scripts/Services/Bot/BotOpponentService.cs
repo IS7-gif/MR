@@ -5,12 +5,9 @@ using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.EventBusSystem;
-using Project.Scripts.Services.EventBusSystem.Events;
 using Project.Scripts.Shared.Bot;
 using Project.Scripts.Shared.Heroes;
-using Project.Scripts.Shared.Moves;
 using R3;
-using UnityEngine;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Bot
@@ -20,28 +17,28 @@ namespace Project.Scripts.Services.Bot
         private readonly EventBus _eventBus;
         private readonly IHeroService _heroService;
         private readonly IGameStateService _gameStateService;
+        private readonly IEnemyAvatarChargeService _enemyChargeService;
         private readonly BotConfig _botConfig;
-        private readonly MoveBarConfig _moveBarConfig;
 
         private BotDecisionEngine _engine;
-        private readonly MoveBarEngine _botMoveBar = new MoveBarEngine();
         private CancellationTokenSource _cts;
         private IDisposable _stateSub;
         private readonly bool[] _heroActivationPending = new bool[4];
+        private bool _dischargeScheduled;
 
 
         public BotOpponentService(
             EventBus eventBus,
             IHeroService heroService,
             IGameStateService gameStateService,
-            BotConfig botConfig,
-            MoveBarConfig moveBarConfig)
+            IEnemyAvatarChargeService enemyChargeService,
+            BotConfig botConfig)
         {
             _eventBus = eventBus;
             _heroService = heroService;
             _gameStateService = gameStateService;
+            _enemyChargeService = enemyChargeService;
             _botConfig = botConfig;
-            _moveBarConfig = moveBarConfig;
         }
 
 
@@ -50,10 +47,7 @@ namespace Project.Scripts.Services.Bot
             if (false == _botConfig.Enabled)
                 return;
 
-            var settings = _botConfig.ToSettings();
-            _engine = new BotDecisionEngine(settings, UnityEngine.Random.Range(0, int.MaxValue));
-
-            _botMoveBar.Initialize(_moveBarConfig.ToSettings());
+            _engine = new BotDecisionEngine(_botConfig.ToSettings(), UnityEngine.Random.Range(0, int.MaxValue));
 
             if (_botConfig.RandomHeroSelection && _botConfig.HeroPool?.Length > 0)
                 _heroService.AssignEnemyHeroes(PickRandomHeroes(_botConfig.HeroPool, 4));
@@ -65,8 +59,7 @@ namespace Project.Scripts.Services.Bot
                 .Take(1)
                 .Subscribe(_ => StopLoops());
 
-            RunMoveBarTickLoop(_cts.Token).Forget();
-            RunAttackLoop(_cts.Token).Forget();
+            RunEnemyChargeLoop(_cts.Token).Forget();
             RunHeroEnergyLoop(_cts.Token).Forget();
         }
 
@@ -78,51 +71,41 @@ namespace Project.Scripts.Services.Bot
         }
 
 
-        private async UniTaskVoid RunMoveBarTickLoop(CancellationToken ct)
-        {
-            const float tickInterval = 0.25f;
-            var lastTime = Time.realtimeSinceStartup;
-
-            while (false == ct.IsCancellationRequested)
-            {
-                var cancelled = await UniTask
-                    .Delay(TimeSpan.FromSeconds(tickInterval), cancellationToken: ct)
-                    .SuppressCancellationThrow();
-
-                if (cancelled)
-                    return;
-
-                var now = Time.realtimeSinceStartup;
-                _botMoveBar.Tick(now - lastTime);
-                lastTime = now;
-            }
-        }
-
-        private async UniTaskVoid RunAttackLoop(CancellationToken ct)
+        private async UniTaskVoid RunEnemyChargeLoop(CancellationToken ct)
         {
             while (false == ct.IsCancellationRequested)
             {
-                var delay = _engine.NextAttackDelay();
                 var cancelled = await UniTask
-                    .Delay(TimeSpan.FromSeconds(delay), cancellationToken: ct)
+                    .Delay(TimeSpan.FromSeconds(_botConfig.EnemyChargeTickInterval), cancellationToken: ct)
                     .SuppressCancellationThrow();
 
                 if (cancelled || false == _gameStateService.IsPlaying)
                     return;
 
-                while (false == _botMoveBar.TryConsume())
+                _enemyChargeService.AddCharge(_botConfig.EnemyChargePerTick);
+
+                if (_enemyChargeService.IsFull && false == _dischargeScheduled)
                 {
-                    var moveCancelled = await UniTask
-                        .Delay(TimeSpan.FromSeconds(0.5f), cancellationToken: ct)
-                        .SuppressCancellationThrow();
-
-                    if (moveCancelled || false == _gameStateService.IsPlaying)
-                        return;
+                    _dischargeScheduled = true;
+                    ScheduleDischarge(ct).Forget();
                 }
-
-                var damage = _engine.GenerateAttackDamage();
-                _eventBus.Publish(new EnemyAttackEvent(damage));
             }
+        }
+
+        private async UniTaskVoid ScheduleDischarge(CancellationToken ct)
+        {
+            var delay = _engine.GenerateDischargeDelay();
+
+            var cancelled = await UniTask
+                .Delay(TimeSpan.FromSeconds(delay), cancellationToken: ct)
+                .SuppressCancellationThrow();
+
+            _dischargeScheduled = false;
+
+            if (cancelled || false == _gameStateService.IsPlaying)
+                return;
+
+            _enemyChargeService.TriggerDischarge();
         }
 
         private async UniTaskVoid RunHeroEnergyLoop(CancellationToken ct)
@@ -143,7 +126,7 @@ namespace Project.Scripts.Services.Bot
                     continue;
 
                 _heroService.AddEnemyHeroEnergy(slotIndex, _botConfig.HeroEnergyPerTick);
-                
+
                 if (_heroService.GetSlots(BattleSide.Enemy)[slotIndex].IsReady
                     && false == _heroActivationPending[slotIndex])
                 {
@@ -155,7 +138,7 @@ namespace Project.Scripts.Services.Bot
 
         private async UniTaskVoid ActivateWithDelay(int slotIndex, CancellationToken ct)
         {
-            var delay = _engine.GenerateHeroActivationDelay(
+            var delay = _engine.GenerateDelay(
                 _botConfig.MinHeroActivationDelay,
                 _botConfig.MaxHeroActivationDelay);
 

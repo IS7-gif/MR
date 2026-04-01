@@ -2,22 +2,14 @@ namespace Project.Scripts.Shared.Bot
 {
     public readonly struct BotSettings
     {
-        public readonly float MinAttackInterval;
-        public readonly float MaxAttackInterval;
-        public readonly int MinAttackDamage;
-        public readonly int MaxAttackDamage;
+        public readonly float MinDischargeDelay;
+        public readonly float MaxDischargeDelay;
 
 
-        public BotSettings(
-            float minAttackInterval,
-            float maxAttackInterval,
-            int minAttackDamage,
-            int maxAttackDamage)
+        public BotSettings(float minDischargeDelay, float maxDischargeDelay)
         {
-            MinAttackInterval = minAttackInterval;
-            MaxAttackInterval = maxAttackInterval;
-            MinAttackDamage = minAttackDamage;
-            MaxAttackDamage = maxAttackDamage;
+            MinDischargeDelay = minDischargeDelay;
+            MaxDischargeDelay = maxDischargeDelay;
         }
     }
 }

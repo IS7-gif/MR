@@ -41,6 +41,19 @@ namespace Project.Scripts.Configs
         [Tooltip("Maximum seconds the bot waits after a hero charges before activating it")]
         [SerializeField] private float _maxHeroActivationDelay = 4.0f;
 
+        [Header("Avatar Charge")]
+        [Tooltip("Seconds between each enemy avatar charge tick")]
+        [SerializeField] private float _enemyChargeTickInterval = 2f;
+
+        [Tooltip("Charge points added to enemy avatar per tick")]
+        [SerializeField] private int _enemyChargePerTick = 8;
+
+        [Tooltip("Minimum seconds the bot waits after charge bar fills before discharging (simulates human reaction)")]
+        [SerializeField] private float _minDischargeDelay = 0.5f;
+
+        [Tooltip("Maximum seconds the bot waits after charge bar fills before discharging")]
+        [SerializeField] private float _maxDischargeDelay = 2.0f;
+
         [Header("Heroes")]
         [Tooltip("If true, bot randomly selects 4 heroes from HeroPool at battle start; if false, uses LevelConfig enemy heroes")]
         [SerializeField] private bool _randomHeroSelection = true;
@@ -55,13 +68,17 @@ namespace Project.Scripts.Configs
         public float MaxHeroActivationDelay => _maxHeroActivationDelay;
         public float HeroEnergyTickInterval => _heroEnergyTickInterval;
         public int HeroEnergyPerTick => _heroEnergyPerTick;
+        public float EnemyChargeTickInterval => _enemyChargeTickInterval;
+        public int EnemyChargePerTick => _enemyChargePerTick;
+        public float MinDischargeDelay => _minDischargeDelay;
+        public float MaxDischargeDelay => _maxDischargeDelay;
         public bool RandomHeroSelection => _randomHeroSelection;
         public HeroConfig[] HeroPool => _heroPool;
 
-        public BotSettings ToSettings() => new BotSettings(
-            _minAttackInterval,
-            _maxAttackInterval,
-            _minAttackDamage,
-            _maxAttackDamage);
+        
+        public BotSettings ToSettings()
+        {
+            return new BotSettings(_minDischargeDelay, _maxDischargeDelay);
+        }
     }
 }

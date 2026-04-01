@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
 using R3;
 using TMPro;
@@ -27,6 +28,9 @@ namespace Project.Scripts.Gameplay.UI
         [Tooltip("Hit reaction component on the enemy avatar panel")]
         [SerializeField] private HitReactionComponent _enemyHitReaction;
 
+        [Tooltip("Charge bar displayed next to the enemy avatar")]
+        [SerializeField] private AvatarChargeBarView _enemyChargeBar;
+
         [Header("Enemy Heroes")]
         [Tooltip("Four HeroSlotView components for the enemy side, ordered left to right")]
         [SerializeField] private HeroSlotView[] _enemyHeroSlots;
@@ -43,6 +47,12 @@ namespace Project.Scripts.Gameplay.UI
 
         [Tooltip("Hit reaction component on the player avatar panel")]
         [SerializeField] private HitReactionComponent _playerHitReaction;
+
+        [Tooltip("Charge bar displayed next to the player avatar")]
+        [SerializeField] private AvatarChargeBarView _playerChargeBar;
+
+        [Tooltip("Button + AvatarActivationInputHandler on the player avatar — publishes PlayerAvatarActivatedEvent")]
+        [SerializeField] private AvatarActivationInputHandler _playerAvatarActivation;
 
         [Header("Player Heroes")]
         [Tooltip("Four HeroSlotView components for the player side, ordered left to right")]
@@ -117,6 +127,19 @@ namespace Project.Scripts.Gameplay.UI
 
             BindHeroSlots(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
             BindHeroSlots(_playerHeroSlots, ViewModel.PlayerHeroSlots);
+
+            _playerChargeBar?.Bind(ViewModel.PlayerChargeBar);
+            _enemyChargeBar?.Bind(ViewModel.EnemyChargeBar);
+
+            if (_playerAvatarActivation)
+            {
+                _playerAvatarActivation.Initialize(ViewModel.EventBus);
+                _playerAvatarActivation.SetInteractable(false);
+
+                ViewModel.PlayerChargeBar.IsFull
+                    .Subscribe(full => _playerAvatarActivation.SetInteractable(full))
+                    .AddTo(Disposables);
+            }
 
             _canvas = GetComponentInParent<Canvas>();
             _isOverlay = _canvas && _canvas.renderMode == RenderMode.ScreenSpaceOverlay;

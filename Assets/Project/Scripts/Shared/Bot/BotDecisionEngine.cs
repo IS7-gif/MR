@@ -15,21 +15,14 @@ namespace Project.Scripts.Shared.Bot
             _rng = new System.Random(seed);
         }
 
-
-        public float NextAttackDelay()
-        {
-            var range = _settings.MaxAttackInterval - _settings.MinAttackInterval;
-            return (float)(_rng.NextDouble() * range + _settings.MinAttackInterval);
-        }
-
-        public int GenerateAttackDamage()
-        {
-            return _rng.Next(_settings.MinAttackDamage, _settings.MaxAttackDamage + 1);
-        }
-
-        public float GenerateHeroActivationDelay(float min, float max)
+        public float GenerateDelay(float min, float max)
         {
             return (float)(_rng.NextDouble() * (max - min) + min);
+        }
+
+        public float GenerateDischargeDelay()
+        {
+            return GenerateDelay(_settings.MinDischargeDelay, _settings.MaxDischargeDelay);
         }
 
         public int PickRandomAssignedSlot(IReadOnlyList<HeroSlotState> slots)

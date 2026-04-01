@@ -175,5 +175,58 @@ namespace Project.Scripts.Services.EventBusSystem
                 IsAtMax = isAtMax;
             }
         }
+
+        public readonly struct PlayerChargeChangedEvent
+        {
+            public int Current { get; }
+            public int Max { get; }
+
+
+            public PlayerChargeChangedEvent(int current, int max)
+            {
+                Current = current;
+                Max = max;
+            }
+        }
+
+        public readonly struct PlayerAvatarActivatedEvent
+        {
+
+        }
+
+        public readonly struct PlayerDischargeEvent
+        {
+            public int DamageAmount { get; }
+
+
+            public PlayerDischargeEvent(int damageAmount)
+            {
+                DamageAmount = damageAmount;
+            }
+        }
+
+        public readonly struct EnemyChargeChangedEvent
+        {
+            public int Current { get; }
+            public int Max { get; }
+
+
+            public EnemyChargeChangedEvent(int current, int max)
+            {
+                Current = current;
+                Max = max;
+            }
+        }
+
+        public readonly struct EnemyDischargeEvent
+        {
+            public int DamageAmount { get; }
+
+
+            public EnemyDischargeEvent(int damageAmount)
+            {
+                DamageAmount = damageAmount;
+            }
+        }
     }
 }

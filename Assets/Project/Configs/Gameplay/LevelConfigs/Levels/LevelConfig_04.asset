@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.LevelConfig
   _levelId: 4
   _width: 7
-  _height: 7
+  _height: 6
   _regularTiles:
   - {fileID: 11400000, guid: 45e3651fed728ad4487420bf9819b91a, type: 2}
   - {fileID: 11400000, guid: 1119a0ba92910f542a294d24513a6914, type: 2}
@@ -26,7 +26,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 46853c594e257054baaee71fc76fa00b, type: 2}
   - {fileID: 11400000, guid: 438f2a2ac5c21944a9de839fc3622991, type: 2}
   - {fileID: 11400000, guid: dc1cae93b0911fd4facc660a6f3387b9, type: 2}
-  _playerHP: 400
+  _playerHP: 600
   _enemyHP: 400
   _goalType: 0
   _playerHeroes:
