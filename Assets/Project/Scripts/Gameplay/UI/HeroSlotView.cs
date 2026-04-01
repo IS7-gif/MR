@@ -8,7 +8,7 @@ namespace Project.Scripts.Gameplay.UI
     public class HeroSlotView : MonoBehaviour
     {
         [Header("Visuals")]
-        [Tooltip("Background Image — stays at its prefab color by default, pulses to hero element color when ready")]
+        [Tooltip("Background Image")]
         [SerializeField] private Image _background;
 
         [Tooltip("Hero portrait Image — tinted with the hero's element color when a hero is assigned")]
@@ -22,19 +22,22 @@ namespace Project.Scripts.Gameplay.UI
         [SerializeField] private Button _activateButton;
 
         [Header("Ready Pulse Animation")]
-        [Tooltip("Duration of one full pulse cycle in seconds (default color to element color and back)")]
-        [SerializeField] private float _pulseDuration = 0.8f;
+        [Tooltip("Duration of one full pulse cycle in seconds")]
+        [SerializeField] private float _pulseDuration = 0.6f;
+
+        [Tooltip("Target alpha for the pulse peak (0-1)")]
+        [SerializeField] private float _pulseAlpha = 0.4f;
 
 
-        private Color _defaultBackgroundColor;
+        private Color _defaultEnergyBarColor;
         private Tween _pulseTween;
         private CompositeDisposable _disposables = new();
 
 
         private void Awake()
         {
-            if (_background)
-                _defaultBackgroundColor = _background.color;
+            if (_energyBarFill)
+                _defaultEnergyBarColor = _energyBarFill.color;
         }
 
         private void OnDestroy()
@@ -66,7 +69,10 @@ namespace Project.Scripts.Gameplay.UI
             if (_energyBarFill)
             {
                 if (viewModel.IsAssigned)
+                {
                     _energyBarFill.color = viewModel.SlotColor;
+                    _defaultEnergyBarColor = viewModel.SlotColor;
+                }
 
                 _energyBarFill.fillAmount = viewModel.EnergyFill.CurrentValue;
 
@@ -74,19 +80,19 @@ namespace Project.Scripts.Gameplay.UI
                     .Skip(1)
                     .Subscribe(v => _energyBarFill.fillAmount = v)
                     .AddTo(_disposables);
-            }
 
-            if (_background && viewModel.IsAssigned)
-            {
-                viewModel.IsActivatable
-                    .Subscribe(activatable =>
-                    {
-                        if (activatable)
-                            StartPulse(viewModel.SlotColor);
-                        else
-                            StopPulse();
-                    })
-                    .AddTo(_disposables);
+                if (viewModel.IsAssigned)
+                {
+                    viewModel.IsActivatable
+                        .Subscribe(activatable =>
+                        {
+                            if (activatable)
+                                StartPulse();
+                            else
+                                StopPulse();
+                        })
+                        .AddTo(_disposables);
+                }
             }
 
             if (_activateButton)
@@ -105,13 +111,18 @@ namespace Project.Scripts.Gameplay.UI
         }
 
 
-        private void StartPulse(Color targetColor)
+        private void StartPulse()
         {
-            _pulseTween?.Kill();
-            _background.color = _defaultBackgroundColor;
+            if (!_energyBarFill)
+                return;
 
-            _pulseTween = _background
-                .DOColor(targetColor, _pulseDuration * 0.5f)
+            StopPulse();
+
+            var peakColor = _defaultEnergyBarColor;
+            peakColor.a = _pulseAlpha;
+
+            _pulseTween = _energyBarFill
+                .DOColor(peakColor, _pulseDuration * 0.5f)
                 .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
@@ -121,8 +132,8 @@ namespace Project.Scripts.Gameplay.UI
             _pulseTween?.Kill();
             _pulseTween = null;
 
-            if (_background)
-                _background.color = _defaultBackgroundColor;
+            if (_energyBarFill)
+                _energyBarFill.color = _defaultEnergyBarColor;
         }
     }
 }
