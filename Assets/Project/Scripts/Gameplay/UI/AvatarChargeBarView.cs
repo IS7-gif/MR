@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Project.Scripts.Configs;
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +19,8 @@ namespace Project.Scripts.Gameplay.UI
 
         private CompositeDisposable _disposables;
         private Color _baseFillColor;
+        private BattleAnimationConfig _config;
+        private Tweener _fillTween;
 
 
         private void Awake()
@@ -27,14 +31,17 @@ namespace Project.Scripts.Gameplay.UI
 
         private void OnDestroy()
         {
+            _fillTween?.Kill();
             _disposables?.Dispose();
         }
 
 
-        public void Bind(AvatarChargeBarViewModel viewModel, IReadyPulseCoordinator pulseCoordinator)
+        public void Bind(AvatarChargeBarViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config)
         {
+            _fillTween?.Kill();
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
+            _config = config;
 
             if (_fill)
             {
@@ -42,7 +49,14 @@ namespace Project.Scripts.Gameplay.UI
 
                 viewModel.FillFraction
                     .Skip(1)
-                    .Subscribe(v => _fill.fillAmount = v)
+                    .Subscribe(v =>
+                    {
+                        _fillTween?.Kill();
+                        if (_config)
+                            _fillTween = _fill.DOFillAmount(v, _config.EnergyFillDuration).SetEase(_config.EnergyFillEase);
+                        else
+                            _fill.fillAmount = v;
+                    })
                     .AddTo(_disposables);
             }
 

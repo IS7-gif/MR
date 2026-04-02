@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs;
 using Project.Scripts.Services.UISystem;
 using R3;
 using TMPro;
@@ -72,8 +73,8 @@ namespace Project.Scripts.Gameplay.UI
                 .Subscribe(damage => SpawnDamageNumber(damage, _playerAvatarSlot.HitAnchor))
                 .AddTo(Disposables);
 
-            BindHeroSlots(_enemyHeroSlots, ViewModel.EnemyHeroSlots, ViewModel.PulseCoordinator);
-            BindHeroSlots(_playerHeroSlots, ViewModel.PlayerHeroSlots, ViewModel.PulseCoordinator);
+            BindHeroSlots(_enemyHeroSlots, ViewModel.EnemyHeroSlots, ViewModel.PulseCoordinator, ViewModel.BattleAnimConfig);
+            BindHeroSlots(_playerHeroSlots, ViewModel.PlayerHeroSlots, ViewModel.PulseCoordinator, ViewModel.BattleAnimConfig);
 
             _canvas = GetComponentInParent<Canvas>();
             _isOverlay = _canvas && _canvas.renderMode == RenderMode.ScreenSpaceOverlay;
@@ -184,7 +185,7 @@ namespace Project.Scripts.Gameplay.UI
             item.Play(damage, anchor, ViewModel.BattleAnimConfig, () => _floatingPool.Release(item));
         }
 
-        private void BindHeroSlots(HeroSlotView[] views, HeroSlotViewModel[] viewModels, IReadyPulseCoordinator pulseCoordinator)
+        private void BindHeroSlots(HeroSlotView[] views, HeroSlotViewModel[] viewModels, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config)
         {
             if (null == views || null == viewModels)
                 return;
@@ -193,7 +194,7 @@ namespace Project.Scripts.Gameplay.UI
             for (var i = 0; i < count; i++)
             {
                 if (views[i])
-                    views[i].Bind(viewModels[i], pulseCoordinator);
+                    views[i].Bind(viewModels[i], pulseCoordinator, config);
             }
         }
     }

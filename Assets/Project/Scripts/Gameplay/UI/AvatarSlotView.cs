@@ -63,7 +63,7 @@ namespace Project.Scripts.Gameplay.UI
                     .AddTo(_disposables);
             }
 
-            _energyBar?.Bind(viewModel.EnergyBar, pulseCoordinator);
+            _energyBar?.Bind(viewModel.EnergyBar, pulseCoordinator, viewModel.AnimConfig);
 
             if (_activationHandler)
             {

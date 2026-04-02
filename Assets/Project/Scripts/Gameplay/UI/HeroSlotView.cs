@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Project.Scripts.Configs;
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +25,8 @@ namespace Project.Scripts.Gameplay.UI
 
         private Color _defaultEnergyBarColor;
         private CompositeDisposable _disposables = new();
+        private BattleAnimationConfig _config;
+        private Tweener _energyFillTween;
 
 
         private void Awake()
@@ -36,12 +40,14 @@ namespace Project.Scripts.Gameplay.UI
             if (_activateButton)
                 _activateButton.onClick.RemoveAllListeners();
 
+            _energyFillTween?.Kill();
             _disposables?.Dispose();
         }
 
 
-        public void Bind(HeroSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator)
+        public void Bind(HeroSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config)
         {
+            _config = config;
             if (_portrait)
             {
                 _portrait.enabled = viewModel.IsAssigned;
@@ -67,7 +73,14 @@ namespace Project.Scripts.Gameplay.UI
 
                 viewModel.EnergyFill
                     .Skip(1)
-                    .Subscribe(v => _energyBarFill.fillAmount = v)
+                    .Subscribe(v =>
+                    {
+                        _energyFillTween?.Kill();
+                        if (_config)
+                            _energyFillTween = _energyBarFill.DOFillAmount(v, _config.EnergyFillDuration).SetEase(_config.EnergyFillEase);
+                        else
+                            _energyBarFill.fillAmount = v;
+                    })
                     .AddTo(_disposables);
 
                 if (viewModel.IsAssigned)

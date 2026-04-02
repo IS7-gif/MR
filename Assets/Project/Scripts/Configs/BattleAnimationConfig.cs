@@ -53,6 +53,13 @@ namespace Project.Scripts.Configs
         [Tooltip("Easing curve for the pulse animation")]
         [SerializeField] private Ease _readyPulseEase = Ease.InOutSine;
 
+        [Header("Energy Bar Animation")]
+        [Tooltip("Duration in seconds for the energy fill tween")]
+        [SerializeField] private float _energyFillDuration = 0.35f;
+
+        [Tooltip("Easing curve for the energy fill tween")]
+        [SerializeField] private Ease _energyFillEase = Ease.OutCubic;
+
         [Header("Floating Damage Numbers")]
         [Tooltip("Distance in canvas units the damage number floats upward")]
         [SerializeField] private float _floatDamageDistance = 80f;
@@ -76,6 +83,8 @@ namespace Project.Scripts.Configs
         public Ease HPBarLagEase => _hpBarLagEase;
         public float HPBarHealDuration => _hpBarHealDuration;
         public Ease HPBarHealEase => _hpBarHealEase;
+        public float EnergyFillDuration => _energyFillDuration;
+        public Ease EnergyFillEase => _energyFillEase;
         public float FloatDamageDistance => _floatDamageDistance;
         public float FloatDamageDuration => _floatDamageDuration;
         public Ease FloatDamageEase => _floatDamageEase;
