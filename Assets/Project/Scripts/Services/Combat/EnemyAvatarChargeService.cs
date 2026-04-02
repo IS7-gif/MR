@@ -8,47 +8,47 @@ namespace Project.Scripts.Services.Combat
 {
     public class EnemyAvatarChargeService : IEnemyAvatarChargeService, IDisposable
     {
-        public int CurrentCharge => _engine.Snapshot.CurrentCharge;
-        public int MaxCharge => _engine.Snapshot.MaxCharge;
-        public bool IsFull => _engine.Snapshot.IsFull;
+        public int CurrentEnergy => _engine.Snapshot.CurrentEnergy;
+        public int MaxEnergy => _engine.Snapshot.MaxEnergy;
+        public bool IsReady => _engine.Snapshot.IsReady;
 
-        
+
         private readonly EventBus _eventBus;
-        private readonly AvatarChargeEngine _engine = new AvatarChargeEngine();
+        private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
 
-        
+
         public EnemyAvatarChargeService(EventBus eventBus, DamageConfig damageConfig)
         {
             _eventBus = eventBus;
             _engine.Initialize(damageConfig.MaxAvatarCharge);
         }
 
-        public void AddCharge(int amount)
+        public void AddEnergy(int amount)
         {
-            var added = _engine.TryAddCharge(amount);
+            var added = _engine.TryAddEnergy(amount);
 
             if (added > 0)
-                PublishChargeChanged();
+                PublishEnergyChanged();
         }
 
-        public void TriggerDischarge()
+        public void TriggerAttack()
         {
-            var discharged = _engine.TryDischarge();
+            var released = _engine.TryRelease();
 
-            if (discharged <= 0)
+            if (released <= 0)
                 return;
 
-            PublishChargeChanged();
-            _eventBus.Publish(new EnemyDischargeEvent(discharged));
+            PublishEnergyChanged();
+            _eventBus.Publish(new EnemyAvatarAttackedEvent(released));
         }
 
         public void Dispose() { }
 
 
-        private void PublishChargeChanged()
+        private void PublishEnergyChanged()
         {
             var snap = _engine.Snapshot;
-            _eventBus.Publish(new EnemyChargeChangedEvent(snap.CurrentCharge, snap.MaxCharge));
+            _eventBus.Publish(new EnemyAvatarEnergyChangedEvent(snap.CurrentEnergy, snap.MaxEnergy));
         }
     }
 }

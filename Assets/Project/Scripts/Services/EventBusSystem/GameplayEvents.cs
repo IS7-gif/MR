@@ -23,13 +23,13 @@ namespace Project.Scripts.Services.EventBusSystem
 
         }
 
-        public readonly struct DamageDealtEvent
+        public readonly struct CascadeCompletedEvent
         {
             public DamageBreakdown Breakdown { get; }
             public int Total => Breakdown.Total;
 
 
-            public DamageDealtEvent(DamageBreakdown breakdown)
+            public CascadeCompletedEvent(DamageBreakdown breakdown)
             {
                 Breakdown = breakdown;
             }
@@ -178,13 +178,13 @@ namespace Project.Scripts.Services.EventBusSystem
             }
         }
 
-        public readonly struct PlayerChargeChangedEvent
+        public readonly struct PlayerAvatarEnergyChangedEvent
         {
             public int Current { get; }
             public int Max { get; }
 
 
-            public PlayerChargeChangedEvent(int current, int max)
+            public PlayerAvatarEnergyChangedEvent(int current, int max)
             {
                 Current = current;
                 Max = max;
@@ -196,36 +196,36 @@ namespace Project.Scripts.Services.EventBusSystem
 
         }
 
-        public readonly struct PlayerDischargeEvent
+        public readonly struct PlayerAvatarAttackedEvent
         {
             public int DamageAmount { get; }
 
 
-            public PlayerDischargeEvent(int damageAmount)
+            public PlayerAvatarAttackedEvent(int damageAmount)
             {
                 DamageAmount = damageAmount;
             }
         }
 
-        public readonly struct EnemyChargeChangedEvent
+        public readonly struct EnemyAvatarEnergyChangedEvent
         {
             public int Current { get; }
             public int Max { get; }
 
 
-            public EnemyChargeChangedEvent(int current, int max)
+            public EnemyAvatarEnergyChangedEvent(int current, int max)
             {
                 Current = current;
                 Max = max;
             }
         }
 
-        public readonly struct EnemyDischargeEvent
+        public readonly struct EnemyAvatarAttackedEvent
         {
             public int DamageAmount { get; }
 
 
-            public EnemyDischargeEvent(int damageAmount)
+            public EnemyAvatarAttackedEvent(int damageAmount)
             {
                 DamageAmount = damageAmount;
             }

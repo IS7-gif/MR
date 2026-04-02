@@ -11,12 +11,6 @@ namespace Project.Scripts.Gameplay.UI
 {
     public class GameplayViewModel : BaseViewModel
     {
-        private readonly EventBus _eventBus;
-        private readonly IEnemyStateService _enemyState;
-        private readonly LevelConfig _levelConfig;
-        private readonly IEnergyService _energyService;
-
-
         public ReactiveProperty<int> LastDamage { get; } = new(0);
         public ReactiveProperty<int> EnemyHP { get; } = new(0);
         public int CurrentLevel { get; private set; }
@@ -25,6 +19,12 @@ namespace Project.Scripts.Gameplay.UI
         public ReactiveProperty<float> NatureEnergy { get; } = new(0f);
         public ReactiveProperty<float> LightEnergy { get; } = new(0f);
         public ReactiveProperty<float> VoidEnergy { get; } = new(0f);
+        
+        
+        private readonly EventBus _eventBus;
+        private readonly IEnemyStateService _enemyState;
+        private readonly LevelConfig _levelConfig;
+        private readonly IEnergyService _energyService;
 
 
         public GameplayViewModel(EventBus eventBus, IEnemyStateService enemyState,
@@ -42,7 +42,7 @@ namespace Project.Scripts.Gameplay.UI
             CurrentLevel = _levelConfig.LevelId;
             EnemyHP.Value = _enemyState.CurrentHP;
 
-            Disposables.Add(_eventBus.Subscribe<DamageDealtEvent>(OnDamageDealt));
+            Disposables.Add(_eventBus.Subscribe<PlayerAvatarAttackedEvent>(OnPlayerAvatarAttacked));
             Disposables.Add(_eventBus.Subscribe<EnemyHPChangedEvent>(OnEnemyHPChanged));
             Disposables.Add(_eventBus.Subscribe<EnergyChangedEvent>(OnEnergyChanged));
 
@@ -61,7 +61,7 @@ namespace Project.Scripts.Gameplay.UI
         }
 
 
-        private void OnDamageDealt(DamageDealtEvent e) => LastDamage.Value = e.Total;
+        private void OnPlayerAvatarAttacked(PlayerAvatarAttackedEvent e) => LastDamage.Value = e.DamageAmount;
 
         private void OnEnemyHPChanged(EnemyHPChangedEvent e) => EnemyHP.Value = e.Current;
 

@@ -56,7 +56,7 @@ namespace Project.Scripts.Gameplay.UI
                     .AddTo(_disposables);
             }
 
-            viewModel.IsFull
+            viewModel.IsReady
                 .Subscribe(full =>
                 {
                     if (_readyIndicator)

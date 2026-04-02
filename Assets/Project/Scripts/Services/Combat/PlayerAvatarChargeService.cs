@@ -10,13 +10,13 @@ namespace Project.Scripts.Services.Combat
 {
     public class PlayerAvatarChargeService : IPlayerAvatarChargeService, IDisposable
     {
-        public int CurrentCharge => _engine.Snapshot.CurrentCharge;
-        public int MaxCharge => _engine.Snapshot.MaxCharge;
-        public bool IsFull => _engine.Snapshot.IsFull;
-        
-        
+        public int CurrentEnergy => _engine.Snapshot.CurrentEnergy;
+        public int MaxEnergy => _engine.Snapshot.MaxEnergy;
+        public bool IsReady => _engine.Snapshot.IsReady;
+
+
         private readonly EventBus _eventBus;
-        private readonly AvatarChargeEngine _engine = new AvatarChargeEngine();
+        private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
@@ -25,7 +25,7 @@ namespace Project.Scripts.Services.Combat
             _eventBus = eventBus;
             _engine.Initialize(damageConfig.MaxAvatarCharge);
 
-            _subscriptions.Add(_eventBus.Subscribe<DamageDealtEvent>(OnDamageDealt));
+            _subscriptions.Add(_eventBus.Subscribe<CascadeCompletedEvent>(OnCascadeCompleted));
             _subscriptions.Add(_eventBus.Subscribe<PlayerAvatarActivatedEvent>(OnPlayerAvatarActivated));
         }
 
@@ -35,37 +35,37 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private void OnDamageDealt(DamageDealtEvent e)
+        private void OnCascadeCompleted(CascadeCompletedEvent e)
         {
             var before = _engine.Snapshot;
-            var added = _engine.TryAddCharge(e.Total);
+            var added = _engine.TryAddEnergy(e.Total);
 
             if (added <= 0)
             {
-                Debug.Log($"[PlayerCharge] Bar full ({before.CurrentCharge}/{before.MaxCharge}) — {e.Total} dmg blocked until discharge");
+                Debug.Log($"[PlayerAvatar] Bar full ({before.CurrentEnergy}/{before.MaxEnergy}) — {e.Total} energy blocked until release");
                 return;
             }
 
             var after = _engine.Snapshot;
             Debug.Log(e.Breakdown.ToLogString());
-            Debug.Log($"[PlayerCharge] {after.CurrentCharge}/{after.MaxCharge}{(after.IsFull ? " — READY TO DISCHARGE" : string.Empty)}");
-            PublishChargeChanged();
+            Debug.Log($"[PlayerAvatar] {after.CurrentEnergy}/{after.MaxEnergy}{(after.IsReady ? " - ready to attack" : string.Empty)}");
+            PublishEnergyChanged();
         }
 
         private void OnPlayerAvatarActivated(PlayerAvatarActivatedEvent _)
         {
-            var discharged = _engine.TryDischarge();
-            if (discharged <= 0)
+            var released = _engine.TryRelease();
+            if (released <= 0)
                 return;
 
-            PublishChargeChanged();
-            _eventBus.Publish(new PlayerDischargeEvent(discharged));
+            PublishEnergyChanged();
+            _eventBus.Publish(new PlayerAvatarAttackedEvent(released));
         }
 
-        private void PublishChargeChanged()
+        private void PublishEnergyChanged()
         {
             var snap = _engine.Snapshot;
-            _eventBus.Publish(new PlayerChargeChangedEvent(snap.CurrentCharge, snap.MaxCharge));
+            _eventBus.Publish(new PlayerAvatarEnergyChangedEvent(snap.CurrentEnergy, snap.MaxEnergy));
         }
     }
 }

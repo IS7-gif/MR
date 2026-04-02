@@ -29,7 +29,7 @@ namespace Project.Scripts.Services.Audio
                 _prevPlayerHp = e.Current;
             }).AddTo(_disposables);
 
-            eventBus.Subscribe<DamageDealtEvent>(_ =>
+            eventBus.Subscribe<PlayerAvatarAttackedEvent>(_ =>
             {
                 _audioService.Play(AudioTags.Group_Gameplay, AudioTags.Sound_Hit_01);
             }).AddTo(_disposables);

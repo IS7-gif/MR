@@ -9,42 +9,42 @@ namespace Project.Scripts.Gameplay.UI
     public class AvatarChargeBarViewModel : IDisposable
     {
         public ReactiveProperty<float> FillFraction { get; } = new(0f);
-        public ReactiveProperty<bool> IsFull { get; } = new(false);
+        public ReactiveProperty<bool> IsReady { get; } = new(false);
 
-        
+
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
         public AvatarChargeBarViewModel(EventBus eventBus, BattleSide side)
         {
             if (side == BattleSide.Player)
-                _subscriptions.Add(eventBus.Subscribe<PlayerChargeChangedEvent>(OnPlayerChargeChanged));
+                _subscriptions.Add(eventBus.Subscribe<PlayerAvatarEnergyChangedEvent>(OnPlayerEnergyChanged));
             else
-                _subscriptions.Add(eventBus.Subscribe<EnemyChargeChangedEvent>(OnEnemyChargeChanged));
+                _subscriptions.Add(eventBus.Subscribe<EnemyAvatarEnergyChangedEvent>(OnEnemyEnergyChanged));
         }
 
         public void Dispose()
         {
             FillFraction.Dispose();
-            IsFull.Dispose();
+            IsReady.Dispose();
             _subscriptions.Dispose();
         }
 
 
-        private void OnPlayerChargeChanged(PlayerChargeChangedEvent e)
+        private void OnPlayerEnergyChanged(PlayerAvatarEnergyChangedEvent e)
         {
-            ApplyCharge(e.Current, e.Max);
+            ApplyEnergy(e.Current, e.Max);
         }
 
-        private void OnEnemyChargeChanged(EnemyChargeChangedEvent e)
+        private void OnEnemyEnergyChanged(EnemyAvatarEnergyChangedEvent e)
         {
-            ApplyCharge(e.Current, e.Max);
+            ApplyEnergy(e.Current, e.Max);
         }
 
-        private void ApplyCharge(int current, int max)
+        private void ApplyEnergy(int current, int max)
         {
             FillFraction.Value = max > 0 ? (float)current / max : 0f;
-            IsFull.Value = max > 0 && current >= max;
+            IsReady.Value = max > 0 && current >= max;
         }
     }
 }

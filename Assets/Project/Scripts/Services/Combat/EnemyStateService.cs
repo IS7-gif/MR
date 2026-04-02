@@ -24,10 +24,9 @@ namespace Project.Scripts.Services.Combat
             MaxHP = levelConfig.EnemyHP;
             CurrentHP = levelConfig.EnemyHP;
 
-            _subscriptions.Add(_eventBus.Subscribe<PlayerDischargeEvent>(OnPlayerDischarge));
+            _subscriptions.Add(_eventBus.Subscribe<PlayerAvatarAttackedEvent>(OnPlayerAvatarAttacked));
             _subscriptions.Add(_eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated));
         }
-
 
         public void Dispose()
         {
@@ -35,9 +34,9 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private void OnPlayerDischarge(PlayerDischargeEvent e)
+        private void OnPlayerAvatarAttacked(PlayerAvatarAttackedEvent e)
         {
-            Debug.Log($"[Combat] Player dealt {e.DamageAmount} dmg to enemy (HP: {CurrentHP} → {Math.Max(0, CurrentHP - e.DamageAmount)}/{MaxHP})");
+            Debug.Log($"[Combat] Player avatar attacked for {e.DamageAmount} dmg (enemy HP: {CurrentHP} → {Math.Max(0, CurrentHP - e.DamageAmount)}/{MaxHP})");
             ApplyDamage(e.DamageAmount);
         }
 

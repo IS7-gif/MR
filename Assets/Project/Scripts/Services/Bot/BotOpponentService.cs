@@ -82,9 +82,9 @@ namespace Project.Scripts.Services.Bot
                 if (cancelled || false == _gameStateService.IsPlaying)
                     return;
 
-                _enemyChargeService.AddCharge(_botConfig.EnemyChargePerTick);
+                _enemyChargeService.AddEnergy(_botConfig.EnemyChargePerTick);
 
-                if (_enemyChargeService.IsFull && false == _dischargeScheduled)
+                if (_enemyChargeService.IsReady && false == _dischargeScheduled)
                 {
                     _dischargeScheduled = true;
                     ScheduleDischarge(ct).Forget();
@@ -105,7 +105,7 @@ namespace Project.Scripts.Services.Bot
             if (cancelled || false == _gameStateService.IsPlaying)
                 return;
 
-            _enemyChargeService.TriggerDischarge();
+            _enemyChargeService.TriggerAttack();
         }
 
         private async UniTaskVoid RunHeroEnergyLoop(CancellationToken ct)

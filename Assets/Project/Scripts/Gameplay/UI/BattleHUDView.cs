@@ -136,7 +136,7 @@ namespace Project.Scripts.Gameplay.UI
                 _playerAvatarActivation.Initialize(ViewModel.EventBus);
                 _playerAvatarActivation.SetInteractable(false);
 
-                ViewModel.PlayerChargeBar.IsFull
+                ViewModel.PlayerChargeBar.IsReady
                     .Subscribe(full => _playerAvatarActivation.SetInteractable(full))
                     .AddTo(Disposables);
             }
