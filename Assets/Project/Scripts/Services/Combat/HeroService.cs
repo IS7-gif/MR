@@ -14,14 +14,18 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
+        private readonly IPlayerStateService _playerState;
+        private readonly IEnemyStateService _enemyState;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
         private IDisposable _subscription;
 
 
-        public HeroService(EventBus eventBus, LevelConfig levelConfig)
+        public HeroService(EventBus eventBus, LevelConfig levelConfig, IPlayerStateService playerState, IEnemyStateService enemyState)
         {
             _eventBus = eventBus;
+            _playerState = playerState;
+            _enemyState = enemyState;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes);
             InitSlots(_enemySlots, levelConfig.EnemyHeroes);
@@ -80,9 +84,20 @@ namespace Project.Scripts.Services.Combat
         }
 
 
+        private bool IsHpFull(BattleSide side)
+        {
+            if (side == BattleSide.Player)
+                return _playerState.CurrentHP >= _playerState.MaxHP;
+
+            return _enemyState.CurrentHP >= _enemyState.MaxHP;
+        }
+
         private void TryActivateSlot(ref HeroSlotState slot, BattleSide side, int slotIndex)
         {
             if (false == slot.IsReady)
+                return;
+
+            if (slot.ActionType == HeroActionType.HealAlly && IsHpFull(side))
                 return;
 
             _eventBus.Publish(new HeroActivatedEvent(side, slotIndex, slot.ActionType, slot.ActionValue));

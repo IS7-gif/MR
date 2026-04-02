@@ -18,6 +18,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IHeroService _heroService;
         private readonly IGameStateService _gameStateService;
         private readonly IEnemyAvatarChargeService _enemyChargeService;
+        private readonly IEnemyStateService _enemyState;
         private readonly BotConfig _botConfig;
 
         private BotDecisionEngine _engine;
@@ -32,12 +33,14 @@ namespace Project.Scripts.Services.Bot
             IHeroService heroService,
             IGameStateService gameStateService,
             IEnemyAvatarChargeService enemyChargeService,
+            IEnemyStateService enemyState,
             BotConfig botConfig)
         {
             _eventBus = eventBus;
             _heroService = heroService;
             _gameStateService = gameStateService;
             _enemyChargeService = enemyChargeService;
+            _enemyState = enemyState;
             _botConfig = botConfig;
         }
 
@@ -133,9 +136,13 @@ namespace Project.Scripts.Services.Bot
 
                     _heroService.AddEnemyHeroEnergy(i, _botConfig.HeroEnergyPerTick);
 
-                    if (_heroService.GetSlots(BattleSide.Enemy)[i].IsReady
-                        && false == _heroActivationPending[i])
+                    var updatedSlot = _heroService.GetSlots(BattleSide.Enemy)[i];
+                    if (updatedSlot.IsReady && false == _heroActivationPending[i])
                     {
+                        if (updatedSlot.ActionType == HeroActionType.HealAlly
+                            && _enemyState.CurrentHP >= _enemyState.MaxHP)
+                            continue;
+
                         _heroActivationPending[i] = true;
                         ActivateWithDelay(i, ct).Forget();
                     }
