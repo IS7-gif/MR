@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Gameplay.UI;
+using Project.Scripts.Gameplay.WorldSpace;
 using Project.Scripts.Services;
 using Project.Scripts.Services.Audio;
 using Project.Scripts.Services.Combat;
@@ -39,13 +40,13 @@ namespace Project.Scripts.Gameplay
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
         private UIService _uiService;
-        private GameplayViewModel _gameplayViewModel;
         private MoveBarViewModel _moveBarViewModel;
         private IGameStateService _gameStateService;
         private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
         private BattleHUDViewModel _battleHUDViewModel;
         private IBoardBoundsProvider _boardBoundsProvider;
+        private WorldBattleHUDView _worldBattleHUDView;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
@@ -89,9 +90,10 @@ namespace Project.Scripts.Gameplay
 
         private void OnDestroy()
         {
-            _uiService?.Close<GameplayView>();
             _uiService?.Close<MoveBarView>();
-            _uiService?.Close<BattleHUDView>();
+            _uiService?.Close<TopBarView>();
+            if (_worldBattleHUDView)
+                _worldBattleHUDView.Close();
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
@@ -110,7 +112,6 @@ namespace Project.Scripts.Gameplay
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
             UIService uiService,
-            GameplayViewModel gameplayViewModel,
             MoveBarViewModel moveBarViewModel,
             IGameStateService gameStateService,
             IMoveBarService moveBarService,
@@ -128,7 +129,6 @@ namespace Project.Scripts.Gameplay
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
             _uiService = uiService;
-            _gameplayViewModel = gameplayViewModel;
             _moveBarViewModel = moveBarViewModel;
             _gameStateService = gameStateService;
             _moveBarService = moveBarService;
@@ -142,11 +142,9 @@ namespace Project.Scripts.Gameplay
         {
             _moveBarService.Initialize();
 
-            _uiService.RegisterView<GameplayView>(_uiConfig.GameplayViewPrefab, UILayer.MainDynamic);
             _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.MainDynamic);
-            _uiService.RegisterView<BattleHUDView>(_uiConfig.BattleHUDViewPrefab, UILayer.MainDynamic);
+            _uiService.RegisterView<TopBarView>(_uiConfig.TopBarViewPrefab, UILayer.Main);
 
-            await _uiService.Show<GameplayView, GameplayViewModel>(_gameplayViewModel);
             await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
             var cellSize = ComputeCellSize();
@@ -155,8 +153,19 @@ namespace Project.Scripts.Gameplay
 
             var boardTopWorldY = boardCenter.y + _levelConfig.Height * cellSize * 0.5f;
             var boardHalfWidth = _levelConfig.Width * cellSize * 0.5f;
-            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth);
-            await _uiService.Show<BattleHUDView, BattleHUDViewModel>(_battleHUDViewModel);
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, cellSize);
+
+            await _uiService.Show<TopBarView, BattleHUDViewModel>(_battleHUDViewModel);
+
+            // InputService is created here so WorldBattleHUDView can subscribe to its events.
+            // The input map is enabled later via InitAsync, so no input fires until then.
+            _inputService = new InputService(_inputConfig);
+
+            var hudGo = Instantiate(_uiConfig.WorldBattleHUDViewPrefab);
+            _worldBattleHUDView = hudGo.GetComponent<WorldBattleHUDView>();
+            _worldBattleHUDView.SetDependencies(_inputService);
+            await _worldBattleHUDView.InitializeAsync(_battleHUDViewModel);
+            await _worldBattleHUDView.ShowAsync();
 
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
@@ -175,7 +184,6 @@ namespace Project.Scripts.Gameplay
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig);
 
-            _inputService = new InputService(_inputConfig);
             _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold);
 
             var moveChecker = new MoveChecker(gridManager.State, gridManager, matchFinder, _levelConfig);
@@ -225,7 +233,7 @@ namespace Project.Scripts.Gameplay
 
             var boardTopWorldY = boardCenter.y + _levelConfig.Height * _cellSize * 0.5f;
             var boardHalfWidth = _levelConfig.Width * _cellSize * 0.5f;
-            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth);
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
         }
 #endif
 

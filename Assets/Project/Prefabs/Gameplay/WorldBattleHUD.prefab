@@ -1,0 +1,922 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1008485216135536246
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 338484875750044009}
+  - component: {fileID: 519651677648346252}
+  m_Layer: 0
+  m_Name: TargetingHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &338484875750044009
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1008485216135536246}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8462921636447792864}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519651677648346252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1008485216135536246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d912a65e98a15384eaa493240f7393dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldTargetingInputHandler
+--- !u!1 &8010516392992138223
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8462921636447792864}
+  - component: {fileID: 8754196901872767336}
+  m_Layer: 0
+  m_Name: WorldBattleHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8462921636447792864
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8010516392992138223}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6656729071754448696}
+  - {fileID: 4506838086783210490}
+  - {fileID: 4532171633706895654}
+  - {fileID: 8376985026184124689}
+  - {fileID: 1971417171047583829}
+  - {fileID: 4839084132740868149}
+  - {fileID: 7655086996571141511}
+  - {fileID: 2315689571549928399}
+  - {fileID: 5495075587489736060}
+  - {fileID: 5671648828094456940}
+  - {fileID: 338484875750044009}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8754196901872767336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8010516392992138223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d35d496d7cd6c4c86b9feb16743119, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldBattleHUDView
+  _playerHeroSlots:
+  - {fileID: 34413871785096680}
+  - {fileID: 2981936325939341402}
+  - {fileID: 1089814464826980513}
+  - {fileID: 1002082620398614961}
+  _enemyHeroSlots:
+  - {fileID: 2250904299562832613}
+  - {fileID: 9067473409235815975}
+  - {fileID: 3971230550829532364}
+  - {fileID: 6342830940137622920}
+  _playerAvatarSlot: {fileID: 2096586862909719157}
+  _enemyAvatarSlot: {fileID: 279201010939908252}
+  _targetingInputHandler: {fileID: 519651677648346252}
+  _floatingDamagePrefab: {fileID: 8456231779810160761, guid: 79104c41107d65d49b13b1875346fcfd, type: 3}
+  _hudConfig: {fileID: 11400000, guid: cff4c79d8e4fc4b4da37669c8e9dea17, type: 2}
+--- !u!1001 &385549284635959795
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Player_HeroSlot_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &34413871785096680 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 385549284635959795}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &4839084132740868149 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 385549284635959795}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &633847452923522474
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.7900001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Player_HeroSlot_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &1002082620398614961 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 633847452923522474}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &5671648828094456940 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 633847452923522474}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &737517527967558842
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.95000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Player_HeroSlot_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &1089814464826980513 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 737517527967558842}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &5495075587489736060 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 737517527967558842}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1882273451250468606
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 1274146383776473485, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1274146383776473485, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1274146383776473485, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4761414574657836969, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Enemy_HeroSlot_1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &2250904299562832613 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 1882273451250468606}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &6656729071754448696 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 1882273451250468606}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2531796905941920817
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.049999952
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.7594338
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.5382921
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.45136154
+      objectReference: {fileID: 0}
+    - target: {fileID: 7850579593205264303, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Name
+      value: Player_AvatarView
+      objectReference: {fileID: 0}
+    - target: {fileID: 7850579593205264303, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+--- !u!114 &2096586862909719157 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4483946389371743812, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+  m_PrefabInstance: {fileID: 2531796905941920817}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99e0b9b0dbe77d44b88d048ef17781ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldAvatarSlotView
+--- !u!4 &2315689571549928399 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+  m_PrefabInstance: {fileID: 2531796905941920817}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3189124104398306369
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Player_HeroSlot_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &2981936325939341402 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 3189124104398306369}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &7655086996571141511 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 3189124104398306369}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3620710579916165335
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.95000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Enemy_HeroSlot_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!114 &3971230550829532364 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 3620710579916165335}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!4 &8376985026184124689 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 3620710579916165335}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4460189451848859352
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.049999952
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.49803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.50980395
+      objectReference: {fileID: 0}
+    - target: {fileID: 5862967615998522800, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.7647059
+      objectReference: {fileID: 0}
+    - target: {fileID: 7850579593205264303, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_Name
+      value: Enemy_AvatarView
+      objectReference: {fileID: 0}
+    - target: {fileID: 7850579593205264303, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+--- !u!114 &279201010939908252 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4483946389371743812, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+  m_PrefabInstance: {fileID: 4460189451848859352}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99e0b9b0dbe77d44b88d048ef17781ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldAvatarSlotView
+--- !u!4 &4532171633706895654 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
+  m_PrefabInstance: {fileID: 4460189451848859352}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6711980901824977299
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.7900001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Enemy_HeroSlot_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!4 &1971417171047583829 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 6711980901824977299}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6342830940137622920 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 6711980901824977299}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+--- !u!1001 &8716118076312279612
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8462921636447792864}
+    m_Modifications:
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_Name
+      value: Enemy_HeroSlot_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6995669921356842586, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+--- !u!4 &4506838086783210490 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 8716118076312279612}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9067473409235815975 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 370416894395110427, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
+  m_PrefabInstance: {fileID: 8716118076312279612}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView

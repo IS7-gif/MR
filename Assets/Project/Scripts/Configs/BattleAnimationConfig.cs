@@ -15,8 +15,8 @@ namespace Project.Scripts.Configs
         [Tooltip("Easing curve applied to both phases of the hit flash")]
         [SerializeField] private Ease _hitFlashEase = Ease.InOutQuad;
 
-        [Tooltip("Distance in canvas units the avatar panel moves during knockback")]
-        [SerializeField] private float _knockbackDistance = 20f;
+        [Tooltip("Distance in world units the avatar/hero moves during knockback")]
+        [SerializeField] private float _knockbackDistance = 0.2f;
 
         [Tooltip("Total duration in seconds of the knockback (move away + return)")]
         [SerializeField] private float _knockbackDuration = 0.3f;

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: bee97293ed2c3b94486cef79da02090a
+guid: fb2e99b3351c91f42a85dc70b091754c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 180696341497944452
-    second: shining_0
+      213: 8690233088761051932
+    second: square_512_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 512
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,7 +126,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shining_0
+      name: square_512_0
       rect:
         serializedVersion: 2
         x: 0
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 489923f7d56f18200800000000000000
-      internalID: 180696341497944452
+      spriteID: c1bb2fe83f8e99870800000000000000
+      internalID: 8690233088761051932
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      shining_0: 180696341497944452
+      square_512_0: 8690233088761051932
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

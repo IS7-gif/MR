@@ -18,6 +18,13 @@ namespace Project.Scripts.Gameplay.UI
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
+        public Observable<int> Hit => _hit;
+        public Observable<int> Heal => _heal;
+
+
+        private readonly Subject<int> _hit = new();
+        private readonly Subject<int> _heal = new();
+        private int _prevHP;
 
 
         public HeroSlotViewModel(
@@ -35,6 +42,7 @@ namespace Project.Scripts.Gameplay.UI
             Portrait = portrait;
 
             HPFill = new ReactiveProperty<float>(state.IsAssigned && state.MaxHP > 0 ? (float)state.CurrentHP / state.MaxHP : 1f);
+            _prevHP = state.IsAssigned ? state.CurrentHP : 0;
         }
 
         public void UpdateEnergy(int current, int max)
@@ -45,6 +53,12 @@ namespace Project.Scripts.Gameplay.UI
 
         public void UpdateHP(int current, int max)
         {
+            if (current < _prevHP)
+                _hit.OnNext(_prevHP - current);
+            else if (current > _prevHP)
+                _heal.OnNext(current - _prevHP);
+
+            _prevHP = current;
             HPFill.Value = max > 0 ? (float)current / max : 0f;
 
             if (current <= 0)
@@ -57,6 +71,8 @@ namespace Project.Scripts.Gameplay.UI
             IsActivatable.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();
+            _hit.Dispose();
+            _heal.Dispose();
         }
     }
 }

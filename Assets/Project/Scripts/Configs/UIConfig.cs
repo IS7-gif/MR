@@ -5,9 +5,6 @@ namespace Project.Scripts.Configs
     [CreateAssetMenu(fileName = "UIConfig", menuName = "Configs/UI Config")]
     public class UIConfig : ScriptableObject
     {
-        [Tooltip("Prefab containing the GameplayView component — shown during gameplay")]
-        [SerializeField] private GameObject _gameplayViewPrefab;
-
         [Tooltip("Prefab containing the WinView component — shown when the player defeats the enemy")]
         [SerializeField] private GameObject _winViewPrefab;
 
@@ -17,14 +14,30 @@ namespace Project.Scripts.Configs
         [Tooltip("Prefab containing the MoveBarView component — docked to the bottom of the screen")]
         [SerializeField] private GameObject _moveBarViewPrefab;
 
-        [Tooltip("Prefab containing the BattleHUDView component — shows player and enemy avatars with HP bars")]
-        [SerializeField] private GameObject _battleHUDViewPrefab;
+        [Tooltip("Prefab containing the TopBarView component — enemy name and secondary label, stays in Canvas")]
+        [SerializeField] private GameObject _topBarViewPrefab;
+
+        [Tooltip("Prefab containing the WorldBattleHUDView component — world-space replacement for BattleHUDView")]
+        [SerializeField] private GameObject _worldBattleHUDViewPrefab;
+
+        [Tooltip("Configuration asset for world-space HUD layout, sizing and sorting")]
+        [SerializeField] private WorldHUDConfig _worldHUD;
 
 
-        public GameObject GameplayViewPrefab => _gameplayViewPrefab;
         public GameObject WinViewPrefab => _winViewPrefab;
         public GameObject LoseViewPrefab => _loseViewPrefab;
         public GameObject MoveBarViewPrefab => _moveBarViewPrefab;
-        public GameObject BattleHUDViewPrefab => _battleHUDViewPrefab;
+
+        public GameObject TopBarViewPrefab => _topBarViewPrefab;
+
+        public GameObject WorldBattleHUDViewPrefab
+        {
+            get { return _worldBattleHUDViewPrefab; }
+        }
+
+        public WorldHUDConfig WorldHUD
+        {
+            get { return _worldHUD; }
+        }
     }
 }

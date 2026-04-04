@@ -15,7 +15,7 @@ MonoBehaviour:
   _hitFlashColor: {r: 1, g: 0.2, b: 0.2, a: 1}
   _hitFlashDuration: 0.3
   _hitFlashEase: 7
-  _knockbackDistance: 20
+  _knockbackDistance: 0.15
   _knockbackDuration: 0.3
   _knockbackEase: 6
   _resultScreenDelay: 0.4
@@ -24,6 +24,16 @@ MonoBehaviour:
   _hpBarLagEase: 9
   _hpBarHealDuration: 0.4
   _hpBarHealEase: 6
+  _readyPulseDuration: 0.6
+  _readyPulseAlpha: 0.4
+  _readyPulseEase: 4
+  _energyFillDuration: 0.35
+  _energyFillEase: 9
+  _sourceHighlightColor: {r: 1, g: 1, b: 1, a: 1}
+  _attackTargetColor: {r: 1, g: 0.15, b: 0.15, a: 1}
+  _healTargetColor: {r: 0.15, g: 1, b: 0.25, a: 1}
+  _damageNumberColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  _healNumberColor: {r: 0.25, g: 1, b: 0.25, a: 1}
   _floatDamageDistance: 170
   _floatDamageDuration: 1.2
   _floatDamageEase: 9

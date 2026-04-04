@@ -31,7 +31,6 @@ namespace Project.Scripts.DI
             builder.Register<IEnemyAvatarChargeService, EnemyAvatarChargeService>(Lifetime.Singleton);
             builder.Register<IAbilityExecutionService, AbilityExecutionService>(Lifetime.Singleton);
 
-            builder.Register<GameplayViewModel>(Lifetime.Singleton);
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);
             builder.Register<BattleHUDViewModel>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Singleton);

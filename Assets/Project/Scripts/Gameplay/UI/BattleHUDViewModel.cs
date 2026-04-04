@@ -25,6 +25,11 @@ namespace Project.Scripts.Gameplay.UI
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
 
+        public float CellSize
+        {
+            get { return _boardBounds.CellSize; }
+        }
+
 
         private readonly EventBus _eventBus;
         private readonly IEnemyStateService _enemyState;

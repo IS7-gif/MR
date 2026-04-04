@@ -5,7 +5,8 @@ namespace Project.Scripts.Services
         float BoardTopWorldY { get; }
         float BoardHalfWidth { get; }
         float BoardCenterX { get; }
+        float CellSize { get; }
 
-        void SetBounds(float centerX, float topWorldY, float halfWidth);
+        void SetBounds(float centerX, float topWorldY, float halfWidth, float cellSize);
     }
 }
