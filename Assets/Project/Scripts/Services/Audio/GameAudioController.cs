@@ -1,7 +1,7 @@
 using System;
 using Project.Scripts.Services.Audio.AudioSystem;
-using Project.Scripts.Services.EventBusSystem;
-using Project.Scripts.Services.EventBusSystem.Events;
+using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
 using Scripts.Services.Audio.AudioSystem.Configs;
 using UnityEngine;

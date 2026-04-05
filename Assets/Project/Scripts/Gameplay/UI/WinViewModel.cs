@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Services;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.UISystem;
 
 namespace Project.Scripts.Gameplay.UI
@@ -31,7 +31,6 @@ namespace Project.Scripts.Gameplay.UI
             OpponentName = opponentName;
             _onClose = onClose;
         }
-
 
         public void NextLevel()
         {

@@ -1,6 +1,5 @@
 using System;
-using Project.Scripts.Services.EventBusSystem;
-using Project.Scripts.Services.EventBusSystem.Events;
+using Project.Scripts.Services.Events;
 
 namespace Project.Scripts.Services.Combat
 {

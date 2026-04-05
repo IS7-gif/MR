@@ -1,4 +1,4 @@
-using Project.Scripts.Behaviours;
+using Project.Scripts.Tiles.Behaviours;
 using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 

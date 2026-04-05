@@ -5,8 +5,9 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.UI;
-using Project.Scripts.Services;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Services.Game;
+using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.UISystem;
 using R3;
 

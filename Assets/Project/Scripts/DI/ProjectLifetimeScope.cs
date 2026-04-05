@@ -1,7 +1,7 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Damage;
-using Project.Scripts.Services.EventBusSystem;
+using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
 using UnityEngine;
 using VContainer;

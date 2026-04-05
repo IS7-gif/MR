@@ -1,5 +1,4 @@
-using Project.Scripts.Services.EventBusSystem;
-using Project.Scripts.Services.EventBusSystem.Events;
+using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
 
 namespace Project.Scripts.Services.Combat
