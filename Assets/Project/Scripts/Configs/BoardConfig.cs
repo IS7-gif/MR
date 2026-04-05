@@ -13,7 +13,7 @@ namespace Project.Scripts.Configs
         [SerializeField] [Range(0f, 0.5f)] private float _uiReservedHeightPercent = 0.4f;
 
         [Tooltip("Visual size of each tile relative to its cell (1 = fills cell completely, <1 = gaps between tiles)")]
-        [SerializeField] [Range(0.5f, 1f)] private float _tileScale = 1f;
+        [SerializeField] [Range(0.5f, 1f)] private float _tileScale = 0.85f;
 
         [Tooltip("Extra space in Unity units added around the board for the frame sprite")]
         [SerializeField] private float _framePadding = 0.1f;
@@ -22,7 +22,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private float _maskTopPadding = 2f;
 
         [Tooltip("Fixed gap between the bottom of the screen and the bottom board edge, expressed in cell units (1 = one tile height). Consistent across all screen sizes.")]
-        [SerializeField] [Range(0f, 5f)] private float _boardBottomPaddingCells = 0.5f;
+        [SerializeField] [Range(0f, 5f)] private float _boardBottomPaddingCells = 0.65f;
 
         [Tooltip("Minimum number of tiles in a row/column to count as a match")]
         [SerializeField] [Range(2, 6)] private int _minMatchLength = 3;

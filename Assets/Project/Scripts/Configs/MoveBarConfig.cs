@@ -10,10 +10,10 @@ namespace Project.Scripts.Configs
         [SerializeField] private int _maxMoves = 10;
 
         [Tooltip("Time in seconds to regenerate one move charge")]
-        [SerializeField] private float _secondsPerMove = 2.8f;
+        [SerializeField] private float _secondsPerMove = 2.5f;
 
         [Tooltip("Number of move charges available at the start of each battle")]
-        [SerializeField] private int _startMoves = 5;
+        [SerializeField] private int _startMoves = 4;
 
         [Header("Visual")]
         [Tooltip("Gap between segments as a fraction of total bar width (e.g. 0.01 = 1%)")]

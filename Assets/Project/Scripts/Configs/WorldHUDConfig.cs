@@ -6,7 +6,7 @@ namespace Project.Scripts.Configs
     public class WorldHUDConfig : ScriptableObject
     {
         [Tooltip("World-space Y offset added above the board top edge to position the HUD root")]
-        [SerializeField] private float _hudBottomPadding = 0.15f;
+        [SerializeField] private float _hudBottomPadding = 0.4f;
 
         
         public float HudBottomPadding => _hudBottomPadding;

@@ -16,7 +16,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private Ease _hitFlashEase = Ease.InOutQuad;
 
         [Tooltip("Distance in world units the avatar/hero moves during knockback")]
-        [SerializeField] private float _knockbackDistance = 0.2f;
+        [SerializeField] private float _knockbackDistance = 0.15f;
 
         [Tooltip("Total duration in seconds of the knockback (move away + return)")]
         [SerializeField] private float _knockbackDuration = 0.3f;
@@ -78,10 +78,10 @@ namespace Project.Scripts.Configs
         [SerializeField] private Color _healNumberColor = new Color(0.25f, 1f, 0.25f, 1f);
 
         [Tooltip("Distance in canvas units the damage number floats upward")]
-        [SerializeField] private float _floatDamageDistance = 80f;
+        [SerializeField] private float _floatDamageDistance = 170f;
 
         [Tooltip("Total duration in seconds of the float-up and fade-out animation")]
-        [SerializeField] private float _floatDamageDuration = 0.9f;
+        [SerializeField] private float _floatDamageDuration = 1.2f;
 
         [Tooltip("Easing curve for the upward float movement")]
         [SerializeField] private Ease _floatDamageEase = Ease.OutCubic;

@@ -16,23 +16,23 @@ namespace Project.Scripts.Configs
 
         [Header("Attack")]
         [Tooltip("Minimum seconds between bot attacks on the player")]
-        [SerializeField] private float _minAttackInterval = 8f;
+        [SerializeField] private float _minAttackInterval = 1.5f;
 
         [Tooltip("Maximum seconds between bot attacks on the player")]
-        [SerializeField] private float _maxAttackInterval = 20f;
+        [SerializeField] private float _maxAttackInterval = 3.5f;
 
         [Tooltip("Minimum damage dealt per bot attack")]
-        [SerializeField] private int _minAttackDamage = 5;
+        [SerializeField] private int _minAttackDamage = 8;
 
         [Tooltip("Maximum damage dealt per bot attack")]
-        [SerializeField] private int _maxAttackDamage = 25;
+        [SerializeField] private int _maxAttackDamage = 26;
 
         [Header("Hero Energy")]
         [Tooltip("Seconds between each hero energy tick for the bot")]
-        [SerializeField] private float _heroEnergyTickInterval = 3f;
+        [SerializeField] private float _heroEnergyTickInterval = 0.8f;
 
         [Tooltip("Energy added to a random hero slot per tick")]
-        [SerializeField] private int _heroEnergyPerTick = 1;
+        [SerializeField] private int _heroEnergyPerTick = 2;
 
         [Header("Hero Activation")]
         [Tooltip("Minimum seconds the bot waits after a hero charges before activating it (simulates human reaction)")]

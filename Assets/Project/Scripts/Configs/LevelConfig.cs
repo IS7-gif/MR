@@ -16,10 +16,10 @@ namespace Project.Scripts.Configs
 
         [Header("Board")]
         [Tooltip("Number of tile columns on the board")]
-        [SerializeField] private int _width = 8;
+        [SerializeField] private int _width = 7;
 
         [Tooltip("Number of tile rows on the board")]
-        [SerializeField] private int _height = 8;
+        [SerializeField] private int _height = 6;
 
         [Tooltip("Tile types that can appear as ordinary matches on this board")]
         [SerializeField] private TileConfig[] _regularTiles;
@@ -29,10 +29,10 @@ namespace Project.Scripts.Configs
 
         [Header("Combat")]
         [Tooltip("Starting HP of the player avatar for this level")]
-        [SerializeField] private int _playerHP = 100;
+        [SerializeField] private int _playerHP = 550;
 
         [Tooltip("Starting HP of the enemy avatar for this level")]
-        [SerializeField] private int _enemyHP = 100;
+        [SerializeField] private int _enemyHP = 550;
 
         [Tooltip("Win condition type - DamageBased means the player wins by reducing enemy HP to zero")]
         [SerializeField] private LevelGoalType _goalType = LevelGoalType.DamageBased;
