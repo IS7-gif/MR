@@ -29,6 +29,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
         [Tooltip("Prefab with WorldFloatingDamageNumber component — pooled at runtime")]
         [SerializeField] private WorldFloatingDamageNumber _floatingDamagePrefab;
 
+        
         private IInputService _inputService;
         private BattleViewConfig _battleViewConfig;
         private ObjectPool<WorldFloatingDamageNumber> _floatingPool;

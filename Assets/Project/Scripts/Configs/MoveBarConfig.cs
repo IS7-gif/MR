@@ -50,6 +50,9 @@ namespace Project.Scripts.Configs
         public float EmptyShakeStrength => _emptyShakeStrength;
 
 
-        public MoveBarSettings ToSettings() => new(_maxMoves, _secondsPerMove, _startMoves);
+        public MoveBarSettings ToSettings()
+        {
+            return new MoveBarSettings(_maxMoves, _secondsPerMove, _startMoves);
+        }
     }
 }
