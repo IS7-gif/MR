@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BattleAnimationConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleAnimationConfig
   _hitFlashColor: {r: 1, g: 0.2, b: 0.2, a: 1}
-  _hitFlashDuration: 0.3
+  _hitFlashDuration: 0.35
   _hitFlashEase: 7
-  _knockbackDistance: 0.15
+  _knockbackDistance: 0.2
   _knockbackDuration: 0.3
   _knockbackEase: 6
   _resultScreenDelay: 0.4
@@ -34,6 +34,6 @@ MonoBehaviour:
   _healTargetColor: {r: 0.15, g: 1, b: 0.25, a: 1}
   _damageNumberColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   _healNumberColor: {r: 0.25, g: 1, b: 0.25, a: 1}
-  _floatDamageDistance: 170
+  _floatDamageDistance: 0.75
   _floatDamageDuration: 1.2
   _floatDamageEase: 9

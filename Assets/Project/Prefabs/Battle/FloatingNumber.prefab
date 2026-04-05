@@ -133,8 +133,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 2.5
-  m_fontSizeBase: 2.5
+  m_fontSize: 3
+  m_fontSizeBase: 3
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 8367419746692419591}
   - component: {fileID: 8456231779810160761}
   m_Layer: 0
-  m_Name: WorldFloatingNumber
+  m_Name: FloatingNumber
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -227,4 +227,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldFloatingDamageNumber
   _label: {fileID: 5225892071544154856}
-  _floatDistance: 0.5
+  _floatDistance: 0.8

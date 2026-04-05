@@ -12,9 +12,6 @@ namespace Project.Scripts.Gameplay.Battle
         [Tooltip("TextMeshPro label that displays the damage or heal value")]
         [SerializeField] private TextMeshPro _label;
 
-        [Tooltip("Distance in world units the number floats upward during the animation")]
-        [SerializeField] private float _floatDistance = 0.5f;
-
 
         private Sequence _sequence;
 
@@ -48,7 +45,7 @@ namespace Project.Scripts.Gameplay.Battle
 
             _sequence = DOTween.Sequence()
                 .Append(transform
-                    .DOMove(startPos + Vector3.up * _floatDistance, config.FloatDamageDuration)
+                    .DOMove(startPos + Vector3.up * config.FloatDamageDistance, config.FloatDamageDuration)
                     .SetEase(config.FloatDamageEase))
                 .Join(_label
                     .DOFade(0f, config.FloatDamageDuration)

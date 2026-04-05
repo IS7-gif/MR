@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
