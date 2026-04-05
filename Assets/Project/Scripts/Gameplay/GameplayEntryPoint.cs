@@ -39,6 +39,7 @@ namespace Project.Scripts.Gameplay
         private IDamageCalculator _damageCalculator;
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
+        private BattleViewConfig _battleViewConfig;
         private UIService _uiService;
         private MoveBarViewModel _moveBarViewModel;
         private IGameStateService _gameStateService;
@@ -111,6 +112,7 @@ namespace Project.Scripts.Gameplay
             IDamageCalculator damageCalculator,
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
+            BattleViewConfig battleViewConfig,
             UIService uiService,
             MoveBarViewModel moveBarViewModel,
             IGameStateService gameStateService,
@@ -128,6 +130,7 @@ namespace Project.Scripts.Gameplay
             _damageCalculator = damageCalculator;
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
+            _battleViewConfig = battleViewConfig;
             _uiService = uiService;
             _moveBarViewModel = moveBarViewModel;
             _gameStateService = gameStateService;
@@ -161,9 +164,9 @@ namespace Project.Scripts.Gameplay
             // The input map is enabled later via InitAsync, so no input fires until then.
             _inputService = new InputService(_inputConfig);
 
-            var hudGo = Instantiate(_uiConfig.WorldBattleHUDViewPrefab);
+            var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
             _worldBattleHUDView = hudGo.GetComponent<WorldBattleHUDView>();
-            _worldBattleHUDView.SetDependencies(_inputService);
+            _worldBattleHUDView.SetDependencies(_inputService, _battleViewConfig);
             await _worldBattleHUDView.InitializeAsync(_battleHUDViewModel);
             await _worldBattleHUDView.ShowAsync();
 

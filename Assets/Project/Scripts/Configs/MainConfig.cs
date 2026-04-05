@@ -12,13 +12,13 @@ namespace Project.Scripts.Configs
         [SerializeField] private BoardConfig _boardConfig;
         [SerializeField] private BoardAnimationConfig _boardAnimationConfig;
         [SerializeField] private BattleAnimationConfig _battleAnimationConfig;
-        [SerializeField] private DamageConfig _damageConfig;
+        [SerializeField] private MatchDamageConfig _matchDamageConfig;
         [SerializeField] private SpecialTileConfig _specialTileConfig;
         [SerializeField] private LevelDatabase _levelDatabase;
         [SerializeField] private UIConfig _uiConfig;
-        [SerializeField] private EnergyConfig _energyConfig;
+        [SerializeField] private HeroEnergyConfig _heroEnergyConfig;
         [SerializeField] private MoveBarConfig _moveBarConfig;
-        [SerializeField] private BattleHUDConfig _battleHUDConfig;
+        [SerializeField] private BattleViewConfig _battleViewConfig;
         [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
 
 
@@ -28,13 +28,13 @@ namespace Project.Scripts.Configs
         public BoardConfig BoardConfig => _boardConfig;
         public BoardAnimationConfig BoardAnimationConfig => _boardAnimationConfig;
         public BattleAnimationConfig BattleAnimationConfig => _battleAnimationConfig;
-        public DamageConfig DamageConfig => _damageConfig;
+        public MatchDamageConfig MatchDamageConfig => _matchDamageConfig;
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;
         public UIConfig UIConfig => _uiConfig;
-        public EnergyConfig EnergyConfig => _energyConfig;
+        public HeroEnergyConfig HeroEnergyConfig => _heroEnergyConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
-        public BattleHUDConfig BattleHUDConfig => _battleHUDConfig;
+        public BattleViewConfig BattleViewConfig => _battleViewConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
     }
 }

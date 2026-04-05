@@ -17,10 +17,10 @@ namespace Project.Scripts.Services.Combat
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
 
 
-        public EnemyAvatarChargeService(EventBus eventBus, DamageConfig damageConfig)
+        public EnemyAvatarChargeService(EventBus eventBus, HeroEnergyConfig heroEnergyConfig)
         {
             _eventBus = eventBus;
-            _engine.Initialize(damageConfig.MaxAvatarCharge);
+            _engine.Initialize(heroEnergyConfig.MaxAvatarCharge);
         }
 
         public void AddEnergy(int amount)

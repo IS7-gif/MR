@@ -9,7 +9,7 @@ namespace Project.Scripts.Services.Combat
 {
     public class EnergyService : IEnergyService, IDisposable
     {
-        private readonly EnergyConfig _config;
+        private readonly HeroEnergyConfig _config;
         private readonly EventBus _eventBus;
         private readonly Dictionary<TileKind, int> _energy;
         private IDisposable _subscription;
@@ -19,7 +19,7 @@ namespace Project.Scripts.Services.Combat
         public int MaxEnergy => _config.MaxEnergyPerType;
 
 
-        public EnergyService(EnergyConfig config, EventBus eventBus)
+        public EnergyService(HeroEnergyConfig config, EventBus eventBus)
         {
             _config = config;
             _eventBus = eventBus;

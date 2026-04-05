@@ -18,11 +18,11 @@ MonoBehaviour:
   _boardConfig: {fileID: 11400000, guid: be905cc36eebaa048b09269c08009310, type: 2}
   _boardAnimationConfig: {fileID: 11400000, guid: cbd98e1f82be3af488e15870bc436ae1, type: 2}
   _battleAnimationConfig: {fileID: 11400000, guid: 78800f9186b816a479bc920c3b746561, type: 2}
-  _damageConfig: {fileID: 11400000, guid: 0956d6ae0c68a0f4eb88015db2973137, type: 2}
+  _matchDamageConfig: {fileID: 11400000, guid: 0956d6ae0c68a0f4eb88015db2973137, type: 2}
   _specialTileConfig: {fileID: 11400000, guid: bf43509404b084149a8b2978f4619c2d, type: 2}
   _levelDatabase: {fileID: 11400000, guid: 528394c8e2714e3489a9a33180a6de4c, type: 2}
   _uiConfig: {fileID: 11400000, guid: 63526929da5930348899f6e6bbc1be6c, type: 2}
-  _energyConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
+  _heroEnergyConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
   _moveBarConfig: {fileID: 11400000, guid: 1d120bb07ff23a948a01c2604afe52b3, type: 2}
-  _battleHUDConfig: {fileID: 11400000, guid: 45c9ff60227b1c741b257cc9fe86a26e, type: 2}
+  _battleViewConfig: {fileID: 11400000, guid: 0d769511b02f54e4a8d7f8b556769b48, type: 2}
   _tileKindPaletteConfig: {fileID: 11400000, guid: d100b8948d0a59f4cbe9d90dd813cb63, type: 2}

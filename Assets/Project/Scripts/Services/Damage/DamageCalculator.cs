@@ -8,10 +8,10 @@ namespace Project.Scripts.Services.Damage
 {
     public class DamageCalculator : IDamageCalculator
     {
-        private readonly DamageConfig _config;
+        private readonly MatchDamageConfig _config;
 
 
-        public DamageCalculator(DamageConfig config)
+        public DamageCalculator(MatchDamageConfig config)
         {
             _config = config;
         }

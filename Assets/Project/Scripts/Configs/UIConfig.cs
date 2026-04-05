@@ -17,27 +17,10 @@ namespace Project.Scripts.Configs
         [Tooltip("Prefab containing the TopBarView component — enemy name and secondary label, stays in Canvas")]
         [SerializeField] private GameObject _topBarViewPrefab;
 
-        [Tooltip("Prefab containing the WorldBattleHUDView component — world-space replacement for BattleHUDView")]
-        [SerializeField] private GameObject _worldBattleHUDViewPrefab;
-
-        [Tooltip("Configuration asset for world-space HUD layout, sizing and sorting")]
-        [SerializeField] private WorldHUDConfig _worldHUD;
-
 
         public GameObject WinViewPrefab => _winViewPrefab;
         public GameObject LoseViewPrefab => _loseViewPrefab;
         public GameObject MoveBarViewPrefab => _moveBarViewPrefab;
-
         public GameObject TopBarViewPrefab => _topBarViewPrefab;
-
-        public GameObject WorldBattleHUDViewPrefab
-        {
-            get { return _worldBattleHUDViewPrefab; }
-        }
-
-        public WorldHUDConfig WorldHUD
-        {
-            get { return _worldHUD; }
-        }
     }
 }

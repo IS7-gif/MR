@@ -21,10 +21,10 @@ namespace Project.Scripts.Services.Combat
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public PlayerAvatarChargeService(EventBus eventBus, DamageConfig damageConfig)
+        public PlayerAvatarChargeService(EventBus eventBus, HeroEnergyConfig heroEnergyConfig)
         {
             _eventBus = eventBus;
-            _engine.Initialize(damageConfig.MaxAvatarCharge);
+            _engine.Initialize(heroEnergyConfig.MaxAvatarCharge);
         }
 
         public void Start()

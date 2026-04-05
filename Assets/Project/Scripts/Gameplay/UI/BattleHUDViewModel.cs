@@ -34,7 +34,7 @@ namespace Project.Scripts.Gameplay.UI
         private readonly EventBus _eventBus;
         private readonly IEnemyStateService _enemyState;
         private readonly IPlayerStateService _playerState;
-        private readonly BattleHUDConfig _config;
+        private readonly BattleViewConfig _battleViewConfig;
         private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
         private readonly TileKindPaletteConfig _palette;
@@ -48,7 +48,7 @@ namespace Project.Scripts.Gameplay.UI
             EventBus eventBus,
             IEnemyStateService enemyState,
             IPlayerStateService playerState,
-            BattleHUDConfig config,
+            BattleViewConfig battleViewConfig,
             BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
             TileKindPaletteConfig palette,
@@ -60,7 +60,7 @@ namespace Project.Scripts.Gameplay.UI
             _eventBus = eventBus;
             _enemyState = enemyState;
             _playerState = playerState;
-            _config = config;
+            _battleViewConfig = battleViewConfig;
             _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
             _palette = palette;
@@ -76,7 +76,7 @@ namespace Project.Scripts.Gameplay.UI
             PlayerAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Player,
-                _config.PlayerAvatarSprite,
+                _battleViewConfig.PlayerAvatarSprite,
                 _playerState.CurrentHP,
                 _playerState.MaxHP,
                 _battleAnimationConfig);
@@ -84,7 +84,7 @@ namespace Project.Scripts.Gameplay.UI
             EnemyAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Enemy,
-                _config.EnemyAvatarSprite,
+                _battleViewConfig.EnemyAvatarSprite,
                 _enemyState.CurrentHP,
                 _enemyState.MaxHP,
                 _battleAnimationConfig);

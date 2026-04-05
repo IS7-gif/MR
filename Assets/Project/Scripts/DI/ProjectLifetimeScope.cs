@@ -20,15 +20,15 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
             builder.RegisterInstance(_mainConfig.BattleAnimationConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
-            builder.RegisterInstance(_mainConfig.DamageConfig);
+            builder.RegisterInstance(_mainConfig.MatchDamageConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);
             builder.RegisterInstance(_mainConfig.AudioSFXConfig);
             builder.RegisterInstance(_mainConfig.SpecialTileConfig);
             builder.RegisterInstance(_mainConfig.LevelDatabase);
             builder.RegisterInstance(_mainConfig.UIConfig);
-            builder.RegisterInstance(_mainConfig.EnergyConfig);
+            builder.RegisterInstance(_mainConfig.HeroEnergyConfig);
             builder.RegisterInstance(_mainConfig.MoveBarConfig);
-            builder.RegisterInstance(_mainConfig.BattleHUDConfig);
+            builder.RegisterInstance(_mainConfig.BattleViewConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
 
             builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);

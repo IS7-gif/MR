@@ -29,11 +29,8 @@ namespace Project.Scripts.Gameplay.WorldSpace
         [Tooltip("Prefab with WorldFloatingDamageNumber component — pooled at runtime")]
         [SerializeField] private WorldFloatingDamageNumber _floatingDamagePrefab;
 
-        [Tooltip("World HUD layout and sizing configuration")]
-        [SerializeField] private WorldHUDConfig _hudConfig;
-
-
         private IInputService _inputService;
+        private BattleViewConfig _battleViewConfig;
         private ObjectPool<WorldFloatingDamageNumber> _floatingPool;
 
 
@@ -54,9 +51,10 @@ namespace Project.Scripts.Gameplay.WorldSpace
         }
 
 
-        public void SetDependencies(IInputService inputService)
+        public void SetDependencies(IInputService inputService, BattleViewConfig battleViewConfig)
         {
             _inputService = inputService;
+            _battleViewConfig = battleViewConfig;
         }
 
 
@@ -64,7 +62,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
         {
             transform.position = new Vector3(
                 ViewModel.BoardCenterX,
-                ViewModel.BoardTopWorldY + _hudConfig.HudBottomPadding,
+                ViewModel.BoardTopWorldY + _battleViewConfig.BattleAreaTopPadding,
                 0f);
         }
 
