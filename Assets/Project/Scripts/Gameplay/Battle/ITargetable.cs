@@ -1,9 +1,9 @@
 using Project.Scripts.Shared.Heroes;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public interface IWorldTargetable
+    public interface ITargetable
     {
         UnitDescriptor Descriptor { get; }
         bool IsReadySource { get; }

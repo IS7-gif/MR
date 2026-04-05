@@ -1,14 +1,13 @@
 using System;
 using DG.Tweening;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.UI;
 using TMPro;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldFloatingDamageNumber : MonoBehaviour
+    public class FloatingDamageNumber : MonoBehaviour
     {
         [Tooltip("TextMeshPro label that displays the damage or heal value")]
         [SerializeField] private TextMeshPro _label;

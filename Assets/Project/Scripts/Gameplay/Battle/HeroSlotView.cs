@@ -1,14 +1,13 @@
 using DG.Tweening;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldHeroSlotView : MonoBehaviour, IWorldTargetable
+    public class HeroSlotView : MonoBehaviour, ITargetable
     {
         [Tooltip("Background SpriteRenderer — defines the slot's visual bounds and is scaled by SetSize")]
         [SerializeField] private SpriteRenderer _background;
@@ -20,13 +19,13 @@ namespace Project.Scripts.Gameplay.WorldSpace
         [SerializeField] private SpriteRenderer _glow;
 
         [Tooltip("Main HP bar — snaps instantly on damage")]
-        [SerializeField] private WorldBarRenderer _hpBar;
+        [SerializeField] private BarRenderer _hpBar;
 
         [Tooltip("Lag HP bar placed visually behind the main bar — drains with a delay after damage")]
-        [SerializeField] private WorldBarRenderer _hpLagBar;
+        [SerializeField] private BarRenderer _hpLagBar;
 
         [Tooltip("Energy bar — tinted with the hero's element color")]
-        [SerializeField] private WorldBarRenderer _energyBar;
+        [SerializeField] private BarRenderer _energyBar;
 
         [Tooltip("Spawn anchor for floating damage/heal numbers — defaults to slot centre if unassigned")]
         [SerializeField] private Transform _hitAnchor;

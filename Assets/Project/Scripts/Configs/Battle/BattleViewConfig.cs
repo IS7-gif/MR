@@ -5,7 +5,7 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleViewConfig", menuName = "Configs/Battle/Battle View Config")]
     public class BattleViewConfig : ScriptableObject
     {
-        [Tooltip("Prefab containing the WorldBattleHUDView component - world-space battle view root")]
+        [Tooltip("Prefab containing the BattleHUDView component - world-space battle view root")]
         [SerializeField] private GameObject _battleHUDViewPrefab;
 
         [Tooltip("World-space Y offset added above the board top edge to position the battle HUD root")]

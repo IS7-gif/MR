@@ -3,19 +3,19 @@ using Project.Scripts.Services.Input;
 using Project.Scripts.Shared.Heroes;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldTargetingInputHandler : MonoBehaviour
+    public class TargetingInputHandler : MonoBehaviour
     {
         private const float OffsetPx = 20f;
 
 
         private IInputService _input;
-        private WorldTargetingRegistry _registry;
+        private TargetingRegistry _registry;
         private IAbilityExecutionService _abilityExecution;
         private Camera _cam;
-        private IWorldTargetable _source;
-        private IWorldTargetable _target;
+        private ITargetable _source;
+        private ITargetable _target;
         private Vector2 _currentScreenPos;
 
 
@@ -27,7 +27,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
 
         public void Init(
             IInputService input,
-            WorldTargetingRegistry registry,
+            TargetingRegistry registry,
             IAbilityExecutionService abilityExecution,
             Camera cam)
         {

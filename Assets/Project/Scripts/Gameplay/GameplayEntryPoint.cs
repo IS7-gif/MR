@@ -5,7 +5,7 @@ using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.UI;
-using Project.Scripts.Gameplay.WorldSpace;
+using Project.Scripts.Gameplay.Battle;
 using Project.Scripts.Services;
 using Project.Scripts.Services.Audio;
 using Project.Scripts.Services.Combat;
@@ -51,7 +51,7 @@ namespace Project.Scripts.Gameplay
         private GameResultPresenter _gameResultPresenter;
         private BattleHUDViewModel _battleHUDViewModel;
         private IBoardBoundsProvider _boardBoundsProvider;
-        private WorldBattleHUDView _worldBattleHUDView;
+        private BattleHUDView _battleHUDView;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
@@ -97,8 +97,8 @@ namespace Project.Scripts.Gameplay
         {
             _uiService?.Close<MoveBarView>();
             _uiService?.Close<TopBarView>();
-            if (_worldBattleHUDView)
-                _worldBattleHUDView.Close();
+            if (_battleHUDView)
+                _battleHUDView.Close();
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
@@ -164,15 +164,15 @@ namespace Project.Scripts.Gameplay
 
             await _uiService.Show<TopBarView, BattleHUDViewModel>(_battleHUDViewModel);
 
-            // InputService is created here so WorldBattleHUDView can subscribe to its events.
+            // InputService is created here so BattleHUDView can subscribe to its events.
             // The input map is enabled later via InitAsync, so no input fires until then.
             _inputService = new InputService(_inputConfig);
 
             var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
-            _worldBattleHUDView = hudGo.GetComponent<WorldBattleHUDView>();
-            _worldBattleHUDView.SetDependencies(_inputService, _battleViewConfig);
-            await _worldBattleHUDView.InitializeAsync(_battleHUDViewModel);
-            await _worldBattleHUDView.ShowAsync();
+            _battleHUDView = hudGo.GetComponent<BattleHUDView>();
+            _battleHUDView.SetDependencies(_inputService, _battleViewConfig);
+            await _battleHUDView.InitializeAsync(_battleHUDViewModel);
+            await _battleHUDView.ShowAsync();
 
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);

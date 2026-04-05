@@ -1,24 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldTargetingRegistry
+    public class TargetingRegistry
     {
-        private readonly List<IWorldTargetable> _units = new();
+        private readonly List<ITargetable> _units = new();
 
 
-        public void Register(IWorldTargetable unit)
+        public void Register(ITargetable unit)
         {
             _units.Add(unit);
         }
 
-        public void Unregister(IWorldTargetable unit)
+        public void Unregister(ITargetable unit)
         {
             _units.Remove(unit);
         }
 
-        public IWorldTargetable FindAtPosition(Vector2 screenPos, Camera cam, float offsetPx = 20f)
+        public ITargetable FindAtPosition(Vector2 screenPos, Camera cam, float offsetPx = 20f)
         {
             var z = Mathf.Abs(cam.transform.position.z);
             var worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, z));

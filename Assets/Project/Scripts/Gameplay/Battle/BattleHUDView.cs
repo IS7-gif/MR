@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Input;
@@ -8,32 +7,32 @@ using R3;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldBattleHUDView : BaseView<BattleHUDViewModel>
+    public class BattleHUDView : BaseView<BattleHUDViewModel>
     {
         [Tooltip("Four hero slot views for the player side, ordered left to right (indices 0–3)")]
-        [SerializeField] private WorldHeroSlotView[] _playerHeroSlots;
+        [SerializeField] private HeroSlotView[] _playerHeroSlots;
 
         [Tooltip("Four hero slot views for the enemy side, ordered left to right (indices 0–3)")]
-        [SerializeField] private WorldHeroSlotView[] _enemyHeroSlots;
+        [SerializeField] private HeroSlotView[] _enemyHeroSlots;
 
         [Tooltip("Avatar slot view for the player")]
-        [SerializeField] private WorldAvatarSlotView _playerAvatarSlot;
+        [SerializeField] private AvatarSlotView _playerAvatarSlot;
 
         [Tooltip("Avatar slot view for the enemy")]
-        [SerializeField] private WorldAvatarSlotView _enemyAvatarSlot;
+        [SerializeField] private AvatarSlotView _enemyAvatarSlot;
 
         [Tooltip("Handles drag-to-target input gestures in world space")]
-        [SerializeField] private WorldTargetingInputHandler _targetingInputHandler;
+        [SerializeField] private TargetingInputHandler _targetingInputHandler;
 
-        [Tooltip("Prefab with WorldFloatingDamageNumber component — pooled at runtime")]
-        [SerializeField] private WorldFloatingDamageNumber _floatingDamagePrefab;
+        [Tooltip("Prefab with FloatingDamageNumber component — pooled at runtime")]
+        [SerializeField] private FloatingDamageNumber _floatingDamagePrefab;
 
         
         private IInputService _inputService;
         private BattleViewConfig _battleViewConfig;
-        private ObjectPool<WorldFloatingDamageNumber> _floatingPool;
+        private ObjectPool<FloatingDamageNumber> _floatingPool;
 
 
         protected override UniTask OnBindViewModel()
@@ -77,7 +76,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
             BindHeroRow(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
         }
 
-        private void BindHeroRow(WorldHeroSlotView[] views, HeroSlotViewModel[] viewModels)
+        private void BindHeroRow(HeroSlotView[] views, HeroSlotViewModel[] viewModels)
         {
             if (null == views || null == viewModels)
                 return;
@@ -95,7 +94,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
             if (false == _targetingInputHandler || null == _inputService)
                 return;
 
-            var registry = new WorldTargetingRegistry();
+            var registry = new TargetingRegistry();
 
             if (_playerAvatarSlot)
                 registry.Register(_playerAvatarSlot);
@@ -121,7 +120,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
             if (false == _floatingDamagePrefab)
                 return;
 
-            _floatingPool = new ObjectPool<WorldFloatingDamageNumber>(
+            _floatingPool = new ObjectPool<FloatingDamageNumber>(
                 createFunc: () => Instantiate(_floatingDamagePrefab, transform),
                 actionOnGet: c => c.gameObject.SetActive(true),
                 actionOnRelease: c => { c.Kill(); c.gameObject.SetActive(false); },
@@ -149,7 +148,7 @@ namespace Project.Scripts.Gameplay.WorldSpace
             BindHeroFloatingNumbers(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
         }
 
-        private void BindHeroFloatingNumbers(WorldHeroSlotView[] views, HeroSlotViewModel[] viewModels)
+        private void BindHeroFloatingNumbers(HeroSlotView[] views, HeroSlotViewModel[] viewModels)
         {
             if (null == views || null == viewModels)
                 return;

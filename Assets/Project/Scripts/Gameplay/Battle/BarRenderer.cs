@@ -1,9 +1,9 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.WorldSpace
+namespace Project.Scripts.Gameplay.Battle
 {
-    public class WorldBarRenderer : MonoBehaviour
+    public class BarRenderer : MonoBehaviour
     {
         [Tooltip("Fill SpriteRenderer — direct child of this GameObject")]
         [SerializeField] private SpriteRenderer _fill;
