@@ -26,7 +26,6 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.SpecialTileConfig);
             builder.RegisterInstance(_mainConfig.LevelDatabase);
             builder.RegisterInstance(_mainConfig.UIConfig);
-            builder.RegisterInstance(_mainConfig.HeroEnergyConfig);
             builder.RegisterInstance(_mainConfig.MoveBarConfig);
             builder.RegisterInstance(_mainConfig.BattleViewConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);

@@ -39,6 +39,14 @@ namespace Project.Scripts.Configs.Levels
         [Tooltip("Тип условия победы - DamageBased означает, что игрок побеждает, снизив HP врага до нуля")]
         [SerializeField] private LevelGoalType _goalType = LevelGoalType.DamageBased;
 
+        // TODO: replace with player loadout from lobby
+        [Tooltip("Боевые параметры аватара игрока для этого уровня")]
+        [SerializeField] private AvatarCombatConfig _playerAvatarConfig;
+
+        // TODO: replace with opponent data from matchmaking
+        [Tooltip("Боевые параметры аватара противника для этого уровня")]
+        [SerializeField] private AvatarCombatConfig _enemyAvatarConfig;
+
         // TODO: replace with lobby loadout when PvP is implemented
         [Header("Heroes (temporary - will be replaced by lobby loadout)")]
         [Tooltip("Четыре конфига героев для стороны игрока (пустой слот = null)")]
@@ -61,6 +69,8 @@ namespace Project.Scripts.Configs.Levels
         public int PlayerHP => _playerHP;
         public int EnemyHP => _enemyHP;
         public LevelGoalType GoalType => _goalType;
+        public AvatarCombatConfig PlayerAvatarConfig => _playerAvatarConfig;
+        public AvatarCombatConfig EnemyAvatarConfig => _enemyAvatarConfig;
         public HeroConfig[] PlayerHeroes => _playerHeroes;
         public HeroConfig[] EnemyHeroes => _enemyHeroes;
         public BotConfig BotConfig => _botConfig;

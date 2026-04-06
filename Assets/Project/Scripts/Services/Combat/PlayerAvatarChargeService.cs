@@ -1,5 +1,5 @@
 using System;
-using Project.Scripts.Configs.Battle;
+using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
 using R3;
@@ -20,10 +20,10 @@ namespace Project.Scripts.Services.Combat
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public PlayerAvatarChargeService(EventBus eventBus, HeroEnergyConfig heroEnergyConfig)
+        public PlayerAvatarChargeService(EventBus eventBus, LevelConfig levelConfig)
         {
             _eventBus = eventBus;
-            _engine.Initialize(heroEnergyConfig.MaxAvatarCharge);
+            _engine.Initialize(levelConfig.PlayerAvatarConfig.MaxAvatarCharge);
         }
 
         public void Start()

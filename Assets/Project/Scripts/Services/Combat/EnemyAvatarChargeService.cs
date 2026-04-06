@@ -1,6 +1,5 @@
 using System;
-using Project.Scripts.Configs;
-using Project.Scripts.Configs.Battle;
+using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
 
@@ -17,10 +16,10 @@ namespace Project.Scripts.Services.Combat
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
 
 
-        public EnemyAvatarChargeService(EventBus eventBus, HeroEnergyConfig heroEnergyConfig)
+        public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig)
         {
             _eventBus = eventBus;
-            _engine.Initialize(heroEnergyConfig.MaxAvatarCharge);
+            _engine.Initialize(levelConfig.EnemyAvatarConfig.MaxAvatarCharge);
         }
 
         public void AddEnergy(int amount)

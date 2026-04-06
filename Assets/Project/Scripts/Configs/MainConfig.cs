@@ -20,7 +20,6 @@ namespace Project.Scripts.Configs
         [SerializeField] private SpecialTileConfig _specialTileConfig;
         [SerializeField] private LevelDatabase _levelDatabase;
         [SerializeField] private UIConfig _uiConfig;
-        [SerializeField] private HeroEnergyConfig _heroEnergyConfig;
         [SerializeField] private MoveBarConfig _moveBarConfig;
         [SerializeField] private BattleViewConfig _battleViewConfig;
         [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
@@ -36,7 +35,6 @@ namespace Project.Scripts.Configs
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;
         public UIConfig UIConfig => _uiConfig;
-        public HeroEnergyConfig HeroEnergyConfig => _heroEnergyConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
         public BattleViewConfig BattleViewConfig => _battleViewConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
