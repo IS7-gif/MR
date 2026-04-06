@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6fc6a29fd7f1e5d4e92bc3d0e8776808, type: 3}
-  m_Name: LevelConfig_06
+  m_Name: Level_06
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.LevelConfig
   _levelId: 6
   _width: 7
@@ -29,6 +29,8 @@ MonoBehaviour:
   _playerHP: 550
   _enemyHP: 550
   _goalType: 0
+  _playerAvatarConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
+  _enemyAvatarConfig: {fileID: 11400000, guid: b3e5f7a9c1d2e4f608192a3b4c5d6e7f, type: 2}
   _playerHeroes:
   - {fileID: 11400000, guid: 0f3d3fa3eb654c94a8971358e409f27b, type: 2}
   - {fileID: 11400000, guid: fa0aaf68376b121419125f776a10be55, type: 2}
@@ -40,5 +42,3 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fa0aaf68376b121419125f776a10be55, type: 2}
   - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
   _botConfig: {fileID: 11400000, guid: f0d9901f5fa0aeb4997e1c445357669f, type: 2}
-  _playerAvatarConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
-  _enemyAvatarConfig: {fileID: 11400000, guid: b3e5f7a9c1d2e4f608192a3b4c5d6e7f, type: 2}
