@@ -8,16 +8,16 @@ namespace Project.Scripts.Gameplay.UI
 {
     public class WinView : BaseView<WinViewModel>
     {
-        [Tooltip("Text displaying the number of moves used to win")]
+        [Tooltip("Текст с количеством использованных ходов для победы")]
         [SerializeField] private TMP_Text _movesText;
 
-        [Tooltip("Text displaying the current level ID")]
+        [Tooltip("Текст с ID текущего уровня")]
         [SerializeField] private TMP_Text _levelIdText;
 
-        [Tooltip("Text displaying the defeated opponent's name")]
+        [Tooltip("Текст с именем побеждённого противника")]
         [SerializeField] private TMP_Text _opponentNameText;
 
-        [Tooltip("Button that advances to the next level")]
+        [Tooltip("Кнопка перехода на следующий уровень")]
         [SerializeField] private Button _nextLevelButton;
 
 

@@ -6,31 +6,31 @@ namespace Project.Scripts.Configs.Board
     [CreateAssetMenu(fileName = "BoardConfig", menuName = "Configs/Board Config")]
     public class BoardConfig : ScriptableObject
     {
-        [Tooltip("Fraction of screen width reserved as padding on each side (0 = no padding, 0.5 = half screen)")]
+        [Tooltip("Доля ширины экрана, зарезервированная как отступ с каждой стороны (0 = без отступа, 0.5 = половина экрана)")]
         [SerializeField] [Range(0f, 0.5f)] private float _boardPaddingPercent = 0.08f;
 
-        [Tooltip("Fraction of screen height reserved for UI (score, buttons, etc.) — board will not grow into this area")]
+        [Tooltip("Доля высоты экрана, зарезервированная для UI (счёт, кнопки и т.д.) - доска не будет расширяться в эту область")]
         [SerializeField] [Range(0f, 0.5f)] private float _uiReservedHeightPercent = 0.4f;
 
-        [Tooltip("Visual size of each tile relative to its cell (1 = fills cell completely, <1 = gaps between tiles)")]
+        [Tooltip("Визуальный размер тайла относительно ячейки (1 = заполняет ячейку полностью, <1 = зазоры между тайлами)")]
         [SerializeField] [Range(0.5f, 1f)] private float _tileScale = 0.85f;
 
-        [Tooltip("Extra space in Unity units added around the board for the frame sprite")]
+        [Tooltip("Дополнительное пространство в единицах Unity вокруг доски для спрайта рамки")]
         [SerializeField] private float _framePadding = 0.1f;
 
-        [Tooltip("How many extra tile rows the spawn mask reveals above the board (hides tiles appearing from above)")]
+        [Tooltip("Сколько дополнительных рядов тайлов маска спавна открывает выше доски (скрывает тайлы, появляющиеся сверху)")]
         [SerializeField] private float _maskTopPadding = 2f;
 
-        [Tooltip("Fixed gap between the bottom of the screen and the bottom board edge, expressed in cell units (1 = one tile height). Consistent across all screen sizes.")]
+        [Tooltip("Фиксированный отступ между нижним краем экрана и нижним краем доски, в единицах ячеек (1 = высота одного тайла). Одинаков для всех разрешений.")]
         [SerializeField] [Range(0f, 5f)] private float _boardBottomPaddingCells = 0.65f;
 
-        [Tooltip("Minimum number of tiles in a row/column to count as a match")]
+        [Tooltip("Минимальное количество тайлов в ряду/столбце для засчитывания совпадения")]
         [SerializeField] [Range(2, 6)] private int _minMatchLength = 3;
 
-        [Tooltip("Maximum width-to-height ratio for the game area. On wider screens the content is pillarboxed to this ratio (0.5 = 1:2)")]
+        [Tooltip("Максимальное соотношение ширины к высоте игровой области. На широких экранах контент обрамляется до этого соотношения (0.5 = 1:2)")]
         [SerializeField] [Range(0.3f, 1f)] private float _maxAspectRatio = 0.5f;
 
-        [Tooltip("Prefab used to instantiate each tile")]
+        [Tooltip("Префаб для инстанцирования каждого тайла")]
         [SerializeField] private Tile _tilePrefab;
 
 

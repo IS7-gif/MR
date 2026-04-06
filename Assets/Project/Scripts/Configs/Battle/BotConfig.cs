@@ -7,58 +7,58 @@ namespace Project.Scripts.Configs.Battle
     public class BotConfig : ScriptableObject
     {
         [Header("Debug")]
-        [Tooltip("Uncheck to disable bot during analytics recording; does not affect registration")]
+        [Tooltip("Снимите флажок для отключения бота во время записи аналитики; не влияет на регистрацию")]
         [SerializeField] private bool _enabled = true;
 
         [Header("Identity")]
-        [Tooltip("Name displayed for the opponent in battle UI")]
+        [Tooltip("Имя, отображаемое для противника в боевом UI")]
         [SerializeField] private string _opponentName = "Enemy";
 
         [Header("Attack")]
-        [Tooltip("Minimum seconds between bot attacks on the player")]
+        [Tooltip("Минимальное количество секунд между атаками бота на игрока")]
         [SerializeField] private float _minAttackInterval = 1.5f;
 
-        [Tooltip("Maximum seconds between bot attacks on the player")]
+        [Tooltip("Максимальное количество секунд между атаками бота на игрока")]
         [SerializeField] private float _maxAttackInterval = 3.5f;
 
-        [Tooltip("Minimum damage dealt per bot attack")]
+        [Tooltip("Минимальный урон за атаку бота")]
         [SerializeField] private int _minAttackDamage = 8;
 
-        [Tooltip("Maximum damage dealt per bot attack")]
+        [Tooltip("Максимальный урон за атаку бота")]
         [SerializeField] private int _maxAttackDamage = 26;
 
         [Header("Hero Energy")]
-        [Tooltip("Seconds between each hero energy tick for the bot")]
+        [Tooltip("Секунды между тиками энергии героя бота")]
         [SerializeField] private float _heroEnergyTickInterval = 0.8f;
 
-        [Tooltip("Energy added to a random hero slot per tick")]
+        [Tooltip("Энергия, добавляемая к случайному слоту героя за тик")]
         [SerializeField] private int _heroEnergyPerTick = 2;
 
         [Header("Hero Activation")]
-        [Tooltip("Minimum seconds the bot waits after a hero charges before activating it (simulates human reaction)")]
+        [Tooltip("Минимальное количество секунд, которое бот ждёт после зарядки героя перед активацией (симулирует реакцию человека)")]
         [SerializeField] private float _minHeroActivationDelay = 1.0f;
 
-        [Tooltip("Maximum seconds the bot waits after a hero charges before activating it")]
+        [Tooltip("Максимальное количество секунд ожидания бота после зарядки героя перед активацией")]
         [SerializeField] private float _maxHeroActivationDelay = 4.0f;
 
         [Header("Avatar Charge")]
-        [Tooltip("Seconds between each enemy avatar charge tick")]
+        [Tooltip("Секунды между тиками зарядки аватара врага")]
         [SerializeField] private float _enemyChargeTickInterval = 2f;
 
-        [Tooltip("Charge points added to enemy avatar per tick")]
+        [Tooltip("Очки заряда, добавляемые аватару врага за тик")]
         [SerializeField] private int _enemyChargePerTick = 8;
 
-        [Tooltip("Minimum seconds the bot waits after charge bar fills before discharging (simulates human reaction)")]
+        [Tooltip("Минимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом (симулирует реакцию человека)")]
         [SerializeField] private float _minDischargeDelay = 0.5f;
 
-        [Tooltip("Maximum seconds the bot waits after charge bar fills before discharging")]
+        [Tooltip("Максимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом")]
         [SerializeField] private float _maxDischargeDelay = 2.0f;
 
         [Header("Heroes")]
-        [Tooltip("If true, bot randomly selects 4 heroes from HeroPool at battle start; if false, uses LevelConfig enemy heroes")]
+        [Tooltip("Если true, бот случайно выбирает 4 героев из HeroPool в начале боя; если false, использует героев врага из LevelConfig")]
         [SerializeField] private bool _randomHeroSelection = true;
 
-        [Tooltip("Pool of heroes the bot can randomly pick from when RandomHeroSelection is enabled")]
+        [Tooltip("Пул героев, из которого бот случайно выбирает при включённом RandomHeroSelection")]
         [SerializeField] private HeroConfig[] _heroPool;
 
 

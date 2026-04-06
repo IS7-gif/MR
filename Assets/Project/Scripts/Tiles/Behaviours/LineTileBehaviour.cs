@@ -7,7 +7,7 @@ namespace Project.Scripts.Tiles.Behaviours
     [CreateAssetMenu(fileName = "LineTileBehaviour", menuName = "Configs/Behaviours/Line")]
     public class LineTileBehaviour : TileBehaviour
     {
-        [Tooltip("True - clears the entire row; False - clears the entire column")]
+        [Tooltip("True - очищает всю строку; False - очищает весь столбец")]
         [SerializeField] private bool _isHorizontal;
 
 

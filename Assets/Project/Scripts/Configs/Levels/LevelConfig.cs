@@ -13,43 +13,43 @@ namespace Project.Scripts.Configs.Levels
     public class LevelConfig : ScriptableObject
     {
         [Header("Level")]
-        [Tooltip("Unique numeric identifier for this level, used by LevelDatabase lookups")]
+        [Tooltip("Уникальный числовой идентификатор уровня, используется для поиска в LevelDatabase")]
         [SerializeField] private int _levelId = 1;
 
         [Header("Board")]
-        [Tooltip("Number of tile columns on the board")]
+        [Tooltip("Количество столбцов тайлов на доске")]
         [SerializeField] private int _width = 7;
 
-        [Tooltip("Number of tile rows on the board")]
+        [Tooltip("Количество строк тайлов на доске")]
         [SerializeField] private int _height = 6;
 
-        [Tooltip("Tile types that can appear as ordinary matches on this board")]
+        [Tooltip("Типы тайлов, доступные для обычных совпадений на этой доске")]
         [SerializeField] private TileConfig[] _regularTiles;
 
-        [Tooltip("Tile types that can appear as special (power-up) tiles on this board")]
+        [Tooltip("Типы тайлов, доступные как специальные (улучшенные) тайлы на этой доске")]
         [SerializeField] private TileConfig[] _specialTiles;
 
         [Header("Combat")]
-        [Tooltip("Starting HP of the player avatar for this level")]
+        [Tooltip("Начальные HP аватара игрока для этого уровня")]
         [SerializeField] private int _playerHP = 550;
 
-        [Tooltip("Starting HP of the enemy avatar for this level")]
+        [Tooltip("Начальные HP аватара противника для этого уровня")]
         [SerializeField] private int _enemyHP = 550;
 
-        [Tooltip("Win condition type - DamageBased means the player wins by reducing enemy HP to zero")]
+        [Tooltip("Тип условия победы - DamageBased означает, что игрок побеждает, снизив HP врага до нуля")]
         [SerializeField] private LevelGoalType _goalType = LevelGoalType.DamageBased;
 
         // TODO: replace with lobby loadout when PvP is implemented
         [Header("Heroes (temporary - will be replaced by lobby loadout)")]
-        [Tooltip("Four hero configs for the player side (null slot = empty)")]
+        [Tooltip("Четыре конфига героев для стороны игрока (пустой слот = null)")]
         [SerializeField] private HeroConfig[] _playerHeroes = new HeroConfig[4];
 
-        [Tooltip("Four hero configs for the enemy side; used when BotConfig.RandomHeroSelection is false")]
+        [Tooltip("Четыре конфига героев для стороны врага; используется когда BotConfig.RandomHeroSelection = false")]
         [SerializeField] private HeroConfig[] _enemyHeroes = new HeroConfig[4];
 
         // TODO: replace with matchmaking opponent data when lobby is implemented
         [Header("Bot (temporary - will be replaced by lobby opponent)")]
-        [Tooltip("Bot settings for this level; null means no bot (reserved for real PvP)")]
+        [Tooltip("Настройки бота для этого уровня; null означает отсутствие бота (зарезервировано для реального PvP)")]
         [SerializeField] private BotConfig _botConfig;
 
 

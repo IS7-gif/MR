@@ -9,11 +9,11 @@ namespace Project.Scripts.Utils
     [RequireComponent(typeof(Camera))]
     public class CameraSetup : MonoBehaviour
     {
-        [Tooltip("Reference aspect ratio (width / height). Must match BoardConfig.MaxAspectRatio (default 0.5 for 1:2).")]
+        [Tooltip("Эталонное соотношение сторон (ширина / высота). Должно совпадать с BoardConfig.MaxAspectRatio (по умолчанию 0.5 для 1:2).")]
         [Range(0.3f, 1f)]
         [SerializeField] private float _referenceAspect = 0.5f;
 
-        [Tooltip("Orthographic size for the reference aspect ratio. Copy the value currently set on the Camera component here.")]
+        [Tooltip("Ортографический размер для эталонного соотношения сторон. Скопируйте сюда значение, установленное на компоненте Camera.")]
         [SerializeField] private float _referenceOrthographicSize = 5f;
 
         private Camera _camera;

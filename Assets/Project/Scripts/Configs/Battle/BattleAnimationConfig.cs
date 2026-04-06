@@ -6,84 +6,84 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleAnimationConfig", menuName = "Configs/Battle Animation Config")]
     public class BattleAnimationConfig : ScriptableObject
     {
-        [Tooltip("Color the avatar flashes to when receiving damage")]
+        [Tooltip("Цвет вспышки аватара при получении урона")]
         [SerializeField] private Color _hitFlashColor = new Color(1f, 0.2f, 0.2f, 1f);
 
-        [Tooltip("Total duration in seconds of the hit flash (fade to color + fade back)")]
+        [Tooltip("Общая длительность вспышки попадания в секундах (затухание к цвету + затухание обратно)")]
         [SerializeField] private float _hitFlashDuration = 0.3f;
 
-        [Tooltip("Easing curve applied to both phases of the hit flash")]
+        [Tooltip("Кривая ослабления для обеих фаз вспышки попадания")]
         [SerializeField] private Ease _hitFlashEase = Ease.InOutQuad;
 
-        [Tooltip("Distance in world units the avatar/hero moves during knockback")]
+        [Tooltip("Расстояние в мировых единицах, на которое двигается аватар/герой при отбрасывании")]
         [SerializeField] private float _knockbackDistance = 0.15f;
 
-        [Tooltip("Total duration in seconds of the knockback (move away + return)")]
+        [Tooltip("Общая длительность отбрасывания в секундах (отход + возврат)")]
         [SerializeField] private float _knockbackDuration = 0.3f;
 
-        [Tooltip("Easing curve applied to both phases of the knockback")]
+        [Tooltip("Кривая ослабления для обеих фаз отбрасывания")]
         [SerializeField] private Ease _knockbackEase = Ease.OutQuad;
 
-        [Tooltip("Delay in seconds before the Win/Lose window appears after the final hit animation finishes")]
+        [Tooltip("Задержка в секундах перед появлением окна победы/поражения после завершения финальной анимации попадания")]
         [SerializeField] private float _resultScreenDelay = 0.4f;
 
         [Header("HP Bar Animation")]
-        [Tooltip("Delay in seconds before the lag bar starts draining after damage")]
+        [Tooltip("Задержка в секундах перед началом опустошения лаг-полосы после получения урона")]
         [SerializeField] private float _hpBarLagDelay = 0.2f;
 
-        [Tooltip("Duration in seconds for the lag bar to drain to the new HP value")]
+        [Tooltip("Длительность опустошения лаг-полосы до нового значения HP в секундах")]
         [SerializeField] private float _hpBarLagDuration = 1f;
 
-        [Tooltip("Easing curve for the lag bar drain")]
+        [Tooltip("Кривая ослабления для опустошения лаг-полосы")]
         [SerializeField] private Ease _hpBarLagEase = Ease.OutCubic;
 
-        [Tooltip("Duration in seconds for a smooth HP tween when healing (no shake, no lag bar)")]
+        [Tooltip("Длительность плавной анимации HP при лечении в секундах (без тряски, без лаг-полосы)")]
         [SerializeField] private float _hpBarHealDuration = 0.4f;
 
-        [Tooltip("Easing curve for the heal tween")]
+        [Tooltip("Кривая ослабления для анимации лечения")]
         [SerializeField] private Ease _hpBarHealEase = Ease.OutQuad;
 
         [Header("Ready Pulse")]
-        [Tooltip("Duration of one full pulse cycle in seconds")]
+        [Tooltip("Длительность одного полного цикла пульсации в секундах")]
         [SerializeField] private float _readyPulseDuration = 0.6f;
 
-        [Tooltip("Minimum alpha reached at the bottom of the pulse (0-1)")]
+        [Tooltip("Минимальная прозрачность в нижней точке пульсации (0-1)")]
         [SerializeField] private float _readyPulseAlpha = 0.4f;
 
-        [Tooltip("Easing curve for the pulse animation")]
+        [Tooltip("Кривая ослабления для анимации пульсации")]
         [SerializeField] private Ease _readyPulseEase = Ease.InOutSine;
 
         [Header("Energy Bar Animation")]
-        [Tooltip("Duration in seconds for the energy fill tween")]
+        [Tooltip("Длительность анимации заполнения энергии в секундах")]
         [SerializeField] private float _energyFillDuration = 0.35f;
 
-        [Tooltip("Easing curve for the energy fill tween")]
+        [Tooltip("Кривая ослабления для анимации заполнения энергии")]
         [SerializeField] private Ease _energyFillEase = Ease.OutCubic;
 
         [Header("Targeting Highlights")]
-        [Tooltip("Glow color of the unit being dragged from (source)")]
+        [Tooltip("Цвет свечения юнита, от которого начато перетаскивание (источник)")]
         [SerializeField] private Color _sourceHighlightColor = Color.white;
 
-        [Tooltip("Glow color of a valid attack target")]
+        [Tooltip("Цвет свечения допустимой цели атаки")]
         [SerializeField] private Color _attackTargetColor = new Color(1f, 0.15f, 0.15f, 1f);
 
-        [Tooltip("Glow color of a valid heal target")]
+        [Tooltip("Цвет свечения допустимой цели лечения")]
         [SerializeField] private Color _healTargetColor = new Color(0.15f, 1f, 0.25f, 1f);
 
         [Header("Floating Numbers")]
-        [Tooltip("Color of the damage number label")]
+        [Tooltip("Цвет метки числа урона")]
         [SerializeField] private Color _damageNumberColor = new Color(1f, 0.25f, 0.25f, 1f);
 
-        [Tooltip("Color of the heal number label")]
+        [Tooltip("Цвет метки числа лечения")]
         [SerializeField] private Color _healNumberColor = new Color(0.25f, 1f, 0.25f, 1f);
 
-        [Tooltip("Distance in world units the number floats upward during the animation")]
+        [Tooltip("Расстояние в мировых единицах, на которое число поднимается вверх во время анимации")]
         [SerializeField] private float _floatDamageDistance = 0.75f;
 
-        [Tooltip("Total duration in seconds of the float-up and fade-out animation")]
+        [Tooltip("Общая длительность анимации всплытия и затухания в секундах")]
         [SerializeField] private float _floatDamageDuration = 1.2f;
 
-        [Tooltip("Easing curve for the upward float movement")]
+        [Tooltip("Кривая ослабления для движения числа вверх")]
         [SerializeField] private Ease _floatDamageEase = Ease.OutCubic;
 
         

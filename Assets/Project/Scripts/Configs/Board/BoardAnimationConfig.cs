@@ -6,25 +6,25 @@ namespace Project.Scripts.Configs.Board
     [CreateAssetMenu(fileName = "BoardAnimationConfig", menuName = "Configs/Board Animation Config")]
     public class BoardAnimationConfig : ScriptableObject
     {
-        [Tooltip("Duration in seconds for the tile swap animation")]
+        [Tooltip("Длительность анимации обмена тайлов в секундах")]
         [SerializeField] private float _swapDuration = 0.2f;
 
-        [Tooltip("Duration in seconds for the tile fall animation")]
+        [Tooltip("Длительность анимации падения тайлов в секундах")]
         [SerializeField] private float _fallDuration = 0.15f;
 
-        [Tooltip("Easing curve applied to falling tiles")]
+        [Tooltip("Кривая ослабления для падающих тайлов")]
         [SerializeField] private Ease _fallEase = Ease.OutBounce;
 
-        [Tooltip("Duration in seconds for the tile destroy animation")]
+        [Tooltip("Длительность анимации уничтожения тайлов в секундах")]
         [SerializeField] private float _destroyDuration = 0.1f;
 
-        [Tooltip("Easing curve applied to tile destruction")]
+        [Tooltip("Кривая ослабления для уничтожения тайлов")]
         [SerializeField] private Ease _destroyEase = Ease.InBack;
 
-        [Tooltip("Duration in seconds for the tile spawn animation")]
+        [Tooltip("Длительность анимации появления тайлов в секундах")]
         [SerializeField] private float _spawnDuration = 0.15f;
 
-        [Tooltip("Pause in seconds between successive chain-reaction waves (bomb → line rune → next explosion, etc.)")]
+        [Tooltip("Пауза в секундах между последовательными волнами цепной реакции (бомба - линейная руна - следующий взрыв и т.д.)")]
         [SerializeField] private float _chainReactionWaveDelay = 0.12f;
 
 

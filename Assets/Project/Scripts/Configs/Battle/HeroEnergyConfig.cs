@@ -5,7 +5,7 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "HeroEnergyConfig", menuName = "Configs/Battle/Hero Energy Config")]
     public class HeroEnergyConfig : ScriptableObject
     {
-        [Tooltip("Maximum charge the player and enemy avatar bars can hold")]
+        [Tooltip("Максимальный заряд аватара игрока и врага")]
         [SerializeField] private int _maxAvatarCharge = 110;
 
 

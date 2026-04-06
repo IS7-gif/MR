@@ -9,7 +9,7 @@ namespace Project.Scripts.Gameplay.Battle
 {
     public class FloatingDamageNumber : MonoBehaviour
     {
-        [Tooltip("TextMeshPro label that displays the damage or heal value")]
+        [Tooltip("Всплывающий текст значения урона или лечения")]
         [SerializeField] private TextMeshPro _label;
 
 

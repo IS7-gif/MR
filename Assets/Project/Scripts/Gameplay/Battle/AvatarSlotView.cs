@@ -9,25 +9,25 @@ namespace Project.Scripts.Gameplay.Battle
 {
     public class AvatarSlotView : MonoBehaviour, ITargetable
     {
-        [Tooltip("Background SpriteRenderer — defines the slot bounds and is scaled by SetSize")]
+        [Tooltip("Фоновый SpriteRenderer - определяет границы слота и масштабируется через SetSize")]
         [SerializeField] private SpriteRenderer _background;
 
-        [Tooltip("Portrait SpriteRenderer — displays the avatar image")]
+        [Tooltip("SpriteRenderer портрета - отображает изображение аватара")]
         [SerializeField] private SpriteRenderer _portrait;
 
-        [Tooltip("Glow SpriteRenderer with Additive material — shown as source or target highlight")]
+        [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
         [SerializeField] private SpriteRenderer _glow;
 
-        [Tooltip("Main HP bar — snaps instantly on damage")]
+        [Tooltip("Основная полоса HP - мгновенно обновляется при получении урона")]
         [SerializeField] private BarRenderer _hpBar;
 
-        [Tooltip("Lag HP bar placed visually behind the main bar — drains with delay after damage")]
+        [Tooltip("Лаг-полоса HP позади основной полосы - опустошается с задержкой после получения урона")]
         [SerializeField] private BarRenderer _hpLagBar;
 
-        [Tooltip("Energy/charge bar — fills as the avatar accumulates energy")]
+        [Tooltip("Полоса энергии/заряда - заполняется по мере накопления энергии аватаром")]
         [SerializeField] private BarRenderer _energyBar;
 
-        [Tooltip("Transform used as the spawn anchor for floating damage/heal numbers")]
+        [Tooltip("Transform, используемый как якорь для всплывающих чисел урона/лечения")]
         [SerializeField] private Transform _hitAnchor;
 
 

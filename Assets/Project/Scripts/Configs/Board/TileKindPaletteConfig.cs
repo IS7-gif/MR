@@ -7,7 +7,7 @@ namespace Project.Scripts.Configs.Board
     [CreateAssetMenu(fileName = "TileKindPaletteConfig", menuName = "Configs/TileKindPalette Config")]
     public class TileKindPaletteConfig : ScriptableObject
     {
-        [Tooltip("Color mapping for each tile element type")]
+        [Tooltip("Таблица цветов для каждого типа элемента тайла")]
         [SerializeField] private TileKindColorEntry[] _entries;
 
 
@@ -25,10 +25,10 @@ namespace Project.Scripts.Configs.Board
     [Serializable]
     public struct TileKindColorEntry
     {
-        [Tooltip("Tile element type")]
+        [Tooltip("Тип элемента тайла")]
         public TileKind Kind;
 
-        [Tooltip("Color associated with this element type — used to tint hero slot backgrounds")]
+        [Tooltip("Цвет, связанный с этим типом элемента - используется для окраски фона слотов героев")]
         public Color Color;
     }
 }

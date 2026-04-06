@@ -6,13 +6,13 @@ namespace Project.Scripts.Configs
     [CreateAssetMenu(fileName = "InputConfig", menuName = "Configs/Input Config")]
     public class InputConfig : ScriptableObject
     {
-        [Tooltip("Unity Input System action asset defining all input bindings")]
+        [Tooltip("Ассет действий Unity Input System, определяющий все привязки ввода")]
         [SerializeField] private InputActionAsset _inputActionAsset;
 
-        [Tooltip("Minimum drag distance in pixels before a swipe is registered")]
+        [Tooltip("Минимальное расстояние перетаскивания в пикселях для регистрации свайпа")]
         [SerializeField] private float _screenDragThresholdPixels = 10f;
 
-        [Tooltip("Minimum drag distance in world units before a swap direction is determined")]
+        [Tooltip("Минимальное расстояние перетаскивания в мировых единицах для определения направления обмена")]
         [SerializeField] private float _worldDragThreshold = 0.03f;
 
         

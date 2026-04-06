@@ -5,10 +5,10 @@ namespace Project.Scripts.Gameplay.Battle
 {
     public class BarRenderer : MonoBehaviour
     {
-        [Tooltip("Fill SpriteRenderer — direct child of this GameObject")]
+        [Tooltip("SpriteRenderer заполнения - прямой дочерний объект этого GameObject")]
         [SerializeField] private SpriteRenderer _fill;
 
-        [Tooltip("When true the bar fills from bottom to top instead of left to right")]
+        [Tooltip("При true полоса заполняется снизу вверх вместо слева направо")]
         [SerializeField] private bool _vertical = false;
 
 
@@ -61,14 +61,12 @@ namespace Project.Scripts.Gameplay.Battle
             }
         }
 
-        // Used only for hero energy bars — overrides the fill SpriteRenderer color with the hero's element color.
         public void SetFillColor(Color color)
         {
             if (_fill)
                 _fill.color = color;
         }
 
-        // Used for energy bar pulse animation — adjusts alpha without changing hue.
         public void SetFillAlpha(float alpha)
         {
             if (false == _fill)

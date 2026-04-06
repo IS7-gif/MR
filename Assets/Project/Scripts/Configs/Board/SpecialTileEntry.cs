@@ -7,13 +7,13 @@ namespace Project.Scripts.Configs.Board
     [Serializable]
     public class SpecialTileEntry
     {
-        [Tooltip("Match condition that triggers creation of this special tile")]
+        [Tooltip("Условие совпадения, запускающее создание этого специального тайла")]
         [SerializeField] private SpecialTileCondition _condition;
 
-        [Tooltip("Kind of special tile to spawn when the condition is met")]
+        [Tooltip("Вид специального тайла для спавна при выполнении условия")]
         [SerializeField] private TileKind _tileKind;
 
-        [Tooltip("Where on the board the special tile appears: at the center of the match shape, or at the swap pivot position")]
+        [Tooltip("Где на доске появляется специальный тайл: в центре фигуры совпадения или в точке поворота обмена")]
         [SerializeField] private SpecialTileSpawnPosition _spawnPosition;
 
 

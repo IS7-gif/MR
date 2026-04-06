@@ -7,10 +7,10 @@ namespace Project.Scripts.UI
 {
     public class LoadingScreen : MonoBehaviour
     {
-        [Tooltip("Root panel GameObject shown during loading")]
+        [Tooltip("Корневой GameObject панели, отображаемый во время загрузки")]
         [SerializeField] private GameObject _loadingPanel;
 
-        [Tooltip("Slider representing loading progress (0–1)")]
+        [Tooltip("Слайдер прогресса загрузки (0-1)")]
         [SerializeField] private Slider _progressBar;
 
 
