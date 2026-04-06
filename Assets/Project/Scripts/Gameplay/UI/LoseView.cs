@@ -8,16 +8,16 @@ namespace Project.Scripts.Gameplay.UI
 {
     public class LoseView : BaseView<LoseViewModel>
     {
-        [Tooltip("Text displaying the number of moves used")]
+        [Tooltip("Текст с количеством использованных ходов")]
         [SerializeField] private TMP_Text _movesText;
 
-        [Tooltip("Text displaying the current level ID")]
+        [Tooltip("Текст с ID текущего уровня")]
         [SerializeField] private TMP_Text _levelIdText;
 
-        [Tooltip("Text displaying the opponent's name")]
+        [Tooltip("Текст с именем противника")]
         [SerializeField] private TMP_Text _opponentNameText;
 
-        [Tooltip("Button that retries the current level")]
+        [Tooltip("Кнопка повторного прохождения текущего уровня")]
         [SerializeField] private Button _retryButton;
 
 

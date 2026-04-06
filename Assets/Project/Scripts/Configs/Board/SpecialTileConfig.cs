@@ -5,7 +5,7 @@ namespace Project.Scripts.Configs.Board
     [CreateAssetMenu(fileName = "SpecialTileConfig", menuName = "Configs/Special Tile Config")]
     public class SpecialTileConfig : ScriptableObject
     {
-        [Tooltip("Rules that define which special tile is created for each match condition, checked in order — first matching rule wins")]
+        [Tooltip("Правила, определяющие какой специальный тайл создаётся для каждого условия совпадения, проверяются по порядку - выигрывает первое подходящее правило")]
         [SerializeField] private SpecialTileEntry[] _rules;
 
 

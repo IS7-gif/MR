@@ -7,10 +7,10 @@ namespace Project.Scripts.Tiles.Behaviours
     [CreateAssetMenu(fileName = "BombTileBehaviour", menuName = "Configs/Behaviours/Bomb")]
     public class BombTileBehaviour : TileBehaviour
     {
-        [Tooltip("Grid radius of the explosion for a standard activation — destroys all tiles within this many cells")]
+        [Tooltip("Радиус взрыва в ячейках для стандартной активации - уничтожает все тайлы в пределах этого радиуса")]
         [SerializeField] private int _radius = 1;
 
-        [Tooltip("Grid radius used when two Bombs are swapped together (Bomb + Bomb combo)")]
+        [Tooltip("Радиус в ячейках при обмене двух бомб между собой (комбо Бомба + Бомба)")]
         [SerializeField] private int _doubleRadius = 2;
 
 

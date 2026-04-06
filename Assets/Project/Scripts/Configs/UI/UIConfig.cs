@@ -5,16 +5,16 @@ namespace Project.Scripts.Configs.UI
     [CreateAssetMenu(fileName = "UIConfig", menuName = "Configs/UI Config")]
     public class UIConfig : ScriptableObject
     {
-        [Tooltip("Prefab containing the WinView component — shown when the player defeats the enemy")]
+        [Tooltip("Префаб компонента WinView - отображается, когда игрок побеждает врага")]
         [SerializeField] private GameObject _winViewPrefab;
 
-        [Tooltip("Prefab containing the LoseView component — shown when the player runs out of moves")]
+        [Tooltip("Префаб компонента LoseView - отображается, когда у игрока заканчиваются ходы")]
         [SerializeField] private GameObject _loseViewPrefab;
 
-        [Tooltip("Prefab containing the MoveBarView component — docked to the bottom of the screen")]
+        [Tooltip("Префаб компонента MoveBarView - прикреплён к нижней части экрана")]
         [SerializeField] private GameObject _moveBarViewPrefab;
 
-        [Tooltip("Prefab containing the TopBarView component — enemy name and secondary label, stays in Canvas")]
+        [Tooltip("Префаб компонента TopBarView - имя врага и второстепенный ярлык, остаётся в Canvas")]
         [SerializeField] private GameObject _topBarViewPrefab;
 
 

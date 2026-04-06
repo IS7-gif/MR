@@ -7,13 +7,13 @@ namespace Project.Scripts.Gameplay.UI
 {
     public class TopBarView : BaseView<BattleHUDViewModel>
     {
-        [Tooltip("Root RectTransform of the top container — receives safe area Y offset at runtime")]
+        [Tooltip("Корневой RectTransform верхнего контейнера - получает смещение по Y safe area во время выполнения")]
         [SerializeField] private RectTransform _topContainer;
 
-        [Tooltip("Displays the enemy opponent name")]
+        [Tooltip("Отображает имя противника")]
         [SerializeField] private TMP_Text _enemyNameText;
 
-        [Tooltip("Reserved for timer or secondary label — binding added when timer service is ready")]
+        [Tooltip("Зарезервировано для таймера или дополнительного ярлыка - привязка добавится при готовности сервиса таймера")]
         [SerializeField] private TMP_Text _secondaryText;
 
 

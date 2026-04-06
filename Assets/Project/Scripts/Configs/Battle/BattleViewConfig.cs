@@ -5,16 +5,16 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleViewConfig", menuName = "Configs/Battle/Battle View Config")]
     public class BattleViewConfig : ScriptableObject
     {
-        [Tooltip("Prefab containing the BattleHUDView component - world-space battle view root")]
+        [Tooltip("Префаб компонента BattleHUDView - корень отображения боя в мировом пространстве")]
         [SerializeField] private GameObject _battleHUDViewPrefab;
 
-        [Tooltip("World-space Y offset added above the board top edge to position the battle HUD root")]
+        [Tooltip("Смещение по Y в мировых координатах, добавляемое выше верхнего края доски для позиционирования корня боевого HUD")]
         [SerializeField] private float _battleAreaTopPadding = 0.4f;
 
-        [Tooltip("Portrait sprite shown for the player avatar (null = no sprite)")]
+        [Tooltip("Спрайт портрета аватара игрока (null = без спрайта)")]
         [SerializeField] private Sprite _playerAvatarSprite;
 
-        [Tooltip("Portrait sprite shown for the enemy avatar (null = no sprite)")]
+        [Tooltip("Спрайт портрета аватара врага (null = без спрайта)")]
         [SerializeField] private Sprite _enemyAvatarSprite;
 
 

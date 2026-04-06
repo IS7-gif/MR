@@ -7,13 +7,13 @@ namespace Project.Scripts.Configs.Board
     [CreateAssetMenu(fileName = "TileConfig", menuName = "Configs/Tile Config")]
     public class TileConfig : ScriptableObject
     {
-        [Tooltip("Identity of this tile — determines both match color (Red/Blue/etc.) and special type (Bomb/Storm/etc.)")]
+        [Tooltip("Идентификатор тайла - определяет как цвет совпадения (Red/Blue и т.д.), так и специальный тип (Bomb/Storm и т.д.)")]
         [SerializeField] private TileKind _kind;
 
-        [Tooltip("Visual sprite displayed for this tile")]
+        [Tooltip("Визуальный спрайт тайла")]
         [SerializeField] private Sprite _sprite;
 
-        [Tooltip("Special behaviour applied when this tile is destroyed")]
+        [Tooltip("Специальное поведение при уничтожении этого тайла")]
         [SerializeField] private TileBehaviour _behaviour;
 
 

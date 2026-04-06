@@ -28,10 +28,10 @@ namespace Project.Scripts.Gameplay
 {
     public class GameplayEntryPoint : MonoBehaviour
     {
-        [Tooltip("Parent transform for all instantiated tile objects")]
+        [Tooltip("Родительский Transform для всех инстанцируемых объектов тайлов")]
         [SerializeField] private Transform _tileContainer;
 
-        [Tooltip("View component that sizes the board frame and spawn mask at runtime")]
+        [Tooltip("Компонент View, задающий размер рамки доски и маски спавна во время выполнения")]
         [SerializeField] private BoardView _boardView;
 
         

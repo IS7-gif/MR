@@ -27,7 +27,6 @@ namespace Project.Scripts.DI
             builder.Register<IEnemyStateService, EnemyStateService>(Lifetime.Singleton);
             builder.Register<IPlayerStateService, PlayerStateService>(Lifetime.Singleton);
             builder.Register<ILevelProgressionService, LevelProgressionService>(Lifetime.Singleton);
-            builder.Register<IEnergyService, EnergyService>(Lifetime.Singleton);
             builder.Register<IMoveBarService, MoveBarService>(Lifetime.Singleton);
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();

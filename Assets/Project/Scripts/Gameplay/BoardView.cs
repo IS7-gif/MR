@@ -4,10 +4,10 @@ namespace Project.Scripts.Gameplay
 {
     public class BoardView : MonoBehaviour
     {
-        [Tooltip("SpriteRenderer of the frame that surrounds the board (Draw Mode must be Sliced)")]
+        [Tooltip("SpriteRenderer рамки, окружающей доску (Draw Mode должен быть Sliced)")]
         [SerializeField] private SpriteRenderer _frame;
-        
-        [Tooltip("SpriteMask used to hide tiles appearing above the board during gravity")]
+
+        [Tooltip("SpriteMask для скрытия тайлов, появляющихся выше доски во время гравитации")]
         [SerializeField] private SpriteMask _spriteMask;
 
 

@@ -9,25 +9,25 @@ namespace Project.Scripts.Gameplay.Battle
 {
     public class HeroSlotView : MonoBehaviour, ITargetable
     {
-        [Tooltip("Background SpriteRenderer — defines the slot's visual bounds and is scaled by SetSize")]
+        [Tooltip("Фоновый SpriteRenderer - определяет визуальные границы слота и масштабируется через SetSize")]
         [SerializeField] private SpriteRenderer _background;
 
-        [Tooltip("Portrait SpriteRenderer — tinted with the hero's element color when assigned")]
+        [Tooltip("SpriteRenderer портрета - при назначении окрашивается в цвет элемента героя")]
         [SerializeField] private SpriteRenderer _portrait;
 
-        [Tooltip("Glow SpriteRenderer with Additive material — shown as source or target highlight")]
+        [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
         [SerializeField] private SpriteRenderer _glow;
 
-        [Tooltip("Main HP bar — snaps instantly on damage")]
+        [Tooltip("Основная полоса HP - мгновенно обновляется при получении урона")]
         [SerializeField] private BarRenderer _hpBar;
 
-        [Tooltip("Lag HP bar placed visually behind the main bar — drains with a delay after damage")]
+        [Tooltip("Лаг-полоса HP позади основной полосы - опустошается с задержкой после получения урона")]
         [SerializeField] private BarRenderer _hpLagBar;
 
-        [Tooltip("Energy bar — tinted with the hero's element color")]
+        [Tooltip("Полоса энергии - окрашена в цвет элемента героя")]
         [SerializeField] private BarRenderer _energyBar;
 
-        [Tooltip("Spawn anchor for floating damage/heal numbers — defaults to slot centre if unassigned")]
+        [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
         [SerializeField] private Transform _hitAnchor;
 
 

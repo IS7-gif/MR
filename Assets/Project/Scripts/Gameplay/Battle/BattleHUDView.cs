@@ -11,22 +11,22 @@ namespace Project.Scripts.Gameplay.Battle
 {
     public class BattleHUDView : BaseView<BattleHUDViewModel>
     {
-        [Tooltip("Four hero slot views for the player side, ordered left to right (indices 0–3)")]
+        [Tooltip("Четыре вида слота героя для стороны игрока, упорядочены слева направо (индексы 0-3)")]
         [SerializeField] private HeroSlotView[] _playerHeroSlots;
 
-        [Tooltip("Four hero slot views for the enemy side, ordered left to right (indices 0–3)")]
+        [Tooltip("Четыре вида слота героя для стороны врага, упорядочены слева направо (индексы 0-3)")]
         [SerializeField] private HeroSlotView[] _enemyHeroSlots;
 
-        [Tooltip("Avatar slot view for the player")]
+        [Tooltip("Вид слота аватара игрока")]
         [SerializeField] private AvatarSlotView _playerAvatarSlot;
 
-        [Tooltip("Avatar slot view for the enemy")]
+        [Tooltip("Вид слота аватара врага")]
         [SerializeField] private AvatarSlotView _enemyAvatarSlot;
 
-        [Tooltip("Handles drag-to-target input gestures in world space")]
+        [Tooltip("Обрабатывает жесты перетаскивания к цели в мировом пространстве")]
         [SerializeField] private TargetingInputHandler _targetingInputHandler;
 
-        [Tooltip("Prefab with FloatingDamageNumber component — pooled at runtime")]
+        [Tooltip("Префаб с компонентом FloatingDamageNumber")]
         [SerializeField] private FloatingDamageNumber _floatingDamagePrefab;
 
         

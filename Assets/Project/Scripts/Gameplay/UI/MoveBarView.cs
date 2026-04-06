@@ -10,16 +10,16 @@ namespace Project.Scripts.Gameplay.UI
 {
     public class MoveBarView : BaseView<MoveBarViewModel>
     {
-        [Tooltip("Always-visible opaque base layer image")]
+        [Tooltip("Всегда видимое непрозрачное изображение базового слоя")]
         [SerializeField] private Image _background;
 
-        [Tooltip("Semi-transparent fill image (Type=Filled, Fill Method=Horizontal, Fill Origin=Left)")]
+        [Tooltip("Полупрозрачное изображение заполнения (Type=Filled, Fill Method=Horizontal, Fill Origin=Left)")]
         [SerializeField] private Image _fill;
 
-        [Tooltip("RectTransform container where discrete segment images are spawned at runtime")]
+        [Tooltip("Контейнер RectTransform, в котором во время выполнения создаются изображения дискретных сегментов")]
         [SerializeField] private RectTransform _segmentsContainer;
 
-        [Tooltip("Prefab with an Image component used for each discrete move charge segment")]
+        [Tooltip("Префаб с компонентом Image для каждого дискретного сегмента заряда хода")]
         [SerializeField] private GameObject _segmentPrefab;
 
 

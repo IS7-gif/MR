@@ -10,13 +10,13 @@ namespace Project.Scripts.Bootstrap
 {
     public class BootstrapController : MonoBehaviour
     {
-        [Tooltip("Loading screen UI shown during bootstrap")]
+        [Tooltip("UI экрана загрузки, отображаемый во время bootstrap")]
         [SerializeField] private LoadingScreen _loadingScreen;
 
-        [Tooltip("Delay in seconds before the progress bar appears")]
+        [Tooltip("Задержка в секундах перед появлением прогресс-бара")]
         [SerializeField] private float _initialDelaySeconds = 0.1f;
 
-        [Tooltip("Delay in seconds after scene is fully loaded before activating it")]
+        [Tooltip("Задержка в секундах после полной загрузки сцены перед её активацией")]
         [SerializeField] private float _finalLoadingDelaySeconds = 0.3f;
 
 
