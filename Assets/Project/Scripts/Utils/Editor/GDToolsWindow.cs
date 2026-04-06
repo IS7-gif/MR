@@ -32,6 +32,8 @@ namespace Project.Scripts.Utils.Editor
                 ToggleObject();
             if (GUILayout.Button(new GUIContent("Toggle Gzms", "Toggle Gizmos visibility in the Scene view")))
                 ToggleGizmos();
+            if (GUILayout.Button(new GUIContent("Toggle Snd", "Toggle audio master mute")))
+                ToggleAudio();
 
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Board Edit", EditorStyles.boldLabel);
@@ -143,6 +145,11 @@ namespace Project.Scripts.Utils.Editor
 
             sceneView.drawGizmos = !sceneView.drawGizmos;
             sceneView.Repaint();
+        }
+
+        private void ToggleAudio()
+        {
+            EditorUtility.audioMasterMute = !EditorUtility.audioMasterMute;
         }
 
         private void CopyConsole()
