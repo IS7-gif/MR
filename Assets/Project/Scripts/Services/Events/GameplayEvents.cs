@@ -78,21 +78,6 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct EnergyChangedEvent
-    {
-        public TileKind Kind { get; }
-        public int Current { get; }
-        public int Max { get; }
-
-
-        public EnergyChangedEvent(TileKind kind, int current, int max)
-        {
-            Kind = kind;
-            Current = current;
-            Max = max;
-        }
-    }
-
     public readonly struct PlayerHPChangedEvent
     {
         public int Current { get; }
