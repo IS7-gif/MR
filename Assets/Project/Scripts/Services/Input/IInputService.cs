@@ -8,5 +8,7 @@ namespace Project.Scripts.Services.Input
         event Action<Vector2> OnDragStarted;
         event Action<Vector2> OnDragDelta;
         event Action OnDragCanceled;
+
+        void ReanchorDrag();
     }
 }

@@ -89,6 +89,7 @@ namespace Project.Scripts.Services.Board
             if (false == _moveBarService.HasMoves)
             {
                 _eventBus.Publish(new SwapRejectedEvent());
+                _swapHandler.NotifyBoardReady();
                 return;
             }
 
@@ -101,7 +102,10 @@ namespace Project.Scripts.Services.Board
             var toTile = _view.GetTile(request.To);
 
             if (false == fromTile || false == toTile)
+            {
+                _swapHandler.NotifyBoardReady();
                 return;
+            }
 
             _isProcessing = true;
             try
@@ -202,6 +206,7 @@ namespace Project.Scripts.Services.Board
             finally
             {
                 _isProcessing = false;
+                _swapHandler.NotifyBoardReady();
             }
         }
 

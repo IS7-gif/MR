@@ -15,9 +15,13 @@ namespace Project.Scripts.Configs
         [Tooltip("Минимальное расстояние перетаскивания в мировых единицах для определения направления обмена")]
         [SerializeField] private float _worldDragThreshold = 0.03f;
 
-        
+        [Tooltip("При разблокировке доски (конец каскада) автоматически продолжить удерживаемый свайп без отпускания пальца")]
+        [SerializeField] private bool _reanchorOnUnlock = true;
+
+
         public InputActionAsset InputActionAsset => _inputActionAsset;
         public float ScreenDragThresholdPixels => _screenDragThresholdPixels;
         public float WorldDragThreshold => _worldDragThreshold;
+        public bool ReanchorOnUnlock => _reanchorOnUnlock;
     }
 }

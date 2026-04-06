@@ -124,6 +124,7 @@ namespace Project.Scripts.Gameplay.UI
 
             var rt = (RectTransform)transform;
             rt.sizeDelta = new Vector2(rightLocal.x - leftLocal.x, rt.sizeDelta.y);
+            rt.anchoredPosition = new Vector2((leftLocal.x + rightLocal.x) / 2f, rt.anchoredPosition.y);
         }
 
         private void BuildSegments(int count)

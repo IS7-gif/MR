@@ -192,7 +192,7 @@ namespace Project.Scripts.Gameplay
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig);
 
-            _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold);
+            _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold, _inputConfig.ReanchorOnUnlock);
 
             var moveChecker = new MoveChecker(gridManager.State, gridManager, matchFinder, _levelConfig);
             var specialTileResolver = new SpecialTileResolver(_specialTileConfig, _levelConfig);

@@ -16,17 +16,19 @@ namespace Project.Scripts.Services.Input
         private readonly IGridState _state;
         private readonly IGridView _view;
         private readonly float _worldThreshold;
+        private readonly bool _reanchorOnUnlock;
         private Camera _camera;
         private GridPoint _startGridPos;
         private bool _hasPendingSwap;
 
 
-        public SwapInputHandler(IInputService input, IGridState state, IGridView view, float worldThreshold)
+        public SwapInputHandler(IInputService input, IGridState state, IGridView view, float worldThreshold, bool reanchorOnUnlock)
         {
             _input = input;
             _state = state;
             _view = view;
             _worldThreshold = worldThreshold;
+            _reanchorOnUnlock = reanchorOnUnlock;
         }
 
         public UniTask InitAsync()
@@ -67,7 +69,6 @@ namespace Project.Scripts.Services.Input
             if (worldDelta.magnitude < _worldThreshold)
                 return;
 
-            _hasPendingSwap = false;
             var dir = GetDirection(worldDelta);
             var target = _startGridPos + dir;
             if (false == _state.IsValidPosition(target))
@@ -76,7 +77,14 @@ namespace Project.Scripts.Services.Input
             if (false == _view.GetTile(target))
                 return;
 
+            _hasPendingSwap = false;
             OnSwapRequested?.Invoke(new SwapRequest(_startGridPos, target));
+        }
+
+        public void NotifyBoardReady()
+        {
+            if (_reanchorOnUnlock)
+                _input.ReanchorDrag();
         }
 
         private void HandleDragCanceled()

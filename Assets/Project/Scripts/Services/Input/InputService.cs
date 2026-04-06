@@ -79,6 +79,14 @@ namespace Project.Scripts.Services.Input
             _dragStarted = false;
         }
 
+        public void ReanchorDrag()
+        {
+            if (false == _isDragging)
+                return;
+
+            _dragStarted = false;
+        }
+
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
             _isDragging = false;
