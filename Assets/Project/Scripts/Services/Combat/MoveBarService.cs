@@ -1,5 +1,4 @@
 using System;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Moves;
@@ -13,7 +12,8 @@ namespace Project.Scripts.Services.Combat
         private readonly MoveBarEngine _engine;
 
 
-        public bool HasMoves => _engine.Snapshot.CurrentMoves > 0;
+        public bool IsEnabled => _config.IsEnabled;
+        public bool HasMoves => !_config.IsEnabled || _engine.Snapshot.CurrentMoves > 0;
 
 
         public MoveBarService(MoveBarConfig config, EventBus eventBus)
@@ -28,18 +28,27 @@ namespace Project.Scripts.Services.Combat
 
         public void Initialize()
         {
+            if (!_config.IsEnabled)
+                return;
+
             _engine.Initialize(_config.ToSettings());
             PublishSnapshot();
         }
 
         public void Tick(float deltaTime)
         {
+            if (!_config.IsEnabled)
+                return;
+
             _engine.Tick(deltaTime);
             PublishSnapshot();
         }
 
         public bool TryConsume()
         {
+            if (!_config.IsEnabled)
+                return true;
+
             if (false == _engine.TryConsume())
                 return false;
 

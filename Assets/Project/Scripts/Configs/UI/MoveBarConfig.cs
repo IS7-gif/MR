@@ -6,6 +6,9 @@ namespace Project.Scripts.Configs.UI
     [CreateAssetMenu(fileName = "MoveBarConfig", menuName = "Configs/Move Bar Config")]
     public class MoveBarConfig : ScriptableObject
     {
+        [Tooltip("Включить механику полосы ходов. Если снято — ходы не ограничиваются и UI не отображается")]
+        [SerializeField] private bool _enabled = true;
+
         [Tooltip("Максимальное количество зарядов ходов")]
         [SerializeField] private int _maxMoves = 10;
 
@@ -38,6 +41,7 @@ namespace Project.Scripts.Configs.UI
         [SerializeField] private float _emptyShakeStrength = 8f;
 
 
+        public bool IsEnabled => _enabled;
         public int MaxMoves => _maxMoves;
         public float SecondsPerMove => _secondsPerMove;
         public int StartMoves => _startMoves;

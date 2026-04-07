@@ -4,6 +4,7 @@ namespace Project.Scripts.Services.Combat
 {
     public interface IMoveBarService
     {
+        bool IsEnabled { get; }
         bool HasMoves { get; }
         MoveBarSnapshot GetSnapshot();
         void Initialize();

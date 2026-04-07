@@ -79,7 +79,8 @@ namespace Project.Scripts.Gameplay
             if (false == _gameStateService.IsPlaying)
                 return;
 
-            _moveBarService.Tick(Time.deltaTime);
+            if (_moveBarService.IsEnabled)
+                _moveBarService.Tick(Time.deltaTime);
 
 #if UNITY_EDITOR
             if (_gridManager == null)
@@ -96,7 +97,8 @@ namespace Project.Scripts.Gameplay
 
         private void OnDestroy()
         {
-            _uiService?.Close<MoveBarView>();
+            if (_moveBarService?.IsEnabled == true)
+                _uiService?.Close<MoveBarView>();
             _uiService?.Close<TopBarView>();
             if (_battleHUDView)
                 _battleHUDView.Close();
@@ -150,10 +152,13 @@ namespace Project.Scripts.Gameplay
         {
             _moveBarService.Initialize();
 
-            _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.MainDynamic);
+            if (_moveBarService.IsEnabled)
+                _uiService.RegisterView<MoveBarView>(_uiConfig.MoveBarViewPrefab, UILayer.MainDynamic);
+
             _uiService.RegisterView<TopBarView>(_uiConfig.TopBarViewPrefab, UILayer.Main);
 
-            await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
+            if (_moveBarService.IsEnabled)
+                await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
             var cellSize = ComputeCellSize();
             var boardCenter = ComputeBoardCenter(cellSize);
