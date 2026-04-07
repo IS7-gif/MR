@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
@@ -53,9 +51,6 @@ namespace Project.Scripts.Services.Bot
                 return;
 
             _engine = new BotDecisionEngine(_botConfig.ToSettings(), UnityEngine.Random.Range(0, int.MaxValue));
-
-            if (_botConfig.RandomHeroSelection && _botConfig.HeroPool?.Length > 0)
-                _heroService.AssignEnemyHeroes(PickRandomHeroes(_botConfig.HeroPool, 4));
 
             _cts = new CancellationTokenSource();
 
@@ -130,24 +125,17 @@ namespace Project.Scripts.Services.Bot
                 if (pickedIndex < 0)
                     continue;
 
-                var kind = slots[pickedIndex].Kind;
-                for (var i = 0; i < slots.Count; i++)
+                _heroService.AddEnemyHeroEnergy(pickedIndex, _botConfig.HeroEnergyPerTick);
+
+                var updatedSlot = _heroService.GetSlots(BattleSide.Enemy)[pickedIndex];
+                if (updatedSlot.IsReady && false == _heroActivationPending[pickedIndex])
                 {
-                    if (false == slots[i].IsAssigned || slots[i].Kind != kind)
+                    if (updatedSlot.ActionType == HeroActionType.HealAlly
+                        && _enemyState.CurrentHP >= _enemyState.MaxHP)
                         continue;
 
-                    _heroService.AddEnemyHeroEnergy(i, _botConfig.HeroEnergyPerTick);
-
-                    var updatedSlot = _heroService.GetSlots(BattleSide.Enemy)[i];
-                    if (updatedSlot.IsReady && false == _heroActivationPending[i])
-                    {
-                        if (updatedSlot.ActionType == HeroActionType.HealAlly
-                            && _enemyState.CurrentHP >= _enemyState.MaxHP)
-                            continue;
-
-                        _heroActivationPending[i] = true;
-                        ActivateWithDelay(i, ct).Forget();
-                    }
+                    _heroActivationPending[pickedIndex] = true;
+                    ActivateWithDelay(pickedIndex, ct).Forget();
                 }
             }
         }
@@ -175,21 +163,6 @@ namespace Project.Scripts.Services.Bot
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = null;
-        }
-
-        private static HeroConfig[] PickRandomHeroes(HeroConfig[] pool, int count)
-        {
-            var result = new HeroConfig[count];
-            var available = new List<HeroConfig>(pool);
-
-            for (var i = 0; i < count && available.Count > 0; i++)
-            {
-                var idx = UnityEngine.Random.Range(0, available.Count);
-                result[i] = available[idx];
-                available.RemoveAt(idx);
-            }
-
-            return result;
         }
     }
 }

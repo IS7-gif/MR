@@ -1,4 +1,5 @@
 using System;
+using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
@@ -17,18 +18,24 @@ namespace Project.Scripts.Services.Combat
 
         private readonly EventBus _eventBus;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
+        private readonly AvatarEnergyFormula _formula;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public PlayerAvatarChargeService(EventBus eventBus, LevelConfig levelConfig)
+        public PlayerAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
         {
             _eventBus = eventBus;
             _engine.Initialize(levelConfig.PlayerAvatarConfig.MaxAvatarCharge);
+            _formula = new AvatarEnergyFormula(
+                slotLayoutConfig.AvatarSlotKind,
+                levelConfig.PlayerAvatarConfig.PrimaryTileMultiplier,
+                levelConfig.PlayerAvatarConfig.SecondaryTileMultiplier
+            );
         }
 
         public void Start()
         {
-            _subscriptions.Add(_eventBus.Subscribe<CascadeCompletedEvent>(OnCascadeCompleted));
+            _subscriptions.Add(_eventBus.Subscribe<EnergyGeneratedEvent>(OnEnergyGenerated));
         }
 
         public void Dispose()
@@ -48,19 +55,16 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private void OnCascadeCompleted(CascadeCompletedEvent e)
+        private void OnEnergyGenerated(EnergyGeneratedEvent e)
         {
-            var before = _engine.Snapshot;
-            var added = _engine.TryAddEnergy(e.Total);
-            if (added <= 0)
-            {
-                Debug.Log($"[PlayerAvatar] Bar full ({before.CurrentEnergy}/{before.MaxEnergy}) - {e.Total} energy blocked until release");
-                return;
-            }
+            var gain = _formula.Calculate(e.EnergyByKind);
+            var added = _engine.TryAddEnergy(gain);
 
-            var after = _engine.Snapshot;
-            Debug.Log(e.Breakdown.ToLogString());
-            Debug.Log($"[PlayerAvatar] {after.CurrentEnergy}/{after.MaxEnergy}{(after.IsReady ? " - ready to attack" : string.Empty)}");
+            if (added <= 0f)
+                return;
+
+            var snap = _engine.Snapshot;
+            Debug.Log($"[PlayerAvatar] +{added:F2} → {snap.CurrentEnergy}/{snap.MaxEnergy}{(snap.IsReady ? " — READY" : string.Empty)}");
             PublishEnergyChanged();
         }
 

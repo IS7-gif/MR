@@ -23,6 +23,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private MoveBarConfig _moveBarConfig;
         [SerializeField] private BattleViewConfig _battleViewConfig;
         [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
+        [SerializeField] private SlotLayoutConfig _slotLayoutConfig;
 
 
         public AudioMusicConfig AudioMusicConfig => _audioMusicConfig;
@@ -38,5 +39,6 @@ namespace Project.Scripts.Configs
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
         public BattleViewConfig BattleViewConfig => _battleViewConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
+        public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
     }
 }

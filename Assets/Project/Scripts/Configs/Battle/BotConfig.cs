@@ -14,19 +14,6 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Имя, отображаемое для противника в боевом UI")]
         [SerializeField] private string _opponentName = "Enemy";
 
-        [Header("Attack")]
-        [Tooltip("Минимальное количество секунд между атаками бота на игрока")]
-        [SerializeField] private float _minAttackInterval = 1.5f;
-
-        [Tooltip("Максимальное количество секунд между атаками бота на игрока")]
-        [SerializeField] private float _maxAttackInterval = 3.5f;
-
-        [Tooltip("Минимальный урон за атаку бота")]
-        [SerializeField] private int _minAttackDamage = 8;
-
-        [Tooltip("Максимальный урон за атаку бота")]
-        [SerializeField] private int _maxAttackDamage = 26;
-
         [Header("Hero Energy")]
         [Tooltip("Секунды между тиками энергии героя бота")]
         [SerializeField] private float _heroEnergyTickInterval = 0.8f;
@@ -54,14 +41,6 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Максимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом")]
         [SerializeField] private float _maxDischargeDelay = 2.0f;
 
-        [Header("Heroes")]
-        [Tooltip("Если true, бот случайно выбирает 4 героев из HeroPool в начале боя; если false, использует героев врага из LevelConfig")]
-        [SerializeField] private bool _randomHeroSelection = true;
-
-        [Tooltip("Пул героев, из которого бот случайно выбирает при включённом RandomHeroSelection")]
-        [SerializeField] private HeroConfig[] _heroPool;
-
-
         public bool Enabled => _enabled;
         public string OpponentName => _opponentName;
         public float MinHeroActivationDelay => _minHeroActivationDelay;
@@ -72,8 +51,6 @@ namespace Project.Scripts.Configs.Battle
         public int EnemyChargePerTick => _enemyChargePerTick;
         public float MinDischargeDelay => _minDischargeDelay;
         public float MaxDischargeDelay => _maxDischargeDelay;
-        public bool RandomHeroSelection => _randomHeroSelection;
-        public HeroConfig[] HeroPool => _heroPool;
 
         
         public BotSettings ToSettings()

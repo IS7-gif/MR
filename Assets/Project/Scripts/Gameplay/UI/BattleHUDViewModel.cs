@@ -157,7 +157,7 @@ namespace Project.Scripts.Gameplay.UI
                 var state = states[i];
                 var config = (null != configs && i < configs.Length) ? configs[i] : null;
                 var color = state.IsAssigned
-                    ? _palette.GetColor(state.Kind, Color.gray)
+                    ? _palette.GetColor(state.SlotKind, Color.gray)
                     : Color.gray;
                 var portrait = config ? config.Portrait : null;
 

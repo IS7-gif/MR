@@ -26,7 +26,7 @@ namespace Project.Scripts.Services.Combat
         {
             var added = _engine.TryAddEnergy(amount);
 
-            if (added > 0)
+            if (added > 0f)
                 PublishEnergyChanged();
         }
 

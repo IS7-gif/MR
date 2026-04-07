@@ -4,11 +4,11 @@ namespace Project.Scripts.Shared.Avatar
 {
     public sealed class AvatarEnergyEngine
     {
-        public AvatarEnergyState Snapshot => new AvatarEnergyState(_currentEnergy, _maxEnergy);
+        public AvatarEnergyState Snapshot => new AvatarEnergyState((int)_currentEnergy, _maxEnergy);
 
 
         private int _maxEnergy;
-        private int _currentEnergy;
+        private float _currentEnergy;
 
 
         public void Initialize(int maxEnergy)
@@ -20,13 +20,13 @@ namespace Project.Scripts.Shared.Avatar
             }
 
             _maxEnergy = maxEnergy;
-            _currentEnergy = 0;
+            _currentEnergy = 0f;
         }
 
-        public int TryAddEnergy(int amount)
+        public float TryAddEnergy(float amount)
         {
-            if (amount <= 0 || _currentEnergy >= _maxEnergy)
-                return 0;
+            if (amount <= 0f || _currentEnergy >= _maxEnergy)
+                return 0f;
 
             var before = _currentEnergy;
             _currentEnergy = Mathf.Min(_maxEnergy, _currentEnergy + amount);
@@ -36,18 +36,18 @@ namespace Project.Scripts.Shared.Avatar
 
         public int TryRelease()
         {
-            if (_currentEnergy <= 0 || _currentEnergy < _maxEnergy)
+            if (_currentEnergy < _maxEnergy)
                 return 0;
 
-            var released = _currentEnergy;
-            _currentEnergy = 0;
+            var released = (int)_currentEnergy;
+            _currentEnergy = 0f;
 
             return released;
         }
 
         public void Reset()
         {
-            _currentEnergy = 0;
+            _currentEnergy = 0f;
         }
     }
 }

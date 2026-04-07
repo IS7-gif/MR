@@ -32,13 +32,13 @@ MonoBehaviour:
   _playerAvatarConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
   _enemyAvatarConfig: {fileID: 11400000, guid: b3e5f7a9c1d2e4f608192a3b4c5d6e7f, type: 2}
   _playerHeroes:
-  - {fileID: 11400000, guid: 0f3d3fa3eb654c94a8971358e409f27b, type: 2}
-  - {fileID: 11400000, guid: fa0aaf68376b121419125f776a10be55, type: 2}
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
-  - {fileID: 11400000, guid: 395207d8bdb6b31448032eb6bbb44c01, type: 2}
+  - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
+  - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
+  - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
   _enemyHeroes:
-  - {fileID: 11400000, guid: 6b9f0efe56a08824d8b66232e39a62cb, type: 2}
-  - {fileID: 11400000, guid: 3d542b16d75e51845b176c4f00806ac9, type: 2}
-  - {fileID: 11400000, guid: fa0aaf68376b121419125f776a10be55, type: 2}
+  - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
+  - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
+  - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
   - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
   _botConfig: {fileID: 11400000, guid: e08640440e2033e4489542e45deb29d0, type: 2}

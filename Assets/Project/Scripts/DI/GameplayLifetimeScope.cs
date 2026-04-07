@@ -1,4 +1,3 @@
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Gameplay;
 using Project.Scripts.Gameplay.UI;

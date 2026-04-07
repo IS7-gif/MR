@@ -27,21 +27,21 @@ namespace Project.Scripts.Shared.Bot
 
         public int PickRandomAssignedSlot(IReadOnlyList<HeroSlotState> slots)
         {
-            var assignedCount = 0;
+            var eligibleCount = 0;
             for (var i = 0; i < slots.Count; i++)
             {
-                if (slots[i].IsAssigned)
-                    assignedCount++;
+                if (slots[i].CanAccumulateEnergy)
+                    eligibleCount++;
             }
 
-            if (assignedCount == 0)
+            if (eligibleCount == 0)
                 return -1;
 
-            var pick = _rng.Next(assignedCount);
+            var pick = _rng.Next(eligibleCount);
             var count = 0;
             for (var i = 0; i < slots.Count; i++)
             {
-                if (false == slots[i].IsAssigned)
+                if (false == slots[i].CanAccumulateEnergy)
                     continue;
                 if (count == pick)
                     return i;

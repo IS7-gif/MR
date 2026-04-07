@@ -14,7 +14,7 @@ namespace Project.Scripts.Shared.Heroes
             {
                 ref var slot = ref slots[i];
 
-                if (false == slot.IsAssigned || slot.Kind != kind)
+                if (!slot.CanAccumulateEnergy || slot.SlotKind != kind)
                     continue;
 
                 slot.CurrentEnergy = Math.Min(slot.MaxEnergy, slot.CurrentEnergy + amount);
