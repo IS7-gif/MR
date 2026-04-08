@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
+using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
+using Project.Scripts.Shared.Tiles;
+using VContainer.Unity;
 
 namespace Project.Scripts.Services.Combat
 {
-    public class EnemyAvatarChargeService : IEnemyAvatarChargeService, IDisposable
+    public class EnemyAvatarChargeService : IEnemyAvatarChargeService, IStartable, IDisposable
     {
         public int CurrentEnergy => _engine.Snapshot.CurrentEnergy;
         public int MaxEnergy => _engine.Snapshot.MaxEnergy;
@@ -14,20 +18,40 @@ namespace Project.Scripts.Services.Combat
 
         private readonly EventBus _eventBus;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
+        private readonly AvatarEnergyFormula _formula;
 
 
-        public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig)
+        public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
         {
             _eventBus = eventBus;
             _engine.Initialize(levelConfig.EnemyAvatarConfig.MaxAvatarCharge);
+            _formula = new AvatarEnergyFormula(
+                slotLayoutConfig.AvatarSlotKind,
+                levelConfig.EnemyAvatarConfig.PrimaryTileMultiplier,
+                levelConfig.EnemyAvatarConfig.SecondaryTileMultiplier
+            );
+        }
+        
+        public void Start()
+        {
         }
 
         public void AddEnergy(int amount)
         {
             var added = _engine.TryAddEnergy(amount);
-
             if (added > 0f)
                 PublishEnergyChanged();
+        }
+
+        public void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, int> energyByKind)
+        {
+            var gain = _formula.Calculate(energyByKind);
+            
+            var added = _engine.TryAddEnergy(gain);
+            if (added <= 0f)
+                return;
+
+            PublishEnergyChanged();
         }
 
         public void TriggerAttack()

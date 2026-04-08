@@ -10,10 +10,10 @@ namespace Project.Scripts.Configs.Battle
 
         [Header("Avatar Slot Energy Formula")]
         [Tooltip("Множитель энергии для тайлов, соответствующих типу ячейки аватара")]
-        [SerializeField] private float _primaryTileMultiplier = 1.0f;
+        [SerializeField] private float _primaryTileMultiplier = 4;
 
         [Tooltip("Множитель энергии для тайлов, не совпадающих с типом ячейки аватара")]
-        [SerializeField] private float _secondaryTileMultiplier = 0.25f;
+        [SerializeField] private float _secondaryTileMultiplier = 1f;
 
 
         public int MaxAvatarCharge => _maxAvatarCharge;

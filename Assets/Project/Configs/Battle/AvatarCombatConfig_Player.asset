@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: AvatarCombatConfig_Player
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.AvatarCombatConfig
   _maxAvatarCharge: 110
+  _primaryTileMultiplier: 4
+  _secondaryTileMultiplier: 1

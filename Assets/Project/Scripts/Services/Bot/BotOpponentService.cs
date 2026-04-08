@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Battle;
@@ -7,7 +8,9 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Bot;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Tiles;
 using R3;
+using UnityEngine;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Bot
@@ -20,6 +23,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IEnemyAvatarChargeService _enemyChargeService;
         private readonly IEnemyStateService _enemyState;
         private readonly BotConfig _botConfig;
+        private readonly SlotLayoutConfig _slotLayoutConfig;
 
         private BotDecisionEngine _engine;
         private CancellationTokenSource _cts;
@@ -34,7 +38,8 @@ namespace Project.Scripts.Services.Bot
             IGameStateService gameStateService,
             IEnemyAvatarChargeService enemyChargeService,
             IEnemyStateService enemyState,
-            BotConfig botConfig)
+            BotConfig botConfig,
+            SlotLayoutConfig slotLayoutConfig)
         {
             _eventBus = eventBus;
             _heroService = heroService;
@@ -42,6 +47,7 @@ namespace Project.Scripts.Services.Bot
             _enemyChargeService = enemyChargeService;
             _enemyState = enemyState;
             _botConfig = botConfig;
+            _slotLayoutConfig = slotLayoutConfig;
         }
 
 
@@ -82,7 +88,8 @@ namespace Project.Scripts.Services.Bot
                 if (cancelled || false == _gameStateService.IsPlaying)
                     return;
 
-                _enemyChargeService.AddEnergy(_botConfig.EnemyChargePerTick);
+                var energyByKind = GenerateRandomCascadeEnergy();
+                _enemyChargeService.AddEnergyFromCascades(energyByKind);
 
                 if (_enemyChargeService.IsReady && false == _dischargeScheduled)
                 {
@@ -90,6 +97,56 @@ namespace Project.Scripts.Services.Bot
                     ScheduleDischarge(ct).Forget();
                 }
             }
+        }
+
+        private Dictionary<TileKind, int> GenerateRandomCascadeEnergy()
+        {
+            var energyByKind = new Dictionary<TileKind, int>();
+
+            var variation = 1f + UnityEngine.Random.Range(-_botConfig.CascadeVariation, _botConfig.CascadeVariation);
+            var baseEnergy = Mathf.RoundToInt(_botConfig.BaseEnergyPerTick * variation);
+
+            var availableTypes = new[]
+            {
+                TileKind.Fire,
+                TileKind.Water,
+                TileKind.Nature,
+                TileKind.Light,
+                TileKind.Void
+            };
+
+            if (UnityEngine.Random.value < _botConfig.PrimaryTileProbability) 
+                energyByKind[_slotLayoutConfig.AvatarSlotKind] = baseEnergy;
+
+            var otherCount = UnityEngine.Random.Range(1, 4);
+            var shuffledTypes = ShuffleArray(availableTypes);
+
+            for (var i = 0; i < shuffledTypes.Length; i++)
+            {
+                var tileType = shuffledTypes[i];
+                if (tileType == _slotLayoutConfig.AvatarSlotKind)
+                    continue;
+
+                if (energyByKind.Count >= otherCount)
+                    break;
+
+                var energy = Mathf.RoundToInt(baseEnergy * UnityEngine.Random.Range(0.3f, 0.8f));
+                energyByKind[tileType] = energy;
+            }
+
+            return energyByKind;
+        }
+
+        private T[] ShuffleArray<T>(T[] array)
+        {
+            var shuffled = (T[])array.Clone();
+            for (int i = 0; i < shuffled.Length; i++)
+            {
+                var randomIndex = UnityEngine.Random.Range(i, shuffled.Length);
+                (shuffled[i], shuffled[randomIndex]) = (shuffled[randomIndex], shuffled[i]);
+            }
+            
+            return shuffled;
         }
 
         private async UniTaskVoid ScheduleDischarge(CancellationToken ct)

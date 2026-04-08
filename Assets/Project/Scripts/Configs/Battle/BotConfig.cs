@@ -32,8 +32,14 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Секунды между тиками зарядки аватара врага")]
         [SerializeField] private float _enemyChargeTickInterval = 2f;
 
-        [Tooltip("Очки заряда, добавляемые аватару врага за тик")]
-        [SerializeField] private int _enemyChargePerTick = 8;
+        [Tooltip("Базовое количество энергии за тик (используется для имитации каскадов)")]
+        [SerializeField] private int _baseEnergyPerTick = 8;
+
+        [Tooltip("Вероятность того, что часть энергии будет от главного тайла аватара (0-1)")]
+        [SerializeField] private float _primaryTileProbability = 0.4f;
+
+        [Tooltip("Вариативность количества энергии (множитель от базовой: 0.5-1.5)")]
+        [SerializeField] private float _cascadeVariation = 0.5f;
 
         [Tooltip("Минимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом (симулирует реакцию человека)")]
         [SerializeField] private float _minDischargeDelay = 0.5f;
@@ -48,7 +54,9 @@ namespace Project.Scripts.Configs.Battle
         public float HeroEnergyTickInterval => _heroEnergyTickInterval;
         public int HeroEnergyPerTick => _heroEnergyPerTick;
         public float EnemyChargeTickInterval => _enemyChargeTickInterval;
-        public int EnemyChargePerTick => _enemyChargePerTick;
+        public int BaseEnergyPerTick => _baseEnergyPerTick;
+        public float PrimaryTileProbability => _primaryTileProbability;
+        public float CascadeVariation => _cascadeVariation;
         public float MinDischargeDelay => _minDischargeDelay;
         public float MaxDischargeDelay => _maxDischargeDelay;
 
