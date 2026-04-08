@@ -19,6 +19,6 @@ MonoBehaviour:
   _minHeroActivationDelay: 0.5
   _maxHeroActivationDelay: 2.5
   _enemyChargeTickInterval: 2
-  _enemyChargePerTick: 8
+  _baseEnergyPerTick: 8
   _minDischargeDelay: 0.5
   _maxDischargeDelay: 2
