@@ -80,7 +80,8 @@ namespace Project.Scripts.Gameplay.UI
                 _battleViewConfig.PlayerAvatarSprite,
                 _playerState.CurrentHP,
                 _playerState.MaxHP,
-                _battleAnimationConfig);
+                _battleAnimationConfig,
+                _levelConfig.PlayerAvatarConfig.AbilityType);
 
             EnemyAvatar = new AvatarSlotViewModel(
                 _eventBus,
@@ -88,7 +89,8 @@ namespace Project.Scripts.Gameplay.UI
                 _battleViewConfig.EnemyAvatarSprite,
                 _enemyState.CurrentHP,
                 _enemyState.MaxHP,
-                _battleAnimationConfig);
+                _battleAnimationConfig,
+                _levelConfig.EnemyAvatarConfig.AbilityType);
 
             _playerHeroSlots = CreateHeroSlotViewModels(
                 BattleSide.Player,

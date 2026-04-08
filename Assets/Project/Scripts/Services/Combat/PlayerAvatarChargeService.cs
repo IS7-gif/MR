@@ -3,6 +3,7 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
+using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
 using VContainer.Unity;
@@ -14,6 +15,8 @@ namespace Project.Scripts.Services.Combat
         public int CurrentEnergy => _engine.Snapshot.CurrentEnergy;
         public int MaxEnergy => _engine.Snapshot.MaxEnergy;
         public bool IsReady => _engine.Snapshot.IsReady;
+        public HeroActionType AbilityType { get; }
+        public int AbilityPower { get; }
 
 
         private readonly EventBus _eventBus;
@@ -25,11 +28,14 @@ namespace Project.Scripts.Services.Combat
         public PlayerAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
         {
             _eventBus = eventBus;
-            _engine.Initialize(levelConfig.PlayerAvatarConfig.MaxAvatarCharge);
+            var config = levelConfig.PlayerAvatarConfig;
+            _engine.Initialize(config.MaxEnergy);
+            AbilityType = config.AbilityType;
+            AbilityPower = config.AbilityPower;
             _formula = new AvatarEnergyFormula(
                 slotLayoutConfig.AvatarSlotKind,
-                levelConfig.PlayerAvatarConfig.PrimaryTileMultiplier,
-                levelConfig.PlayerAvatarConfig.SecondaryTileMultiplier
+                config.PrimaryTileMultiplier,
+                config.SecondaryTileMultiplier
             );
         }
 
@@ -44,14 +50,14 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        public int TryRelease()
+        public bool TryRelease()
         {
             var released = _engine.TryRelease();
             if (released <= 0)
-                return 0;
+                return false;
 
             PublishEnergyChanged();
-            return released;
+            return true;
         }
 
 

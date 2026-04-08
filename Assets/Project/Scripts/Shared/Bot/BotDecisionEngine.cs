@@ -25,6 +25,31 @@ namespace Project.Scripts.Shared.Bot
             return GenerateDelay(_settings.MinDischargeDelay, _settings.MaxDischargeDelay);
         }
 
+        public int PickMostWoundedHero(IReadOnlyList<HeroSlotState> slots)
+        {
+            var bestIndex = -1;
+            var lowestFraction = 1f;
+
+            for (var i = 0; i < slots.Count; i++)
+            {
+                var slot = slots[i];
+                if (false == slot.IsAssigned || false == slot.IsAlive || slot.MaxHP <= 0)
+                    continue;
+
+                var fraction = (float)slot.CurrentHP / slot.MaxHP;
+                if (fraction >= 1f)
+                    continue;
+
+                if (fraction < lowestFraction)
+                {
+                    lowestFraction = fraction;
+                    bestIndex = i;
+                }
+            }
+
+            return bestIndex;
+        }
+
         public int PickRandomAssignedSlot(IReadOnlyList<HeroSlotState> slots)
         {
             var eligibleCount = 0;

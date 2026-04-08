@@ -26,11 +26,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 46853c594e257054baaee71fc76fa00b, type: 2}
   - {fileID: 11400000, guid: 438f2a2ac5c21944a9de839fc3622991, type: 2}
   - {fileID: 11400000, guid: dc1cae93b0911fd4facc660a6f3387b9, type: 2}
-  _playerHP: 550
-  _enemyHP: 550
   _goalType: 0
-  _playerAvatarConfig: {fileID: 11400000, guid: a60d18cec01c24c4e9e9175f14d9b4df, type: 2}
-  _enemyAvatarConfig: {fileID: 11400000, guid: b3e5f7a9c1d2e4f608192a3b4c5d6e7f, type: 2}
+  _playerAvatarConfig: {fileID: 11400000, guid: 10f28ac1346170149be5630d8e075bac, type: 2}
+  _enemyAvatarConfig: {fileID: 11400000, guid: 10f28ac1346170149be5630d8e075bac, type: 2}
   _playerHeroes:
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}

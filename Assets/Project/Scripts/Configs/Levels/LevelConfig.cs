@@ -30,22 +30,17 @@ namespace Project.Scripts.Configs.Levels
         [SerializeField] private TileConfig[] _specialTiles;
 
         [Header("Combat")]
-        [Tooltip("Начальные HP аватара игрока для этого уровня")]
-        [SerializeField] private int _playerHP = 550;
-
-        [Tooltip("Начальные HP аватара противника для этого уровня")]
-        [SerializeField] private int _enemyHP = 550;
-
         [Tooltip("Тип условия победы - DamageBased означает, что игрок побеждает, снизив HP врага до нуля")]
         [SerializeField] private LevelGoalType _goalType = LevelGoalType.DamageBased;
 
         // TODO: replace with player loadout from lobby
-        [Tooltip("Боевые параметры аватара игрока для этого уровня")]
-        [SerializeField] private AvatarCombatConfig _playerAvatarConfig;
+        [Space(5)]
+        [Tooltip("Конфиг аватара игрока для этого уровня")]
+        [SerializeField] private AvatarConfig _playerAvatarConfig;
 
         // TODO: replace with opponent data from matchmaking
-        [Tooltip("Боевые параметры аватара противника для этого уровня")]
-        [SerializeField] private AvatarCombatConfig _enemyAvatarConfig;
+        [Tooltip("Конфиг аватара противника для этого уровня")]
+        [SerializeField] private AvatarConfig _enemyAvatarConfig;
 
         // TODO: replace with lobby loadout when PvP is implemented
         [Header("Heroes (temporary - will be replaced by lobby loadout)")]
@@ -66,11 +61,9 @@ namespace Project.Scripts.Configs.Levels
         public int Height => _height;
         public TileConfig[] RegularTiles => _regularTiles;
         public TileConfig[] SpecialTiles => _specialTiles;
-        public int PlayerHP => _playerHP;
-        public int EnemyHP => _enemyHP;
         public LevelGoalType GoalType => _goalType;
-        public AvatarCombatConfig PlayerAvatarConfig => _playerAvatarConfig;
-        public AvatarCombatConfig EnemyAvatarConfig => _enemyAvatarConfig;
+        public AvatarConfig PlayerAvatarConfig => _playerAvatarConfig;
+        public AvatarConfig EnemyAvatarConfig => _enemyAvatarConfig;
         public HeroConfig[] PlayerHeroes => _playerHeroes;
         public HeroConfig[] EnemyHeroes => _enemyHeroes;
         public BotConfig BotConfig => _botConfig;

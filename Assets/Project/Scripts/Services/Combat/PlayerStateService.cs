@@ -1,5 +1,4 @@
 using System;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
@@ -20,10 +19,10 @@ namespace Project.Scripts.Services.Combat
         public PlayerStateService(EventBus eventBus, LevelConfig levelConfig)
         {
             _eventBus = eventBus;
-            MaxHP = levelConfig.PlayerHP;
-            CurrentHP = levelConfig.PlayerHP;
+            MaxHP = levelConfig.PlayerAvatarConfig.MaxHP;
+            CurrentHP = levelConfig.PlayerAvatarConfig.MaxHP;
 
-            _subscriptions.Add(_eventBus.Subscribe<EnemyAvatarAttackedEvent>(OnEnemyAvatarAttacked));
+            _subscriptions.Add(_eventBus.Subscribe<EnemyAvatarActivatedEvent>(OnEnemyAvatarActivated));
             _subscriptions.Add(_eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated));
         }
 
@@ -55,9 +54,10 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private void OnEnemyAvatarAttacked(EnemyAvatarAttackedEvent e)
+        private void OnEnemyAvatarActivated(EnemyAvatarActivatedEvent e)
         {
-            TakeDamage(e.DamageAmount);
+            if (e.ActionType == HeroActionType.DealDamage)
+                TakeDamage(e.ActionValue);
         }
 
         private void OnHeroActivated(HeroActivatedEvent e)

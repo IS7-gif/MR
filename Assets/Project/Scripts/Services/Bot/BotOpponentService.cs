@@ -162,7 +162,24 @@ namespace Project.Scripts.Services.Bot
             if (cancelled || false == _gameStateService.IsPlaying)
                 return;
 
-            _enemyChargeService.TriggerAttack();
+            if (_enemyChargeService.AbilityType == HeroActionType.DealDamage)
+            {
+                _enemyChargeService.TriggerAttack();
+                return;
+            }
+
+            var slots = _heroService.GetSlots(BattleSide.Enemy);
+            var targetIndex = _engine.PickMostWoundedHero(slots);
+            if (targetIndex < 0)
+                return;
+
+            if (_enemyChargeService.TryRelease())
+            {
+                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIndex, _enemyChargeService.AbilityPower);
+                var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIndex, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, _enemyChargeService.AbilityPower));
+            }
         }
 
         private async UniTaskVoid RunHeroEnergyLoop(CancellationToken ct)

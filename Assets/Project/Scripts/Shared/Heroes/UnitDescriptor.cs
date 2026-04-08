@@ -16,9 +16,9 @@ namespace Project.Scripts.Shared.Heroes
             ActionType = actionType;
         }
 
-        public static UnitDescriptor Avatar(BattleSide side)
+        public static UnitDescriptor Avatar(BattleSide side, HeroActionType actionType)
         {
-            return new UnitDescriptor(side, UnitKind.Avatar, -1, HeroActionType.DealDamage);
+            return new UnitDescriptor(side, UnitKind.Avatar, -1, actionType);
         }
 
         public static UnitDescriptor Hero(BattleSide side, int slotIndex, HeroActionType actionType)

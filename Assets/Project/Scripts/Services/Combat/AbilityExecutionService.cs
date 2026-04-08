@@ -34,8 +34,11 @@ namespace Project.Scripts.Services.Combat
 
             if (source.Kind == UnitKind.Avatar)
             {
-                actionValue = _playerAvatarCharge.TryRelease();
-                actionType = HeroActionType.DealDamage;
+                if (!_playerAvatarCharge.TryRelease())
+                    return;
+
+                actionType = _playerAvatarCharge.AbilityType;
+                actionValue = _playerAvatarCharge.AbilityPower;
             }
             else
             {
@@ -45,6 +48,7 @@ namespace Project.Scripts.Services.Combat
 
             if (actionValue <= 0)
                 return;
+
 
             ApplyToTarget(target, actionType, actionValue);
             _eventBus.Publish(new AbilityExecutedEvent(source, target, actionType, actionValue));

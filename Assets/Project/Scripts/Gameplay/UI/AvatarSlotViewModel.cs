@@ -1,5 +1,4 @@
 using System;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
@@ -14,6 +13,7 @@ namespace Project.Scripts.Gameplay.UI
         public Sprite Portrait { get; }
         public BattleAnimationConfig AnimConfig { get; }
         public EventBus EventBus { get; }
+        public HeroActionType AbilityType { get; }
         public ReactiveProperty<float> HPFill { get; }
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
@@ -26,13 +26,14 @@ namespace Project.Scripts.Gameplay.UI
         private int _prevHP;
 
 
-        public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Sprite portrait, 
-            int initialHP, int maxHP, BattleAnimationConfig animConfig)
+        public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Sprite portrait,
+            int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType)
         {
             Side = side;
             Portrait = portrait;
             AnimConfig = animConfig;
             EventBus = eventBus;
+            AbilityType = abilityType;
             _prevHP = initialHP;
             HPFill = new ReactiveProperty<float>(maxHP > 0 ? (float)initialHP / maxHP : 1f);
             EnergyBar = new AvatarChargeBarViewModel(eventBus, side);

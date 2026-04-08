@@ -1,5 +1,4 @@
 using System;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
@@ -21,9 +20,10 @@ namespace Project.Scripts.Services.Combat
         public EnemyStateService(EventBus eventBus, LevelConfig levelConfig)
         {
             _eventBus = eventBus;
-            MaxHP = levelConfig.EnemyHP;
-            CurrentHP = levelConfig.EnemyHP;
+            MaxHP = levelConfig.EnemyAvatarConfig.MaxHP;
+            CurrentHP = levelConfig.EnemyAvatarConfig.MaxHP;
 
+            _subscriptions.Add(_eventBus.Subscribe<EnemyAvatarActivatedEvent>(OnEnemyAvatarActivated));
             _subscriptions.Add(_eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated));
         }
 
@@ -55,6 +55,12 @@ namespace Project.Scripts.Services.Combat
             _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
         }
 
+
+        private void OnEnemyAvatarActivated(EnemyAvatarActivatedEvent e)
+        {
+            if (e.ActionType == HeroActionType.HealAlly)
+                ApplyHeal(e.ActionValue);
+        }
 
         private void OnHeroActivated(HeroActivatedEvent e)
         {

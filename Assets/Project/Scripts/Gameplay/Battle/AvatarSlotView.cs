@@ -31,7 +31,7 @@ namespace Project.Scripts.Gameplay.Battle
         [SerializeField] private Transform _hitAnchor;
 
 
-        public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side);
+        public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side, _viewModel.AbilityType);
         public bool IsReadySource => _viewModel != null && _viewModel.Side == BattleSide.Player && _viewModel.EnergyBar.IsReady.CurrentValue;
         public Bounds WorldBounds => _background ? _background.bounds : new Bounds(transform.position, Vector3.one);
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
@@ -77,7 +77,12 @@ namespace Project.Scripts.Gameplay.Battle
                 return true;
 
             if (source.ActionType == HeroActionType.HealAlly && _viewModel.Side == BattleSide.Player)
+            {
+                if (source.Kind == UnitKind.Avatar)
+                    return false;
+
                 return _viewModel.HPFill.CurrentValue < 1f;
+            }
 
             return false;
         }

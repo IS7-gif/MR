@@ -217,14 +217,16 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct EnemyAvatarAttackedEvent
+    public readonly struct EnemyAvatarActivatedEvent
     {
-        public int DamageAmount { get; }
+        public HeroActionType ActionType { get; }
+        public int ActionValue { get; }
 
 
-        public EnemyAvatarAttackedEvent(int damageAmount)
+        public EnemyAvatarActivatedEvent(HeroActionType actionType, int actionValue)
         {
-            DamageAmount = damageAmount;
+            ActionType = actionType;
+            ActionValue = actionValue;
         }
     }
 
