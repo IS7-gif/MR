@@ -216,8 +216,8 @@ namespace Project.Scripts.Services.Combat
                     IsAssigned = true,
                     CurrentEnergy = 0,
                     MaxEnergy = config.MaxEnergy,
-                    ActionType = config.ActionType,
-                    ActionValue = config.ActionValue,
+                    ActionType = config.AbilityType,
+                    ActionValue = config.AbilityPower,
                     CurrentHP = config.MaxHP,
                     MaxHP = config.MaxHP,
                 };
