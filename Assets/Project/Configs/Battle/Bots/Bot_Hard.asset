@@ -15,10 +15,10 @@ MonoBehaviour:
   _enabled: 1
   _opponentName: Hard
   _heroEnergyTickInterval: 0.4
-  _heroEnergyPerTick: 2
+  _heroEnergyPerTick: 1
   _minHeroActivationDelay: 0.5
   _maxHeroActivationDelay: 2.5
   _enemyChargeTickInterval: 2
-  _baseEnergyPerTick: 8
+  _baseEnergyPerTick: 6
   _minDischargeDelay: 0.5
   _maxDischargeDelay: 2

@@ -15,10 +15,10 @@ MonoBehaviour:
   _enabled: 1
   _opponentName: Medium
   _heroEnergyTickInterval: 0.8
-  _heroEnergyPerTick: 2
+  _heroEnergyPerTick: 1
   _minHeroActivationDelay: 1
   _maxHeroActivationDelay: 4
   _enemyChargeTickInterval: 2.5
-  _baseEnergyPerTick: 7
+  _baseEnergyPerTick: 5
   _minDischargeDelay: 0.5
   _maxDischargeDelay: 2

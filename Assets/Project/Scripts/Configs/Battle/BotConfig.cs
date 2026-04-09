@@ -19,7 +19,7 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private float _heroEnergyTickInterval = 0.8f;
 
         [Tooltip("Энергия, добавляемая к случайному слоту героя за тик")]
-        [SerializeField] private int _heroEnergyPerTick = 2;
+        [SerializeField] private int _heroEnergyPerTick = 1;
 
         [Header("Hero Activation")]
         [Tooltip("Минимальное количество секунд, которое бот ждёт после зарядки героя перед активацией (симулирует реакцию человека)")]
@@ -33,26 +33,26 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private float _enemyChargeTickInterval = 2f;
 
         [Tooltip("Базовое количество энергии за тик (используется для имитации каскадов)")]
-        [SerializeField] private int _baseEnergyPerTick = 8;
+        [SerializeField] private int _baseEnergyPerTick = 6;
 
         [Tooltip("Вероятность того, что часть энергии будет от главного тайла аватара (0-1)")]
-        [SerializeField] private float _primaryTileProbability = 0.4f;
+        [SerializeField] private float _primaryTileProbability = 0.25f;
 
         [Tooltip("Вариативность количества энергии (множитель от базовой: 0.5-1.5)")]
-        [SerializeField] private float _cascadeVariation = 0.5f;
+        [SerializeField] private float _cascadeVariation = 0.3f;
 
         [Header("Cascade Simulation")]
         [Tooltip("Вероятность 'хорошего каскада' (уровень 2) за тик")]
-        [SerializeField] private float _goodCascadeChance = 0.20f;
+        [SerializeField] private float _goodCascadeChance = 0.12f;
 
         [Tooltip("Вероятность 'отличного каскада' (уровень 3+) за тик")]
-        [SerializeField] private float _greatCascadeChance = 0.07f;
+        [SerializeField] private float _greatCascadeChance = 0.04f;
 
         [Tooltip("Множитель энергии для хорошего каскада")]
-        [SerializeField] private float _goodCascadeMultiplier = 1.30f;
+        [SerializeField] private float _goodCascadeMultiplier = 1.20f;
 
         [Tooltip("Множитель энергии для отличного каскада")]
-        [SerializeField] private float _greatCascadeMultiplier = 1.70f;
+        [SerializeField] private float _greatCascadeMultiplier = 1.40f;
 
         [Tooltip("Минимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом (симулирует реакцию человека)")]
         [SerializeField] private float _minDischargeDelay = 0.5f;
@@ -60,6 +60,7 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Максимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом")]
         [SerializeField] private float _maxDischargeDelay = 2.0f;
 
+        
         public bool Enabled => _enabled;
         public string OpponentName => _opponentName;
         public float MinHeroActivationDelay => _minHeroActivationDelay;
