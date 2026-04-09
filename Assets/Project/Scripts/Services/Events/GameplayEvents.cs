@@ -247,4 +247,17 @@ namespace Project.Scripts.Services.Events
             DestroyedGroupId = destroyedGroupId;
         }
     }
+
+    public readonly struct GameResultEvent
+    {
+        public BattleSide Winner { get; }
+        public bool IsFlawless { get; }
+
+
+        public GameResultEvent(BattleSide winner, bool isFlawless)
+        {
+            Winner = winner;
+            IsFlawless = isFlawless;
+        }
+    }
 }

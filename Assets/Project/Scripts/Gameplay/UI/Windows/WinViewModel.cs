@@ -11,6 +11,7 @@ namespace Project.Scripts.Gameplay.UI
         public int MovesUsed { get; private set; }
         public int LevelId { get; private set; }
         public string OpponentName { get; private set; }
+        public bool IsFlawless { get; }
 
 
         private readonly IMoveCounterService _moveCounter;
@@ -23,12 +24,14 @@ namespace Project.Scripts.Gameplay.UI
             ILevelProgressionService progression,
             int levelId,
             string opponentName,
+            bool isFlawless,
             Action onClose)
         {
             _moveCounter = moveCounter;
             _progression = progression;
             LevelId = levelId;
             OpponentName = opponentName;
+            IsFlawless = isFlawless;
             _onClose = onClose;
         }
 

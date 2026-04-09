@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
+using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
@@ -10,7 +11,7 @@ using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.UI
+namespace Project.Scripts.Gameplay.Battle
 {
     public class BattleHUDViewModel : BaseViewModel
     {

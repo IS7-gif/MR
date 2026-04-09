@@ -1,6 +1,6 @@
 using R3;
 
-namespace Project.Scripts.Gameplay.UI
+namespace Project.Scripts.Gameplay.Battle
 {
     public interface IReadyPulseCoordinator
     {

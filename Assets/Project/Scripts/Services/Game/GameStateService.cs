@@ -1,5 +1,7 @@
 using System;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared.Heroes;
 using R3;
 
 namespace Project.Scripts.Services.Game
@@ -11,14 +13,16 @@ namespace Project.Scripts.Services.Game
 
 
         private readonly EventBus _eventBus;
+        private readonly IPlayerStateService _playerState;
         private readonly ReactiveProperty<GameState> _state = new(GameState.Playing);
         private IDisposable _winSub;
         private IDisposable _loseSub;
 
 
-        public GameStateService(EventBus eventBus)
+        public GameStateService(EventBus eventBus, IPlayerStateService playerState)
         {
             _eventBus = eventBus;
+            _playerState = playerState;
             _winSub = _eventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             _loseSub = _eventBus.Subscribe<PlayerDefeatedEvent>(OnPlayerDefeated);
         }
@@ -39,14 +43,21 @@ namespace Project.Scripts.Services.Game
 
         private void OnEnemyDefeated(EnemyDefeatedEvent _)
         {
-            if (IsPlaying)
-                SetState(GameState.Win);
+            if (!IsPlaying)
+                return;
+
+            var isFlawless = _playerState.CurrentHP >= _playerState.MaxHP;
+            _eventBus.Publish(new GameResultEvent(BattleSide.Player, isFlawless));
+            SetState(GameState.Win);
         }
 
         private void OnPlayerDefeated(PlayerDefeatedEvent _)
         {
-            if (IsPlaying)
-                SetState(GameState.Lose);
+            if (!IsPlaying)
+                return;
+
+            _eventBus.Publish(new GameResultEvent(BattleSide.Enemy, isFlawless: false));
+            SetState(GameState.Lose);
         }
     }
 }

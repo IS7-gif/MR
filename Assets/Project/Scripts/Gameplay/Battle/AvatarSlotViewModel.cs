@@ -5,7 +5,7 @@ using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.UI
+namespace Project.Scripts.Gameplay.Battle
 {
     public class AvatarSlotViewModel : IDisposable
     {

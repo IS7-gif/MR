@@ -12,11 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a22e06aa854c5c84f8321b6b0182c0ca, type: 3}
   m_Name: UIConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.UIConfig
-  _gameplayViewPrefab: {fileID: 6275239582545134292, guid: e5f9abd2eea24674188e3562b2a3980f, type: 3}
   _winViewPrefab: {fileID: 6513608689272358209, guid: ef1cef739955fc14b8a6840198e2658e, type: 3}
   _loseViewPrefab: {fileID: 1476658943196127826, guid: 1f41be8b68c02944a8ffc5c753dc2209, type: 3}
   _moveBarViewPrefab: {fileID: 4956103731270986490, guid: 23f4f8141cbd9ab49ba8e0e8efffadb8, type: 3}
-  _battleHUDViewPrefab: {fileID: 2541180038541900123, guid: f38e8bfa5c172bc4f99cdf74dc95fbb0, type: 3}
   _topBarViewPrefab: {fileID: 4057129598969399877, guid: 4a938b04cee44a047876c9d12b631e8e, type: 3}
-  _worldBattleHUDViewPrefab: {fileID: 8010516392992138223, guid: a5c1a4861b5595a49a0a892fc037b33b, type: 3}
-  _worldHUD: {fileID: 11400000, guid: cff4c79d8e4fc4b4da37669c8e9dea17, type: 2}
+  _flawlessVictoryViewPrefab: {fileID: 264388365034592773, guid: 6763c80f2731bb241b6a8333aeab469a, type: 3}

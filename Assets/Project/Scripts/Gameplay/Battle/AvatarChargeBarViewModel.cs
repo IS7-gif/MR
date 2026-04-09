@@ -3,7 +3,7 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
 using R3;
 
-namespace Project.Scripts.Gameplay.UI
+namespace Project.Scripts.Gameplay.Battle
 {
     public class AvatarChargeBarViewModel : IDisposable
     {

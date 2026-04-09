@@ -1,5 +1,6 @@
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Gameplay;
+using Project.Scripts.Gameplay.Battle;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Bot;

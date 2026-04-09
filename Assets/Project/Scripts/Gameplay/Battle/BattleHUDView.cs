@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.UI;
+using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
 using R3;
@@ -32,6 +33,7 @@ namespace Project.Scripts.Gameplay.Battle
         
         private IInputService _inputService;
         private BattleViewConfig _battleViewConfig;
+        private IBoardBoundsProvider _boardBounds;
         private ObjectPool<FloatingDamageNumber> _floatingPool;
 
 
@@ -39,6 +41,7 @@ namespace Project.Scripts.Gameplay.Battle
         {
             PositionHUD();
             BindSlots();
+            PublishBattleAreaCenter();
             SetupTargeting();
             SetupFloatingNumbers();
 
@@ -52,10 +55,11 @@ namespace Project.Scripts.Gameplay.Battle
         }
 
 
-        public void SetDependencies(IInputService inputService, BattleViewConfig battleViewConfig)
+        public void SetDependencies(IInputService inputService, BattleViewConfig battleViewConfig, IBoardBoundsProvider boardBounds)
         {
             _inputService = inputService;
             _battleViewConfig = battleViewConfig;
+            _boardBounds = boardBounds;
         }
 
 
@@ -65,6 +69,15 @@ namespace Project.Scripts.Gameplay.Battle
                 ViewModel.BoardCenterX,
                 ViewModel.BoardTopWorldY + _battleViewConfig.BattleAreaTopPadding,
                 0f);
+        }
+
+        private void PublishBattleAreaCenter()
+        {
+            if (_boardBounds == null || false == _playerAvatarSlot || false == _enemyAvatarSlot)
+                return;
+
+            var centerY = (_playerAvatarSlot.transform.position.y + _enemyAvatarSlot.transform.position.y) * 0.5f;
+            _boardBounds.SetBattleAreaCenter(centerY);
         }
 
         private void BindSlots()

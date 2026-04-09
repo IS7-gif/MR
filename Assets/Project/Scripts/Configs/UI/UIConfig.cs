@@ -17,10 +17,14 @@ namespace Project.Scripts.Configs.UI
         [Tooltip("Префаб компонента TopBarView - имя врага и второстепенный ярлык, остаётся в Canvas")]
         [SerializeField] private GameObject _topBarViewPrefab;
 
+        [Tooltip("Префаб компонента FlawlessVictoryView - надпись Flawless Victory при безупречной победе")]
+        [SerializeField] private GameObject _flawlessVictoryViewPrefab;
+
 
         public GameObject WinViewPrefab => _winViewPrefab;
         public GameObject LoseViewPrefab => _loseViewPrefab;
         public GameObject MoveBarViewPrefab => _moveBarViewPrefab;
         public GameObject TopBarViewPrefab => _topBarViewPrefab;
+        public GameObject FlawlessVictoryViewPrefab => _flawlessVictoryViewPrefab;
     }
 }

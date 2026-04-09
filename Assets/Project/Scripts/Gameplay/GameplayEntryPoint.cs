@@ -175,7 +175,7 @@ namespace Project.Scripts.Gameplay
 
             var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
             _battleHUDView = hudGo.GetComponent<BattleHUDView>();
-            _battleHUDView.SetDependencies(_inputService, _battleViewConfig);
+            _battleHUDView.SetDependencies(_inputService, _battleViewConfig, _boardBoundsProvider);
             await _battleHUDView.InitializeAsync(_battleHUDViewModel);
             await _battleHUDView.ShowAsync();
 

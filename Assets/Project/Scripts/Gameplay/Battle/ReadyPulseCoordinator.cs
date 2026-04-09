@@ -1,10 +1,9 @@
 using System;
 using DG.Tweening;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using R3;
 
-namespace Project.Scripts.Gameplay.UI
+namespace Project.Scripts.Gameplay.Battle
 {
     public class ReadyPulseCoordinator : IReadyPulseCoordinator, IDisposable
     {

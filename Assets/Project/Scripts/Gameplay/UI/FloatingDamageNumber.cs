@@ -1,11 +1,10 @@
 using System;
 using DG.Tweening;
 using Project.Scripts.Configs.Battle;
-using Project.Scripts.Gameplay.UI;
 using TMPro;
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay.Battle
+namespace Project.Scripts.Gameplay.UI
 {
     public class FloatingDamageNumber : MonoBehaviour
     {

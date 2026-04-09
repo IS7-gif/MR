@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Project.Scripts.Gameplay
+namespace Project.Scripts.Gameplay.Battle
 {
     public class BoardView : MonoBehaviour
     {

@@ -70,6 +70,19 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Цвет свечения допустимой цели лечения")]
         [SerializeField] private Color _healTargetColor = new Color(0.15f, 1f, 0.25f, 1f);
 
+        [Header("Flawless Victory")]
+        [Tooltip("Время в секундах, в течение которого надпись Flawless Victory видна на экране")]
+        [SerializeField] private float _flawlessDisplayDuration = 1f;
+
+        [Tooltip("Длительность плавного исчезновения надписи Flawless Victory в секундах")]
+        [SerializeField] private float _flawlessFadeOutDuration = 0.35f;
+
+        [Tooltip("Расстояние в пикселях, на которое надпись улетает вверх во время исчезновения")]
+        [SerializeField] private float _flawlessFlyDistance = 80f;
+
+        [Tooltip("Кривая ослабления для движения и затухания надписи Flawless Victory")]
+        [SerializeField] private Ease _flawlessFadeOutEase = Ease.InQuad;
+
         [Header("Floating Numbers")]
         [Tooltip("Цвет метки числа урона")]
         [SerializeField] private Color _damageNumberColor = new Color(1f, 0.25f, 0.25f, 1f);
@@ -109,6 +122,10 @@ namespace Project.Scripts.Configs.Battle
         public float FloatDamageDistance => _floatDamageDistance;
         public float FloatDamageDuration => _floatDamageDuration;
         public Ease FloatDamageEase => _floatDamageEase;
+        public float FlawlessDisplayDuration => _flawlessDisplayDuration;
+        public float FlawlessFadeOutDuration => _flawlessFadeOutDuration;
+        public float FlawlessFlyDistance => _flawlessFlyDistance;
+        public Ease FlawlessFadeOutEase => _flawlessFadeOutEase;
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;
