@@ -17,7 +17,7 @@ namespace Project.Scripts.Shared.Avatar
             SecondaryMultiplier = secondaryMultiplier;
         }
 
-        public float Calculate(IReadOnlyDictionary<TileKind, int> energyByKind)
+        public float Calculate(IReadOnlyDictionary<TileKind, float> energyByKind)
         {
             var total = 0f;
             foreach (var pair in energyByKind)
@@ -25,7 +25,7 @@ namespace Project.Scripts.Shared.Avatar
                 var multiplier = pair.Key == AvatarKind ? PrimaryMultiplier : SecondaryMultiplier;
                 total += pair.Value * multiplier;
             }
-            
+
             return total;
         }
     }

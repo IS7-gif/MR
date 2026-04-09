@@ -49,7 +49,7 @@ namespace Project.Scripts.Services.Combat
                 PublishEnergyChanged();
         }
 
-        public void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, int> energyByKind)
+        public void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, float> energyByKind)
         {
             var gain = _formula.Calculate(energyByKind);
 

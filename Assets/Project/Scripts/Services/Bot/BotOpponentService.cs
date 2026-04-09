@@ -99,12 +99,22 @@ namespace Project.Scripts.Services.Bot
             }
         }
 
-        private Dictionary<TileKind, int> GenerateRandomCascadeEnergy()
+        private float RollCascadeMultiplier()
         {
-            var energyByKind = new Dictionary<TileKind, int>();
+            var roll = UnityEngine.Random.value;
+            if (roll < _botConfig.GreatCascadeChance)
+                return _botConfig.GreatCascadeMultiplier;
+            if (roll < _botConfig.GoodCascadeChance)
+                return _botConfig.GoodCascadeMultiplier;
+            return 1f;
+        }
+
+        private Dictionary<TileKind, float> GenerateRandomCascadeEnergy()
+        {
+            var energyByKind = new Dictionary<TileKind, float>();
 
             var variation = 1f + UnityEngine.Random.Range(-_botConfig.CascadeVariation, _botConfig.CascadeVariation);
-            var baseEnergy = Mathf.RoundToInt(_botConfig.BaseEnergyPerTick * variation);
+            var baseEnergy = _botConfig.BaseEnergyPerTick * variation * RollCascadeMultiplier();
 
             var availableTypes = new[]
             {
@@ -115,7 +125,7 @@ namespace Project.Scripts.Services.Bot
                 TileKind.Void
             };
 
-            if (UnityEngine.Random.value < _botConfig.PrimaryTileProbability) 
+            if (UnityEngine.Random.value < _botConfig.PrimaryTileProbability)
                 energyByKind[_slotLayoutConfig.AvatarSlotKind] = baseEnergy;
 
             var otherCount = UnityEngine.Random.Range(1, 4);
@@ -130,8 +140,7 @@ namespace Project.Scripts.Services.Bot
                 if (energyByKind.Count >= otherCount)
                     break;
 
-                var energy = Mathf.RoundToInt(baseEnergy * UnityEngine.Random.Range(0.3f, 0.8f));
-                energyByKind[tileType] = energy;
+                energyByKind[tileType] = baseEnergy * UnityEngine.Random.Range(0.3f, 0.8f);
             }
 
             return energyByKind;
@@ -199,7 +208,8 @@ namespace Project.Scripts.Services.Bot
                 if (pickedIndex < 0)
                     continue;
 
-                _heroService.AddEnemyHeroEnergy(pickedIndex, _botConfig.HeroEnergyPerTick);
+                var energyAmount = Mathf.RoundToInt(_botConfig.HeroEnergyPerTick * RollCascadeMultiplier());
+                _heroService.AddEnemyHeroEnergy(pickedIndex, energyAmount);
 
                 var updatedSlot = _heroService.GetSlots(BattleSide.Enemy)[pickedIndex];
                 if (updatedSlot.IsReady && false == _heroActivationPending[pickedIndex])

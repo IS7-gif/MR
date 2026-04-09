@@ -6,7 +6,7 @@ namespace Project.Scripts.Shared.Heroes
     {
         public TileKind SlotKind;
         public bool IsAssigned;
-        public int CurrentEnergy;
+        public float CurrentEnergy;
         public int MaxEnergy;
         public HeroActionType ActionType;
         public int ActionValue;

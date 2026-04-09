@@ -1,6 +1,5 @@
 using Project.Scripts.Configs;
 using Project.Scripts.Services.Audio.AudioSystem;
-using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
 using UnityEngine;
@@ -20,7 +19,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
             builder.RegisterInstance(_mainConfig.BattleAnimationConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
-            builder.RegisterInstance(_mainConfig.MatchDamageConfig);
+            builder.RegisterInstance(_mainConfig.CascadeEnergyConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);
             builder.RegisterInstance(_mainConfig.AudioSFXConfig);
             builder.RegisterInstance(_mainConfig.SpecialTileConfig);
@@ -30,8 +29,6 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BattleViewConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
-
-            builder.Register<IDamageCalculator, DamageCalculator>(Lifetime.Singleton);
 
             builder.Register<EventBus>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton);

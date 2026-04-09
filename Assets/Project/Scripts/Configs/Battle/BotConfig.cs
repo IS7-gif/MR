@@ -41,6 +41,19 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Вариативность количества энергии (множитель от базовой: 0.5-1.5)")]
         [SerializeField] private float _cascadeVariation = 0.5f;
 
+        [Header("Cascade Simulation")]
+        [Tooltip("Вероятность 'хорошего каскада' (уровень 2) за тик")]
+        [SerializeField] private float _goodCascadeChance = 0.20f;
+
+        [Tooltip("Вероятность 'отличного каскада' (уровень 3+) за тик")]
+        [SerializeField] private float _greatCascadeChance = 0.07f;
+
+        [Tooltip("Множитель энергии для хорошего каскада")]
+        [SerializeField] private float _goodCascadeMultiplier = 1.30f;
+
+        [Tooltip("Множитель энергии для отличного каскада")]
+        [SerializeField] private float _greatCascadeMultiplier = 1.70f;
+
         [Tooltip("Минимальное количество секунд ожидания бота после заполнения шкалы заряда перед разрядом (симулирует реакцию человека)")]
         [SerializeField] private float _minDischargeDelay = 0.5f;
 
@@ -57,6 +70,10 @@ namespace Project.Scripts.Configs.Battle
         public int BaseEnergyPerTick => _baseEnergyPerTick;
         public float PrimaryTileProbability => _primaryTileProbability;
         public float CascadeVariation => _cascadeVariation;
+        public float GoodCascadeChance => _goodCascadeChance;
+        public float GreatCascadeChance => _greatCascadeChance;
+        public float GoodCascadeMultiplier => _goodCascadeMultiplier;
+        public float GreatCascadeMultiplier => _greatCascadeMultiplier;
         public float MinDischargeDelay => _minDischargeDelay;
         public float MaxDischargeDelay => _maxDischargeDelay;
 

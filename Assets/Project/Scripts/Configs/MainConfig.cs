@@ -16,7 +16,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private BoardConfig _boardConfig;
         [SerializeField] private BoardAnimationConfig _boardAnimationConfig;
         [SerializeField] private BattleAnimationConfig _battleAnimationConfig;
-        [SerializeField] private MatchDamageConfig _matchDamageConfig;
+        [SerializeField] private CascadeEnergyConfig _cascadeEnergyConfig;
         [SerializeField] private SpecialTileConfig _specialTileConfig;
         [SerializeField] private LevelDatabase _levelDatabase;
         [SerializeField] private UIConfig _uiConfig;
@@ -32,7 +32,7 @@ namespace Project.Scripts.Configs
         public BoardConfig BoardConfig => _boardConfig;
         public BoardAnimationConfig BoardAnimationConfig => _boardAnimationConfig;
         public BattleAnimationConfig BattleAnimationConfig => _battleAnimationConfig;
-        public MatchDamageConfig MatchDamageConfig => _matchDamageConfig;
+        public CascadeEnergyConfig CascadeEnergyConfig => _cascadeEnergyConfig;
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;
         public UIConfig UIConfig => _uiConfig;

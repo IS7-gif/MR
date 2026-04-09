@@ -13,7 +13,6 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Rules;
 using Project.Scripts.Services.Audio.AudioSystem;
-using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
@@ -41,7 +40,7 @@ namespace Project.Scripts.Gameplay
         private LevelConfig _levelConfig;
         private BoardAnimationConfig _animConfig;
         private InputConfig _inputConfig;
-        private IDamageCalculator _damageCalculator;
+        private CascadeEnergyConfig _cascadeEnergyConfig;
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
         private BattleViewConfig _battleViewConfig;
@@ -116,7 +115,7 @@ namespace Project.Scripts.Gameplay
             LevelConfig levelConfig,
             BoardAnimationConfig animConfig,
             InputConfig inputConfig,
-            IDamageCalculator damageCalculator,
+            CascadeEnergyConfig cascadeEnergyConfig,
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
             BattleViewConfig battleViewConfig,
@@ -134,7 +133,7 @@ namespace Project.Scripts.Gameplay
             _levelConfig = levelConfig;
             _animConfig = animConfig;
             _inputConfig = inputConfig;
-            _damageCalculator = damageCalculator;
+            _cascadeEnergyConfig = cascadeEnergyConfig;
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
             _battleViewConfig = battleViewConfig;
@@ -212,7 +211,7 @@ namespace Project.Scripts.Gameplay
                 matchFinder,
                 _swapHandler,
                 moveChecker,
-                _damageCalculator,
+                _cascadeEnergyConfig,
                 _gameStateService,
                 _moveBarService,
                 specialTileResolver,

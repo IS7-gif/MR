@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Project.Scripts.Shared.Damage;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 
@@ -19,18 +18,6 @@ namespace Project.Scripts.Services.Events
     public readonly struct BombActivatedEvent
     {
 
-    }
-
-    public readonly struct CascadeCompletedEvent
-    {
-        public DamageBreakdown Breakdown { get; }
-        public int Total => Breakdown.Total;
-
-
-        public CascadeCompletedEvent(DamageBreakdown breakdown)
-        {
-            Breakdown = breakdown;
-        }
     }
 
     public readonly struct MoveUsedEvent
@@ -69,10 +56,10 @@ namespace Project.Scripts.Services.Events
 
     public readonly struct EnergyGeneratedEvent
     {
-        public IReadOnlyDictionary<TileKind, int> EnergyByKind { get; }
+        public IReadOnlyDictionary<TileKind, float> EnergyByKind { get; }
 
 
-        public EnergyGeneratedEvent(IReadOnlyDictionary<TileKind, int> energyByKind)
+        public EnergyGeneratedEvent(IReadOnlyDictionary<TileKind, float> energyByKind)
         {
             EnergyByKind = energyByKind;
         }

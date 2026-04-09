@@ -13,7 +13,7 @@ namespace Project.Scripts.Services.Combat
         int AbilityPower { get; }
         bool TryRelease();
         void AddEnergy(int amount);
-        void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, int> energyByKind);
+        void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, float> energyByKind);
         void TriggerAttack();
     }
 }

@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs.Battle;
 using Project.Scripts.Tiles.Behaviours;
-using Project.Scripts.Services.Damage;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Shared;
-using Project.Scripts.Shared.Damage;
 using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Input;
 using Project.Scripts.Shared.Rules;
@@ -31,7 +30,7 @@ namespace Project.Scripts.Services.Board
         private readonly IMatchFinder _matchFinder;
         private readonly ISwapInputHandler _swapHandler;
         private readonly IMoveChecker _moveChecker;
-        private readonly IDamageCalculator _damageCalculator;
+        private readonly CascadeEnergyConfig _cascadeEnergyConfig;
         private readonly IGameStateService _gameStateService;
         private readonly IMoveBarService _moveBarService;
         private readonly EventBus _eventBus;
@@ -42,9 +41,9 @@ namespace Project.Scripts.Services.Board
 
         public BoardOrchestrator(EventBus eventBus, IGridState state, IGridView view, IGridOperations gridOps,
             IGravityHandler gravity, IMatchFinder matchFinder, ISwapInputHandler swapHandler,
-            IMoveChecker moveChecker, IDamageCalculator damageCalculator, IGameStateService gameStateService,
-            IMoveBarService moveBarService, SpecialTileResolver specialTileResolver,
-            SwapComboResolver swapComboResolver)
+            IMoveChecker moveChecker, CascadeEnergyConfig cascadeEnergyConfig,
+            IGameStateService gameStateService, IMoveBarService moveBarService,
+            SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver)
         {
             _eventBus = eventBus;
             _state = state;
@@ -54,7 +53,7 @@ namespace Project.Scripts.Services.Board
             _matchFinder = matchFinder;
             _swapHandler = swapHandler;
             _moveChecker = moveChecker;
-            _damageCalculator = damageCalculator;
+            _cascadeEnergyConfig = cascadeEnergyConfig;
             _gameStateService = gameStateService;
             _moveBarService = moveBarService;
             _specialTileResolver = specialTileResolver;
@@ -117,9 +116,8 @@ namespace Project.Scripts.Services.Board
 
                 await _gridOps.SwapTiles(request.From, request.To);
 
-                var waves = new List<WaveBreakdown>();
-                var energyByKind = new Dictionary<TileKind, int>();
-                var bombDamage = 0;
+                var waves = new List<List<MatchResult>>();
+                var energyByKind = new Dictionary<TileKind, float>();
                 var moveUsed = false;
 
                 if (fromIsSpecial && toIsSpecial)
@@ -127,13 +125,10 @@ namespace Project.Scripts.Services.Board
                     _moveBarService.TryConsume();
 
                     var stateBefore = _state.GetGridState();
-                    var tilesBefore = CountActiveTiles(stateBefore);
-
                     await ExecuteSwapCombo(fromKind, toKind, request.To, request.From, fromTile, toTile);
-
                     var stateAfter = _state.GetGridState();
+
                     _eventBus.Publish(new BombActivatedEvent());
-                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(stateAfter));
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
                     await RunPostActivationFlow(waves, request.PivotPosition);
@@ -160,13 +155,10 @@ namespace Project.Scripts.Services.Board
                     }
 
                     var stateBefore = _state.GetGridState();
-                    var tilesBefore = CountActiveTiles(stateBefore);
-
                     await ActivateSpecialWithPartner(specialTile, partnerTile, specialFinalPos);
-
                     var stateAfter = _state.GetGridState();
+
                     _eventBus.Publish(new BombActivatedEvent());
-                    bombDamage = _damageCalculator.CalculateBombDamage(tilesBefore - CountActiveTiles(stateAfter));
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
                     await RunPostActivationFlow(waves, request.PivotPosition);
@@ -186,13 +178,7 @@ namespace Project.Scripts.Services.Board
                     }
                 }
 
-                AccumulateMatchEnergy(waves, energyByKind);
-
-                if (waves.Count > 0 || bombDamage > 0)
-                {
-                    var breakdown = new DamageBreakdown(waves, bombDamage);
-                    _eventBus.Publish(new CascadeCompletedEvent(breakdown));
-                }
+                AccumulateMatchEnergy(waves, _cascadeEnergyConfig, energyByKind);
 
                 if (energyByKind.Count > 0)
                 {
@@ -334,7 +320,7 @@ namespace Project.Scripts.Services.Board
             await _gridOps.ActivateTiles(new List<GridPoint>(cross));
         }
 
-        private async UniTask RunPostActivationFlow(List<WaveBreakdown> waves, GridPoint pivotPosition)
+        private async UniTask RunPostActivationFlow(List<List<MatchResult>> waves, GridPoint pivotPosition)
         {
             await _gravity.ApplyGravity();
             await _gravity.SpawnNewTiles();
@@ -345,13 +331,13 @@ namespace Project.Scripts.Services.Board
             await EnsureMovesAvailable();
         }
 
-        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<WaveBreakdown> waves, GridPoint pivotPosition, bool spawnSpecials)
+        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<List<MatchResult>> waves, GridPoint pivotPosition, bool spawnSpecials)
         {
             while (matches.Count > 0)
             {
                 var cascadeLevel = waves.Count + 1;
                 _eventBus.Publish(new MatchPlayedEvent(cascadeLevel));
-                waves.Add(_damageCalculator.CalculateWave(matches, cascadeLevel));
+                waves.Add(new List<MatchResult>(matches));
 
                 var specialPlacements = spawnSpecials && cascadeLevel == 1
                     ? _specialTileResolver.Resolve(matches, pivotPosition) : null;
@@ -380,17 +366,7 @@ namespace Project.Scripts.Services.Board
 
             var immediateMatches = _matchFinder.FindMatches(_state.GetGridState());
             if (immediateMatches.Count > 0)
-                await ProcessMatchChain(immediateMatches, new List<WaveBreakdown>(), GridPoint.Zero, false);
-        }
-
-        private static int CountActiveTiles(TileKind[,] state)
-        {
-            var count = 0;
-            foreach (var kind in state)
-                if (kind != TileKind.None)
-                    count++;
-
-            return count;
+                await ProcessMatchChain(immediateMatches, new List<List<MatchResult>>(), GridPoint.Zero, false);
         }
 
         private static int GetBombRadius(Tile tile)
@@ -406,43 +382,53 @@ namespace Project.Scripts.Services.Board
             return bomb?.DoubleRadius ?? 2;
         }
 
-        private static void AccumulateMatchEnergy(List<WaveBreakdown> waves, Dictionary<TileKind, int> energy)
+        private static void AccumulateMatchEnergy(List<List<MatchResult>> waves, CascadeEnergyConfig config, Dictionary<TileKind, float> energy)
         {
             for (var i = 0; i < waves.Count; i++)
             {
-                var matches = waves[i].Matches;
+                var matches = waves[i];
+                var cascadeMult = 1f + config.CascadeMultiplierStep * i;
+                var multiMatchMult = matches.Count > 1 ? config.MultiMatchMultiplier : 1f;
+
                 for (var j = 0; j < matches.Count; j++)
                 {
                     var match = matches[j];
                     if (false == match.TileKind.IsColor())
                         continue;
 
+                    var shapeMult = match.Shape switch
+                    {
+                        MatchShape.LShape => config.LShapeMultiplier,
+                        MatchShape.TShape => config.TShapeMultiplier,
+                        _ => 1f
+                    };
+
                     energy.TryGetValue(match.TileKind, out var current);
-                    energy[match.TileKind] = current + match.TileCount;
+                    energy[match.TileKind] = current + match.Positions.Count * shapeMult * cascadeMult * multiMatchMult;
                 }
             }
         }
 
-        private static string BuildEnergyLogString(Dictionary<TileKind, int> energyByKind)
+        private static string BuildEnergyLogString(Dictionary<TileKind, float> energyByKind)
         {
             var sb = new System.Text.StringBuilder();
             sb.AppendLine("[Energy] Move result:");
 
-            var total = 0;
+            var total = 0f;
             foreach (var pair in energyByKind)
             {
-                if (pair.Value <= 0)
+                if (pair.Value <= 0f)
                     continue;
 
-                sb.AppendLine($"  {pair.Key}: +{pair.Value}");
+                sb.AppendLine($"  {pair.Key}: +{pair.Value:F2}");
                 total += pair.Value;
             }
 
-            sb.Append($"  Total: +{total}");
+            sb.Append($"  Total: +{total:F2}");
             return sb.ToString();
         }
 
-        private static void AccumulateGridDiffEnergy(TileKind[,] before, TileKind[,] after, Dictionary<TileKind, int> energy)
+        private static void AccumulateGridDiffEnergy(TileKind[,] before, TileKind[,] after, Dictionary<TileKind, float> energy)
         {
             var width = before.GetLength(0);
             var height = before.GetLength(1);
@@ -458,7 +444,7 @@ namespace Project.Scripts.Services.Board
                     if (after[x, y] != kindBefore)
                     {
                         energy.TryGetValue(kindBefore, out var current);
-                        energy[kindBefore] = current + 1;
+                        energy[kindBefore] = current + 1f;
                     }
                 }
             }
