@@ -225,6 +225,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14cc67f16eca566458640d4de5aa988a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldFloatingDamageNumber
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.UI.FloatingDamageNumber
   _label: {fileID: 5225892071544154856}
   _floatDistance: 0.8

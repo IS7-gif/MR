@@ -858,9 +858,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1842070631}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50c33992f3ba2e446853ac0cc99f79e0, type: 3}
+  m_Script: {fileID: 11500000, guid: ead907757f8ea9a40b2a41bc30db3c5b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.BoardPositioner
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Board.BoardPositioner
   _boardConfig: {fileID: 11400000, guid: be905cc36eebaa048b09269c08009310, type: 2}
   _levelConfig: {fileID: 11400000, guid: d4bb3c3683486ee48ada8915bf927fcf, type: 2}
 --- !u!114 &1842070633
@@ -872,9 +872,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1842070631}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 063b1dd1a829c7a4f80305192b974acd, type: 3}
+  m_Script: {fileID: 11500000, guid: 7648a8822fddcd64d9435ccb96247460, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.BoardView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Board.BoardView
   _frame: {fileID: 899252625}
   _spriteMask: {fileID: 19645327}
 --- !u!4 &1842070634

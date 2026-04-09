@@ -1,5 +1,5 @@
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Gameplay.Battle;
+using Project.Scripts.Gameplay.Battle.HUD;
 using Project.Scripts.Services.UISystem;
 using TMPro;
 using UnityEngine;

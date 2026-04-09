@@ -42,9 +42,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 220178044115466675}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f19cfd6238272654ea49997b7303cf67, type: 3}
+  m_Script: {fileID: 11500000, guid: db605c602a7cb6745905341394e0ffca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldBarRenderer
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.BarRenderer
   _fill: {fileID: 8919502189715921145}
   _vertical: 0
 --- !u!1 &1618246297600553473
@@ -180,9 +180,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2300540158382576327}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f19cfd6238272654ea49997b7303cf67, type: 3}
+  m_Script: {fileID: 11500000, guid: db605c602a7cb6745905341394e0ffca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldBarRenderer
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.BarRenderer
   _fill: {fileID: 5922008021695713138}
   _vertical: 0
 --- !u!1 &3913464817945936822
@@ -721,9 +721,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6995669921356842586}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
   _background: {fileID: 2114889309585241080}
   _portrait: {fileID: 830134576443962202}
   _glow: {fileID: 7829801574302690671}
@@ -987,8 +987,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 9162967105012937807}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f19cfd6238272654ea49997b7303cf67, type: 3}
+  m_Script: {fileID: 11500000, guid: db605c602a7cb6745905341394e0ffca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldBarRenderer
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.BarRenderer
   _fill: {fileID: 1274146383776473485}
   _vertical: 1

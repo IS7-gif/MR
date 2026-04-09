@@ -41,9 +41,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1008485216135536246}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d912a65e98a15384eaa493240f7393dc, type: 3}
+  m_Script: {fileID: 11500000, guid: 0fcda587191ba904f9307311084e2f65, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldTargetingInputHandler
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Targeting.TargetingInputHandler
 --- !u!1 &8010516392992138223
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,9 +96,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8010516392992138223}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15d35d496d7cd6c4c86b9feb16743119, type: 3}
+  m_Script: {fileID: 11500000, guid: fe854326fd1767b4997384408cbac340, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldBattleHUDView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.HUD.BattleHUDView
   _playerHeroSlots:
   - {fileID: 34413871785096680}
   - {fileID: 2981936325939341402}
@@ -182,9 +182,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &4839084132740868149 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -259,9 +259,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &5671648828094456940 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -336,9 +336,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &5495075587489736060 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -425,9 +425,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &6656729071754448696 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -514,9 +514,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99e0b9b0dbe77d44b88d048ef17781ef, type: 3}
+  m_Script: {fileID: 11500000, guid: a41650f2436653948a5cd95f9082a65e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldAvatarSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.AvatarSlotView
 --- !u!4 &2315689571549928399 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
@@ -591,9 +591,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &7655086996571141511 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -668,9 +668,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!4 &8376985026184124689 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5079601235995019718, guid: 7575e71fe03539b4685b8b81b755878e, type: 3}
@@ -757,9 +757,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99e0b9b0dbe77d44b88d048ef17781ef, type: 3}
+  m_Script: {fileID: 11500000, guid: a41650f2436653948a5cd95f9082a65e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldAvatarSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.AvatarSlotView
 --- !u!4 &4532171633706895654 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 216248348914923518, guid: fb834eb0988d15f458393fef0578570a, type: 3}
@@ -839,9 +839,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
 --- !u!1001 &8716118076312279612
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -916,6 +916,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ba87f3f10d55d9408ebe37768c86a25, type: 3}
+  m_Script: {fileID: 11500000, guid: 372a8078fd081714da4b0f09dbb27123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.WorldSpace.WorldHeroSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
