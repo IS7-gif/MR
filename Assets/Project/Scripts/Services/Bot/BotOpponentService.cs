@@ -22,6 +22,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IGameStateService _gameStateService;
         private readonly IEnemyAvatarChargeService _enemyChargeService;
         private readonly IEnemyStateService _enemyState;
+        private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly BotConfig _botConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
 
@@ -38,6 +39,7 @@ namespace Project.Scripts.Services.Bot
             IGameStateService gameStateService,
             IEnemyAvatarChargeService enemyChargeService,
             IEnemyStateService enemyState,
+            IAvatarGroupDefenseService groupDefense,
             BotConfig botConfig,
             SlotLayoutConfig slotLayoutConfig)
         {
@@ -46,6 +48,7 @@ namespace Project.Scripts.Services.Bot
             _gameStateService = gameStateService;
             _enemyChargeService = enemyChargeService;
             _enemyState = enemyState;
+            _groupDefense = groupDefense;
             _botConfig = botConfig;
             _slotLayoutConfig = slotLayoutConfig;
         }
@@ -171,23 +174,89 @@ namespace Project.Scripts.Services.Bot
             if (cancelled || false == _gameStateService.IsPlaying)
                 return;
 
+            var abilityPower = _enemyChargeService.AbilityPower;
+
             if (_enemyChargeService.AbilityType == HeroActionType.DealDamage)
             {
-                _enemyChargeService.TriggerAttack();
-                return;
+                if (!_groupDefense.IsExposed(BattleSide.Player))
+                {
+                    var playerSlots = _heroService.GetSlots(BattleSide.Player);
+                    var targetIdx = _engine.PickGroupBreakTarget(
+                        playerSlots,
+                        _slotLayoutConfig.Group1SlotIndices,
+                        _slotLayoutConfig.Group2SlotIndices);
+
+                    if (targetIdx < 0)
+                        return;
+
+                    if (!_enemyChargeService.TryRelease())
+                        return;
+
+                    _heroService.ApplyDamageToHero(BattleSide.Player, targetIdx, abilityPower);
+
+                    var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.DealDamage);
+                    var target = UnitDescriptor.Hero(BattleSide.Player, targetIdx, HeroActionType.DealDamage);
+                    _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.DealDamage, abilityPower));
+                }
+                else
+                {
+                    _enemyChargeService.TriggerAttack();
+                }
             }
-
-            var slots = _heroService.GetSlots(BattleSide.Enemy);
-            var targetIndex = _engine.PickMostWoundedHero(slots);
-            if (targetIndex < 0)
-                return;
-
-            if (_enemyChargeService.TryRelease())
+            else
             {
-                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIndex, _enemyChargeService.AbilityPower);
+                DischargeAvatarHeal(abilityPower);
+            }
+        }
+
+        private void DischargeAvatarHeal(int abilityPower)
+        {
+            if (!_groupDefense.IsExposed(BattleSide.Enemy))
+            {
+                var enemySlots = _heroService.GetSlots(BattleSide.Enemy);
+                var targetIdx = _engine.PickWeakestGroupHero(
+                    enemySlots,
+                    _slotLayoutConfig.Group1SlotIndices,
+                    _slotLayoutConfig.Group2SlotIndices);
+
+                if (targetIdx < 0)
+                    return;
+
+                if (!_enemyChargeService.TryRelease())
+                    return;
+
+                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIdx, abilityPower);
+
                 var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
-                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIndex, HeroActionType.HealAlly);
-                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, _enemyChargeService.AbilityPower));
+                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIdx, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, abilityPower));
+            }
+            else if (_enemyState.CurrentHP < _enemyState.MaxHP)
+            {
+                if (!_enemyChargeService.TryRelease())
+                    return;
+
+                _enemyState.ApplyHeal(abilityPower);
+
+                var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, abilityPower));
+            }
+            else
+            {
+                var enemySlots = _heroService.GetSlots(BattleSide.Enemy);
+                var targetIdx = _engine.PickMostWoundedHero(enemySlots);
+                if (targetIdx < 0)
+                    return;
+
+                if (!_enemyChargeService.TryRelease())
+                    return;
+
+                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIdx, abilityPower);
+
+                var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIdx, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, abilityPower));
             }
         }
 
@@ -211,16 +280,37 @@ namespace Project.Scripts.Services.Bot
                 var energyAmount = Mathf.RoundToInt(_botConfig.HeroEnergyPerTick * RollCascadeMultiplier());
                 _heroService.AddEnemyHeroEnergy(pickedIndex, energyAmount);
 
-                var updatedSlot = _heroService.GetSlots(BattleSide.Enemy)[pickedIndex];
-                if (updatedSlot.IsReady && false == _heroActivationPending[pickedIndex])
-                {
-                    if (updatedSlot.ActionType == HeroActionType.HealAlly
-                        && _enemyState.CurrentHP >= _enemyState.MaxHP)
-                        continue;
+                var currentEnemySlots = _heroService.GetSlots(BattleSide.Enemy);
+                var updatedSlot = currentEnemySlots[pickedIndex];
 
-                    _heroActivationPending[pickedIndex] = true;
-                    ActivateWithDelay(pickedIndex, ct).Forget();
+                if (!updatedSlot.IsReady || _heroActivationPending[pickedIndex])
+                    continue;
+
+                if (updatedSlot.ActionType == HeroActionType.HealAlly)
+                {
+                    bool hasHealTarget;
+
+                    if (!_groupDefense.IsExposed(BattleSide.Enemy))
+                    {
+                        var t = _engine.PickWeakestGroupHero(
+                            currentEnemySlots,
+                            _slotLayoutConfig.Group1SlotIndices,
+                            _slotLayoutConfig.Group2SlotIndices);
+                        hasHealTarget = t >= 0 && t != pickedIndex;
+                    }
+                    else
+                    {
+                        var t = _engine.PickMostWoundedHero(currentEnemySlots);
+                        hasHealTarget = _enemyState.CurrentHP < _enemyState.MaxHP
+                            || (t >= 0 && t != pickedIndex);
+                    }
+
+                    if (!hasHealTarget)
+                        continue;
                 }
+
+                _heroActivationPending[pickedIndex] = true;
+                ActivateWithDelay(pickedIndex, ct).Forget();
             }
         }
 
@@ -239,7 +329,97 @@ namespace Project.Scripts.Services.Bot
             if (cancelled || false == _gameStateService.IsPlaying)
                 return;
 
-            _heroService.TryActivate(BattleSide.Enemy, slotIndex);
+            var enemySlots = _heroService.GetSlots(BattleSide.Enemy);
+            var slot = enemySlots[slotIndex];
+
+            if (!slot.IsReady)
+                return;
+
+            if (slot.ActionType == HeroActionType.DealDamage)
+            {
+                ActivateHeroDamage(slotIndex, enemySlots);
+            }
+            else
+            {
+                ActivateHeroHeal(slotIndex, enemySlots);
+            }
+        }
+
+        private void ActivateHeroDamage(int slotIndex, IReadOnlyList<HeroSlotState> enemySlots)
+        {
+            if (!_groupDefense.IsExposed(BattleSide.Player))
+            {
+                var playerSlots = _heroService.GetSlots(BattleSide.Player);
+                var targetIdx = _engine.PickGroupBreakTarget(
+                    playerSlots,
+                    _slotLayoutConfig.Group1SlotIndices,
+                    _slotLayoutConfig.Group2SlotIndices);
+
+                if (targetIdx < 0)
+                    return;
+
+                if (!_heroService.TryDischargeHero(BattleSide.Enemy, slotIndex, out _, out var damageValue))
+                    return;
+
+                _heroService.ApplyDamageToHero(BattleSide.Player, targetIdx, damageValue);
+
+                var source = UnitDescriptor.Hero(BattleSide.Enemy, slotIndex, HeroActionType.DealDamage);
+                var target = UnitDescriptor.Hero(BattleSide.Player, targetIdx, HeroActionType.DealDamage);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.DealDamage, damageValue));
+            }
+            else
+            {
+                _heroService.TryActivate(BattleSide.Enemy, slotIndex);
+            }
+        }
+
+        private void ActivateHeroHeal(int slotIndex, IReadOnlyList<HeroSlotState> enemySlots)
+        {
+            if (!_groupDefense.IsExposed(BattleSide.Enemy))
+            {
+                var targetIdx = _engine.PickWeakestGroupHero(
+                    enemySlots,
+                    _slotLayoutConfig.Group1SlotIndices,
+                    _slotLayoutConfig.Group2SlotIndices);
+
+                if (targetIdx < 0 || targetIdx == slotIndex)
+                    return;
+
+                if (!_heroService.TryDischargeHero(BattleSide.Enemy, slotIndex, out _, out var healValue))
+                    return;
+
+                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIdx, healValue);
+
+                var source = UnitDescriptor.Hero(BattleSide.Enemy, slotIndex, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIdx, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, healValue));
+            }
+            else if (_enemyState.CurrentHP < _enemyState.MaxHP)
+            {
+                if (!_heroService.TryDischargeHero(BattleSide.Enemy, slotIndex, out _, out var healValue))
+                    return;
+
+                _enemyState.ApplyHeal(healValue);
+
+                var source = UnitDescriptor.Hero(BattleSide.Enemy, slotIndex, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, healValue));
+            }
+            else
+            {
+                var targetIdx = _engine.PickMostWoundedHero(enemySlots);
+                if (targetIdx < 0 || targetIdx == slotIndex)
+                    return;
+
+                if (!_heroService.TryDischargeHero(BattleSide.Enemy, slotIndex, out _, out var healValue))
+                    return;
+
+                _heroService.ApplyHealToHero(BattleSide.Enemy, targetIdx, healValue);
+
+                var source = UnitDescriptor.Hero(BattleSide.Enemy, slotIndex, HeroActionType.HealAlly);
+                var target = UnitDescriptor.Hero(BattleSide.Enemy, targetIdx, HeroActionType.HealAlly);
+                _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.HealAlly, healValue));
+            }
         }
 
         private void StopLoops()

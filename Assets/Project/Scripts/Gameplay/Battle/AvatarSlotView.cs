@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.UI;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
@@ -38,6 +39,7 @@ namespace Project.Scripts.Gameplay.Battle
 
 
         private AvatarSlotViewModel _viewModel;
+        private IAvatarGroupDefenseService _groupDefense;
         private BattleAnimationConfig _config;
         private CompositeDisposable _disposables;
         private Color _originalPortraitColor;
@@ -54,9 +56,10 @@ namespace Project.Scripts.Gameplay.Battle
         }
 
 
-        public void Bind(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator)
+        public void Bind(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, IAvatarGroupDefenseService groupDefense)
         {
             _viewModel = viewModel;
+            _groupDefense = groupDefense;
             _config = viewModel.AnimConfig;
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
@@ -74,7 +77,12 @@ namespace Project.Scripts.Gameplay.Battle
                 return false;
 
             if (source.ActionType == HeroActionType.DealDamage && _viewModel.Side == BattleSide.Enemy)
+            {
+                if (_groupDefense != null && !_groupDefense.IsExposed(BattleSide.Enemy))
+                    return false;
+
                 return true;
+            }
 
             if (source.ActionType == HeroActionType.HealAlly && _viewModel.Side == BattleSide.Player)
             {

@@ -20,16 +20,12 @@ namespace Project.Scripts.Gameplay.UI
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
         public IReadyPulseCoordinator PulseCoordinator { get; }
         public IAbilityExecutionService AbilityExecution { get; }
+        public IAvatarGroupDefenseService GroupDefense { get; }
         public string EnemyName => _levelConfig.BotConfig ? _levelConfig.BotConfig.OpponentName : string.Empty;
         public BattleAnimationConfig BattleAnimConfig => _battleAnimationConfig;
         public float BoardTopWorldY => _boardBounds.BoardTopWorldY;
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
-
-        public float CellSize
-        {
-            get { return _boardBounds.CellSize; }
-        }
 
 
         private readonly EventBus _eventBus;
@@ -56,7 +52,8 @@ namespace Project.Scripts.Gameplay.UI
             LevelConfig levelConfig,
             IBoardBoundsProvider boardBounds,
             IReadyPulseCoordinator pulseCoordinator,
-            IAbilityExecutionService abilityExecution)
+            IAbilityExecutionService abilityExecution,
+            IAvatarGroupDefenseService groupDefense)
         {
             _eventBus = eventBus;
             _enemyState = enemyState;
@@ -69,6 +66,7 @@ namespace Project.Scripts.Gameplay.UI
             _boardBounds = boardBounds;
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
+            GroupDefense = groupDefense;
         }
 
 

@@ -69,8 +69,8 @@ namespace Project.Scripts.Gameplay.Battle
 
         private void BindSlots()
         {
-            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.PulseCoordinator);
-            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.PulseCoordinator);
+            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense);
+            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense);
 
             BindHeroRow(_playerHeroSlots, ViewModel.PlayerHeroSlots);
             BindHeroRow(_enemyHeroSlots, ViewModel.EnemyHeroSlots);

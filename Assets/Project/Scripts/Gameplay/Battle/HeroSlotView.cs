@@ -77,7 +77,13 @@ namespace Project.Scripts.Gameplay.Battle
                 return true;
 
             if (source.ActionType == HeroActionType.HealAlly && _viewModel.Side == BattleSide.Player)
+            {
+                if (source.Kind == UnitKind.Hero
+                    && source.SlotIndex == _viewModel.SlotIndex)
+                    return false;
+
                 return _viewModel.HPFill.CurrentValue < 1f;
+            }
 
             return false;
         }

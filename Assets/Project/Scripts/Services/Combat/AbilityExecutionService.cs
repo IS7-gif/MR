@@ -9,6 +9,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IHeroService _heroService;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
+        private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly EventBus _eventBus;
 
 
@@ -17,18 +18,31 @@ namespace Project.Scripts.Services.Combat
             IHeroService heroService,
             IPlayerStateService playerState,
             IEnemyStateService enemyState,
+            IAvatarGroupDefenseService groupDefense,
             EventBus eventBus)
         {
             _playerAvatarCharge = playerAvatarCharge;
             _heroService = heroService;
             _playerState = playerState;
             _enemyState = enemyState;
+            _groupDefense = groupDefense;
             _eventBus = eventBus;
         }
 
 
         public void Execute(UnitDescriptor source, UnitDescriptor target)
         {
+            if (target.Kind == UnitKind.Avatar
+                && source.ActionType == HeroActionType.DealDamage
+                && !_groupDefense.IsExposed(target.Side))
+                return;
+
+            if (source.ActionType == HeroActionType.HealAlly
+                && source.Kind == target.Kind
+                && source.Side == target.Side
+                && source.SlotIndex == target.SlotIndex)
+                return;
+
             HeroActionType actionType;
             int actionValue;
 

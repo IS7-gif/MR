@@ -13,12 +13,14 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
+        private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly CompositeDisposable _subscriptions = new();
 
 
-        public PlayerStateService(EventBus eventBus, LevelConfig levelConfig)
+        public PlayerStateService(EventBus eventBus, LevelConfig levelConfig, IAvatarGroupDefenseService groupDefense)
         {
             _eventBus = eventBus;
+            _groupDefense = groupDefense;
             MaxHP = levelConfig.PlayerAvatarConfig.MaxHP;
             CurrentHP = levelConfig.PlayerAvatarConfig.MaxHP;
 
@@ -39,6 +41,9 @@ namespace Project.Scripts.Services.Combat
         public void TakeDamage(int amount)
         {
             if (CurrentHP <= 0 || amount <= 0)
+                return;
+
+            if (!_groupDefense.IsExposed(BattleSide.Player))
                 return;
 
             CurrentHP = Math.Max(0, CurrentHP - amount);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Scripts.Shared.GroupDefense;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 
@@ -231,6 +232,19 @@ namespace Project.Scripts.Services.Events
             Target = target;
             ActionType = actionType;
             Value = value;
+        }
+    }
+
+    public readonly struct AvatarExposedEvent
+    {
+        public BattleSide Side { get; }
+        public HeroGroupId DestroyedGroupId { get; }
+
+
+        public AvatarExposedEvent(BattleSide side, HeroGroupId destroyedGroupId)
+        {
+            Side = side;
+            DestroyedGroupId = destroyedGroupId;
         }
     }
 }
