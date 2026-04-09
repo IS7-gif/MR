@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using DG.Tweening;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
@@ -42,16 +41,12 @@ namespace Project.Scripts.Services.BoardEdit
             if (false == BoardEditMode.IsActive)
                 return;
 
-            if (null == Mouse.current)
-                return;
-
-            if (false == Mouse.current.leftButton.wasPressedThisFrame)
+            if (false == TryGetPressPosition(out var screenPos))
                 return;
 
             if (null == _state)
                 return;
 
-            var screenPos = Mouse.current.position.ReadValue();
             var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(Camera.main.transform.position.z)));
             var gridPos = _view.WorldToGrid(worldPos);
 
@@ -62,6 +57,24 @@ namespace Project.Scripts.Services.BoardEdit
                 return;
 
             _view.ReplaceForEdit(gridPos, BoardEditMode.SelectedKind);
+        }
+
+        private static bool TryGetPressPosition(out Vector2 screenPos)
+        {
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                screenPos = Mouse.current.position.ReadValue();
+                return true;
+            }
+
+            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+            {
+                screenPos = Touchscreen.current.primaryTouch.position.ReadValue();
+                return true;
+            }
+
+            screenPos = default;
+            return false;
         }
 
 
