@@ -183,7 +183,7 @@ namespace Project.Scripts.Services.Board
                 if (energyByKind.Count > 0)
                 {
                     _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
-                    Debug.Log(BuildEnergyLogString(energyByKind));
+                    Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
                 }
 
                 if (moveUsed)
@@ -409,11 +409,38 @@ namespace Project.Scripts.Services.Board
             }
         }
 
-        private static string BuildEnergyLogString(Dictionary<TileKind, float> energyByKind)
+        private static string BuildDetailedCascadeLog(List<List<MatchResult>> waves, CascadeEnergyConfig config, Dictionary<TileKind, float> energyByKind)
         {
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("[Energy] Move result:");
+            sb.AppendLine("[Energy] === Cascade report ===");
 
+            for (var i = 0; i < waves.Count; i++)
+            {
+                var matches = waves[i];
+                var cascadeMult = 1f + config.CascadeMultiplierStep * i;
+                var multiMatchMult = matches.Count > 1 ? config.MultiMatchMultiplier : 1f;
+
+                sb.AppendLine($"  Wave {i + 1}  cascade×{cascadeMult:F2}  multiMatch×{multiMatchMult:F2}  ({matches.Count} match(es))");
+
+                for (var j = 0; j < matches.Count; j++)
+                {
+                    var match = matches[j];
+                    if (false == match.TileKind.IsColor())
+                        continue;
+
+                    var shapeMult = match.Shape switch
+                    {
+                        MatchShape.LShape => config.LShapeMultiplier,
+                        MatchShape.TShape => config.TShapeMultiplier,
+                        _ => 1f
+                    };
+
+                    var raw = match.Positions.Count * shapeMult * cascadeMult * multiMatchMult;
+                    sb.AppendLine($"    [{match.TileKind}] {match.Positions.Count} tiles  shape={match.Shape}×{shapeMult:F2}  → +{raw:F2}");
+                }
+            }
+
+            sb.AppendLine("  == Per-kind totals ==");
             var total = 0f;
             foreach (var pair in energyByKind)
             {
@@ -424,7 +451,7 @@ namespace Project.Scripts.Services.Board
                 total += pair.Value;
             }
 
-            sb.Append($"  Total: +{total:F2}");
+            sb.Append($"  Total energy generated: +{total:F2}");
             return sb.ToString();
         }
 

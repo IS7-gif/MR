@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Tiles;
 using R3;
 using UnityEngine;
 using VContainer.Unity;
@@ -65,13 +67,31 @@ namespace Project.Scripts.Services.Combat
         {
             var gain = _formula.Calculate(e.EnergyByKind);
             var added = _engine.TryAddEnergy(gain);
-
             if (added <= 0f)
                 return;
 
             var snap = _engine.Snapshot;
-            Debug.Log($"[PlayerAvatar] +{added:F2} → {snap.CurrentEnergy}/{snap.MaxEnergy}{(snap.IsReady ? " — READY" : string.Empty)}");
+            Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady));
             PublishEnergyChanged();
+        }
+
+        private string BuildAvatarEnergyLog(IReadOnlyDictionary<TileKind, float> energyByKind, float gain, float added, int current, int max, bool isReady)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("[PlayerAvatar] == Energy formula ==");
+
+            foreach (var pair in energyByKind)
+            {
+                if (pair.Value <= 0f)
+                    continue;
+
+                var mult = pair.Key == _formula.AvatarKind ? _formula.PrimaryMultiplier : _formula.SecondaryMultiplier;
+                var label = pair.Key == _formula.AvatarKind ? "primary" : "secondary";
+                sb.AppendLine($"  {pair.Key}: {pair.Value:F2} × {mult:F2} ({label}) = {pair.Value * mult:F2}");
+            }
+
+            sb.Append($"  Gain={gain:F2}  Added={added:F2}  Charge={current}/{max}{(isReady ? " - READY" : string.Empty)}");
+            return sb.ToString();
         }
 
         private void PublishEnergyChanged()
