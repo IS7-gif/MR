@@ -71,7 +71,7 @@ namespace Project.Scripts.Services.Timer
         private void PublishTimerChanged()
         {
             var timeRemaining = _engine.Snapshot.TimeRemaining;
-            _eventBus.Publish(new BattleTimerChangedEvent(timeRemaining, timeRemaining <= _config.WarningThreshold));
+            _eventBus.Publish(new BattleTimerChangedEvent(timeRemaining, timeRemaining <= _config.EscalationThreshold));
         }
     }
 }

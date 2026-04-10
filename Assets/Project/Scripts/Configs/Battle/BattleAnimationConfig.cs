@@ -7,7 +7,7 @@ namespace Project.Scripts.Configs.Battle
     public class BattleAnimationConfig : ScriptableObject
     {
         [Tooltip("Цвет вспышки аватара при получении урона")]
-        [SerializeField] private Color _hitFlashColor = new Color(1f, 0.2f, 0.2f, 1f);
+        [SerializeField] private Color _hitFlashColor = new(1f, 0.2f, 0.2f, 1f);
 
         [Tooltip("Общая длительность вспышки попадания в секундах (затухание к цвету + затухание обратно)")]
         [SerializeField] private float _hitFlashDuration = 0.3f;
@@ -65,30 +65,30 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private Color _sourceHighlightColor = Color.white;
 
         [Tooltip("Цвет свечения допустимой цели атаки")]
-        [SerializeField] private Color _attackTargetColor = new Color(1f, 0.15f, 0.15f, 1f);
+        [SerializeField] private Color _attackTargetColor = new(1f, 0.15f, 0.15f, 1f);
 
         [Tooltip("Цвет свечения допустимой цели лечения")]
-        [SerializeField] private Color _healTargetColor = new Color(0.15f, 1f, 0.25f, 1f);
+        [SerializeField] private Color _healTargetColor = new(0.15f, 1f, 0.25f, 1f);
 
-        [Header("Flawless Victory")]
-        [Tooltip("Время в секундах, в течение которого надпись Flawless Victory видна на экране")]
-        [SerializeField] private float _flawlessDisplayDuration = 1f;
+        [Header("Board Announcements")]
+        [Tooltip("Длительность в секундах, в течение которой текст объявления остаётся полностью видимым на экране")]
+        [SerializeField] private float _announcementDisplayDuration = 1f;
 
-        [Tooltip("Длительность плавного исчезновения надписи Flawless Victory в секундах")]
-        [SerializeField] private float _flawlessFadeOutDuration = 0.35f;
+        [Tooltip("Длительность в секундах анимации затухания объявления")]
+        [SerializeField] private float _announcementFadeOutDuration = 0.6f;
 
-        [Tooltip("Расстояние в пикселях, на которое надпись улетает вверх во время исчезновения")]
-        [SerializeField] private float _flawlessFlyDistance = 80f;
+        [Tooltip("Расстояние в пикселях, на которое объявление улетает вверх при затухании")]
+        [SerializeField] private float _announcementFlyDistance = 100f;
 
-        [Tooltip("Кривая ослабления для движения и затухания надписи Flawless Victory")]
-        [SerializeField] private Ease _flawlessFadeOutEase = Ease.InQuad;
+        [Tooltip("Кривая ослабления для движения и затухания объявления")]
+        [SerializeField] private Ease _announcementFadeOutEase = Ease.InQuad;
 
         [Header("Floating Numbers")]
         [Tooltip("Цвет метки числа урона")]
-        [SerializeField] private Color _damageNumberColor = new Color(1f, 0.25f, 0.25f, 1f);
+        [SerializeField] private Color _damageNumberColor = new(1f, 0.25f, 0.25f, 1f);
 
         [Tooltip("Цвет метки числа лечения")]
-        [SerializeField] private Color _healNumberColor = new Color(0.25f, 1f, 0.25f, 1f);
+        [SerializeField] private Color _healNumberColor = new(0.25f, 1f, 0.25f, 1f);
 
         [Tooltip("Расстояние в мировых единицах, на которое число поднимается вверх во время анимации")]
         [SerializeField] private float _floatDamageDistance = 0.75f;
@@ -122,10 +122,10 @@ namespace Project.Scripts.Configs.Battle
         public float FloatDamageDistance => _floatDamageDistance;
         public float FloatDamageDuration => _floatDamageDuration;
         public Ease FloatDamageEase => _floatDamageEase;
-        public float FlawlessDisplayDuration => _flawlessDisplayDuration;
-        public float FlawlessFadeOutDuration => _flawlessFadeOutDuration;
-        public float FlawlessFlyDistance => _flawlessFlyDistance;
-        public Ease FlawlessFadeOutEase => _flawlessFadeOutEase;
+        public float AnnouncementDisplayDuration => _announcementDisplayDuration;
+        public float AnnouncementFadeOutDuration => _announcementFadeOutDuration;
+        public float AnnouncementFlyDistance => _announcementFlyDistance;
+        public Ease AnnouncementFadeOutEase => _announcementFadeOutEase;
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;

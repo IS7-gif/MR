@@ -2,17 +2,21 @@ using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Project.Scripts.Services.UISystem;
+using TMPro;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.UI.Windows
 {
-    public class FlawlessVictoryView : BaseView<FlawlessVictoryViewModel>
+    public class BoardAnnouncementView : BaseView<BoardAnnouncementViewModel>
     {
-        [Tooltip("CanvasGroup корневого объекта - используется для fade-out")]
+        [Tooltip("Canvas group of the root object - used for fade-out")]
         [SerializeField] private CanvasGroup _canvasGroup;
 
-        [Tooltip("RectTransform контейнера текста - используется для анимации полёта вверх")]
+        [Tooltip("RectTransform of the text container - used for fly-up animation")]
         [SerializeField] private RectTransform _textRect;
+
+        [Tooltip("Text component displaying the announcement message")]
+        [SerializeField] private TMP_Text _text;
 
 
         private Sequence _sequence;
@@ -31,8 +35,15 @@ namespace Project.Scripts.Gameplay.UI.Windows
             _sequence?.Kill();
         }
 
+
         protected override async UniTask OnShow()
         {
+            if (_text)
+            {
+                _text.text = ViewModel.Text;
+                _text.color = ViewModel.TextColor;
+            }
+
             if (_canvasGroup)
                 _canvasGroup.alpha = 1f;
 
@@ -64,6 +75,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
             ViewModel.NotifyAnimationDone();
         }
 
+
         private Vector2 WorldYToAnchored(float worldY)
         {
             if (!_cam || !_canvasRect)
@@ -72,7 +84,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
             var screenPoint = _cam.WorldToScreenPoint(new Vector3(0f, worldY, 0f));
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _canvasRect, screenPoint, null, out var localPoint);
-            
+
             return localPoint;
         }
     }

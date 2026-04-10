@@ -3,6 +3,7 @@ using Project.Scripts.Gameplay;
 using Project.Scripts.Gameplay.Battle.HUD;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.UI;
+using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Bot;
 using Project.Scripts.Services.Game;
@@ -44,6 +45,8 @@ namespace Project.Scripts.DI
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
             builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
             builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<BoardAnnouncementService>().As<IBoardAnnouncementService>();
+            builder.RegisterEntryPoint<BattleEscalationService>();
 
             if (levelConfig.BotConfig)
             {

@@ -4,8 +4,7 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.UI;
-using Project.Scripts.Gameplay.UI.Windows;
-using Project.Scripts.Services.Board;
+using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
@@ -24,7 +23,7 @@ namespace Project.Scripts.Gameplay
         private readonly ILevelProgressionService _progression;
         private readonly BattleAnimationConfig _battleAnimConfig;
         private readonly LevelConfig _levelConfig;
-        private readonly IBoardBoundsProvider _boardBounds;
+        private readonly IBoardAnnouncementService _announcementService;
 
 
         private readonly EventBus _eventBus;
@@ -42,7 +41,7 @@ namespace Project.Scripts.Gameplay
             BattleAnimationConfig battleAnimConfig,
             LevelConfig levelConfig,
             EventBus eventBus,
-            IBoardBoundsProvider boardBounds)
+            IBoardAnnouncementService announcementService)
         {
             _gameStateService = gameStateService;
             _uiService = uiService;
@@ -52,7 +51,7 @@ namespace Project.Scripts.Gameplay
             _battleAnimConfig = battleAnimConfig;
             _levelConfig = levelConfig;
             _eventBus = eventBus;
-            _boardBounds = boardBounds;
+            _announcementService = announcementService;
         }
 
 
@@ -60,9 +59,6 @@ namespace Project.Scripts.Gameplay
         {
             _uiService.RegisterView<WinView>(_uiConfig.WinViewPrefab, UILayer.Popup);
             _uiService.RegisterView<LoseView>(_uiConfig.LoseViewPrefab, UILayer.Popup);
-
-            if (_uiConfig.FlawlessVictoryViewPrefab)
-                _uiService.RegisterView<FlawlessVictoryView>(_uiConfig.FlawlessVictoryViewPrefab, UILayer.Popup);
 
             _resultSub = _eventBus.Subscribe<GameResultEvent>(OnGameResult);
             _stateSub = _gameStateService.State.Subscribe(OnStateChanged);
@@ -94,13 +90,8 @@ namespace Project.Scripts.Gameplay
         {
             await UniTask.Delay(TimeSpan.FromSeconds(_battleAnimConfig.ResultScreenDelay));
 
-            if (_lastResultIsFlawless && _uiConfig.FlawlessVictoryViewPrefab)
-            {
-                var flawlessViewModel = new FlawlessVictoryViewModel(_battleAnimConfig, _boardBounds);
-                await _uiService.Show<FlawlessVictoryView, FlawlessVictoryViewModel>(flawlessViewModel);
-                await flawlessViewModel.WaitAsync();
-                _uiService.Close<FlawlessVictoryView>();
-            }
+            if (_lastResultIsFlawless)
+                await _announcementService.Show("Flawless Victory!");
 
             var bot = _levelConfig.BotConfig;
             var viewModel = new WinViewModel(_moveCounter, _progression,

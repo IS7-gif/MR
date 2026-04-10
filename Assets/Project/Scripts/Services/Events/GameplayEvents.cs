@@ -270,13 +270,24 @@ namespace Project.Scripts.Services.Events
     public readonly struct BattleTimerChangedEvent
     {
         public float TimeRemaining { get; }
-        public bool IsWarning { get; }
+        public bool IsEscalation { get; }
 
 
-        public BattleTimerChangedEvent(float timeRemaining, bool isWarning)
+        public BattleTimerChangedEvent(float timeRemaining, bool isEscalation)
         {
             TimeRemaining = timeRemaining;
-            IsWarning = isWarning;
+            IsEscalation = isEscalation;
+        }
+    }
+
+    public readonly struct BattleEscalationReachedEvent
+    {
+        public float TimeRemaining { get; }
+
+
+        public BattleEscalationReachedEvent(float timeRemaining)
+        {
+            TimeRemaining = timeRemaining;
         }
     }
 
