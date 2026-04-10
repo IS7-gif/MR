@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0fa01e6fe69cb04688357a1ad1cd52a, type: 3}
   m_Name: AvatarConfig_Damager
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.AvatarConfig
-  _maxHP: 550
-  _maxEnergy: 110
+  _maxHP: 400
+  _maxEnergy: 50
   _abilityType: 0
   _abilityPower: 80
-  _primaryTileMultiplier: 4
+  _primaryTileMultiplier: 2
   _secondaryTileMultiplier: 1

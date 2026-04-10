@@ -31,9 +31,9 @@ MonoBehaviour:
   _enemyAvatarConfig: {fileID: 11400000, guid: 10f28ac1346170149be5630d8e075bac, type: 2}
   _playerHeroes:
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
-  - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
+  - {fileID: 11400000, guid: d6d78ff54c191463caafec257a81561f, type: 2}
   - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
-  - {fileID: 11400000, guid: c40684606f95ebb41b02fac1f62d500d, type: 2}
+  - {fileID: 11400000, guid: 201855d7b78214970acde475c79a1909, type: 2}
   _enemyHeroes:
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}
   - {fileID: 11400000, guid: d58a5fe3509de434a98e96d78ae26093, type: 2}

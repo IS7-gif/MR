@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fea825070002c449f9d0545ccf77bb, type: 3}
   m_Name: Hero_Damager_1
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.HeroConfig
-  _kind: 10
-  _maxEnergy: 10
+  _maxHP: 155
   _abilityType: 0
-  _abilityPower: 40
+  _abilityPower: 50
+  _maxEnergy: 10
   _portrait: {fileID: 21300000, guid: fb2e99b3351c91f42a85dc70b091754c, type: 3}
-  _maxHP: 130
   _displayName: 
