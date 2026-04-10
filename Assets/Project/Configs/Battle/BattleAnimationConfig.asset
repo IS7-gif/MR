@@ -36,6 +36,11 @@ MonoBehaviour:
   _announcementFadeOutDuration: 0.6
   _announcementFlyDistance: 100
   _announcementFadeOutEase: 5
+  _countdownTextColor: {r: 1, g: 1, b: 1, a: 1}
+  _countdownDisplayDuration: 0.5
+  _countdownFadeOutDuration: 0.25
+  _countdownFlyDistance: 60
+  _countdownFadeOutEase: 5
   _damageNumberColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   _healNumberColor: {r: 0.25, g: 1, b: 0.25, a: 1}
   _floatDamageDistance: 0.75

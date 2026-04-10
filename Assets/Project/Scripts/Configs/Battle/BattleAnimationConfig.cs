@@ -83,6 +83,22 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Кривая ослабления для движения и затухания объявления")]
         [SerializeField] private Ease _announcementFadeOutEase = Ease.InQuad;
 
+        [Header("Countdown Announcement")]
+        [Tooltip("Цвет текста цифры обратного отсчёта - должен контрастировать с фоном доски")]
+        [SerializeField] private Color _countdownTextColor = new(1f, 0.3f, 0.3f, 1f);
+
+        [Tooltip("Длительность в секундах, в течение которой цифра обратного отсчёта остаётся полностью видимой - должна быть меньше 1 во избежание наложения")]
+        [SerializeField] private float _countdownDisplayDuration = 0.5f;
+
+        [Tooltip("Длительность в секундах анимации затухания цифры обратного отсчёта")]
+        [SerializeField] private float _countdownFadeOutDuration = 0.25f;
+
+        [Tooltip("Расстояние в пикселях, на которое цифра обратного отсчёта улетает вверх при затухании")]
+        [SerializeField] private float _countdownFlyDistance = 60f;
+
+        [Tooltip("Кривая ослабления для движения и затухания цифры обратного отсчёта")]
+        [SerializeField] private Ease _countdownFadeOutEase = Ease.InQuad;
+
         [Header("Floating Numbers")]
         [Tooltip("Цвет метки числа урона")]
         [SerializeField] private Color _damageNumberColor = new(1f, 0.25f, 0.25f, 1f);
@@ -126,6 +142,11 @@ namespace Project.Scripts.Configs.Battle
         public float AnnouncementFadeOutDuration => _announcementFadeOutDuration;
         public float AnnouncementFlyDistance => _announcementFlyDistance;
         public Ease AnnouncementFadeOutEase => _announcementFadeOutEase;
+        public Color CountdownTextColor => _countdownTextColor;
+        public float CountdownDisplayDuration => _countdownDisplayDuration;
+        public float CountdownFadeOutDuration => _countdownFadeOutDuration;
+        public float CountdownFlyDistance => _countdownFlyDistance;
+        public Ease CountdownFadeOutEase => _countdownFadeOutEase;
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;

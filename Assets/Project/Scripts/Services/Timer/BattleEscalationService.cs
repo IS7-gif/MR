@@ -12,17 +12,24 @@ namespace Project.Scripts.Services.Timer
 {
     public class BattleEscalationService : IStartable, IDisposable
     {
-        private readonly BattleTimerConfig _config;
+        private readonly BattleTimerConfig _timerConfig;
+        private readonly BattleAnimationConfig _animConfig;
         private readonly EventBus _eventBus;
         private readonly IBoardAnnouncementService _announcementService;
+
         private readonly List<IBattleEscalationModifier> _modifiers = new();
         private readonly IDisposable _timerSub;
         private bool _escalationTriggered;
 
 
-        public BattleEscalationService(BattleTimerConfig config, EventBus eventBus, IBoardAnnouncementService announcementService)
+        public BattleEscalationService(
+            BattleTimerConfig timerConfig,
+            BattleAnimationConfig animConfig,
+            EventBus eventBus,
+            IBoardAnnouncementService announcementService)
         {
-            _config = config;
+            _timerConfig = timerConfig;
+            _animConfig = animConfig;
             _eventBus = eventBus;
             _announcementService = announcementService;
 
@@ -42,6 +49,12 @@ namespace Project.Scripts.Services.Timer
 
         private void OnTimerChanged(BattleTimerChangedEvent e)
         {
+            TryTriggerEscalation(e);
+            TryShowCountdown(e);
+        }
+
+        private void TryTriggerEscalation(BattleTimerChangedEvent e)
+        {
             if (_escalationTriggered || false == e.IsEscalation)
                 return;
 
@@ -49,10 +62,29 @@ namespace Project.Scripts.Services.Timer
             _eventBus.Publish(new BattleEscalationReachedEvent(e.TimeRemaining));
 
             var seconds = Mathf.CeilToInt(e.TimeRemaining);
-            _announcementService.Show($"{seconds} seconds!").Forget();
+            _announcementService.Show($"{seconds} seconds remaining!").Forget();
 
             for (var i = 0; i < _modifiers.Count; i++)
                 _modifiers[i].OnEscalationReached();
+        }
+
+        private void TryShowCountdown(BattleTimerChangedEvent e)
+        {
+            var secondsLeft = (int)e.TimeRemaining;
+
+            if (secondsLeft <= 0 || secondsLeft > _timerConfig.CountdownThreshold)
+                return;
+
+            var countdownParams = new BoardAnnouncementParams
+            {
+                TextColor = _animConfig.CountdownTextColor,
+                DisplayDuration = _animConfig.CountdownDisplayDuration,
+                FadeOutDuration = _animConfig.CountdownFadeOutDuration,
+                FlyDistance = _animConfig.CountdownFlyDistance,
+                FadeOutEase = _animConfig.CountdownFadeOutEase
+            };
+
+            _announcementService.Show(secondsLeft.ToString(), countdownParams).Forget();
         }
     }
 }
