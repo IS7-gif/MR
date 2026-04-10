@@ -8,6 +8,7 @@ using Project.Scripts.Services.Bot;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Services.Timer;
 using VContainer;
 using VContainer.Unity;
 
@@ -41,6 +42,8 @@ namespace Project.Scripts.DI
             builder.Register<IReadyPulseCoordinator, ReadyPulseCoordinator>(Lifetime.Singleton);
 
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
+            builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
+            builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
 
             if (levelConfig.BotConfig)
             {

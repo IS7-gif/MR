@@ -145,6 +145,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (_hpLagBar)
                 _hpLagBar.SetFill(viewModel.HPFill.CurrentValue);
 
+            viewModel.SilentDrain
+                .Subscribe(fill =>
+                {
+                    _hpBar?.SetFill(fill);
+                    _hpLagBar?.SetFill(fill);
+                })
+                .AddTo(_disposables);
+
             viewModel.HPFill
                 .Skip(1)
                 .Subscribe(fill =>

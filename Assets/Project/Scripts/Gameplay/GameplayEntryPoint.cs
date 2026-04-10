@@ -16,6 +16,7 @@ using Project.Scripts.Shared.Rules;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
+using Project.Scripts.Services.Timer;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Grid;
 using UnityEngine;
@@ -57,6 +58,8 @@ namespace Project.Scripts.Gameplay
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
         private GameAudioController _gameAudioController;
+        private IBattleTimerService _battleTimerService;
+        private IOvertimeService _overtimeService;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -75,6 +78,9 @@ namespace Project.Scripts.Gameplay
         {
             if (null == _moveBarService)
                 return;
+
+            _battleTimerService?.Tick(Time.deltaTime);
+            _overtimeService?.Tick(Time.deltaTime);
 
             if (false == _gameStateService.IsPlaying)
                 return;
@@ -126,7 +132,9 @@ namespace Project.Scripts.Gameplay
             IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter,
             BattleHUDViewModel battleHUDViewModel,
-            IBoardBoundsProvider boardBoundsProvider)
+            IBoardBoundsProvider boardBoundsProvider,
+            IBattleTimerService battleTimerService,
+            IOvertimeService overtimeService)
         {
             _eventBus = eventBus;
             _audioService = audioService;
@@ -145,6 +153,8 @@ namespace Project.Scripts.Gameplay
             _gameResultPresenter = gameResultPresenter;
             _battleHUDViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
+            _battleTimerService = battleTimerService;
+            _overtimeService = overtimeService;
         }
 
 
@@ -222,6 +232,7 @@ namespace Project.Scripts.Gameplay
             _gameAudioController.StartMusic();
 
             _gameResultPresenter.Initialize();
+            _battleTimerService.Initialize();
 
 #if UNITY_EDITOR
             var editHandler = gameObject.AddComponent<BoardEditClickHandler>();

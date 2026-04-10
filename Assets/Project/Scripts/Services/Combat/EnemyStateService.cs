@@ -60,6 +60,18 @@ namespace Project.Scripts.Services.Combat
             _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
         }
 
+        public void ForceApplyDamage(int amount)
+        {
+            if (CurrentHP <= 0 || amount <= 0)
+                return;
+
+            CurrentHP = Math.Max(0, CurrentHP - amount);
+            _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP, silent: true));
+
+            if (CurrentHP == 0)
+                _eventBus.Publish(new EnemyDefeatedEvent());
+        }
+
 
         private void OnEnemyAvatarActivated(EnemyAvatarActivatedEvent e)
         {

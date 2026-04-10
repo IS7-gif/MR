@@ -5,12 +5,12 @@ using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
-using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
+using R3;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.HUD
@@ -29,6 +29,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public float BoardTopWorldY => _boardBounds.BoardTopWorldY;
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
+        public ReadOnlyReactiveProperty<int> TimerSeconds => _timerSeconds;
 
 
         private readonly EventBus _eventBus;
@@ -40,8 +41,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly TileKindPaletteConfig _palette;
         private readonly LevelConfig _levelConfig;
         private readonly IBoardBoundsProvider _boardBounds;
+        private readonly BattleTimerConfig _battleTimerConfig;
         private HeroSlotViewModel[] _playerHeroSlots;
         private HeroSlotViewModel[] _enemyHeroSlots;
+        private readonly ReactiveProperty<int> _timerSeconds;
 
 
         public BattleHUDViewModel(
@@ -56,7 +59,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             IBoardBoundsProvider boardBounds,
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
-            IAvatarGroupDefenseService groupDefense)
+            IAvatarGroupDefenseService groupDefense,
+            BattleTimerConfig battleTimerConfig)
         {
             _eventBus = eventBus;
             _enemyState = enemyState;
@@ -70,6 +74,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
             GroupDefense = groupDefense;
+            _battleTimerConfig = battleTimerConfig;
+            _timerSeconds = new ReactiveProperty<int>((int)battleTimerConfig.BattleDuration);
         }
 
 
@@ -106,12 +112,14 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             Disposables.Add(_eventBus.Subscribe<HeroEnergyChangedEvent>(OnHeroEnergyChanged));
             Disposables.Add(_eventBus.Subscribe<HeroHPChangedEvent>(OnHeroHPChanged));
             Disposables.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            Disposables.Add(_eventBus.Subscribe<BattleTimerChangedEvent>(OnBattleTimerChanged));
 
             return UniTask.CompletedTask;
         }
 
         protected override void OnCleanup()
         {
+            _timerSeconds.Dispose();
             PlayerAvatar?.Dispose();
             EnemyAvatar?.Dispose();
 
@@ -140,12 +148,17 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             if (null == slots || e.SlotIndex < 0 || e.SlotIndex >= slots.Length)
                 return;
 
-            slots[e.SlotIndex]?.UpdateHP(e.Current, e.Max);
+            slots[e.SlotIndex]?.UpdateHP(e.Current, e.Max, e.Silent);
         }
 
         private void OnHeroDefeated(HeroDefeatedEvent e)
         {
             // Reserved for future side effects (sound, particles, etc.).
+        }
+
+        private void OnBattleTimerChanged(BattleTimerChangedEvent e)
+        {
+            _timerSeconds.Value = (int)e.TimeRemaining;
         }
 
         private HeroSlotViewModel[] CreateHeroSlotViewModels(

@@ -95,13 +95,13 @@ namespace Project.Scripts.Services.Combat
             return true;
         }
 
-        public void ApplyDamageToHero(BattleSide side, int slotIndex, int amount)
+        public void ApplyDamageToHero(BattleSide side, int slotIndex, int amount, bool silent = false)
         {
             if (slotIndex is < 0 or >= SlotCount || amount <= 0)
                 return;
 
             ref var slot = ref GetSlotRef(side, slotIndex);
-            ApplyHPChange(ref slot, side, slotIndex, -amount);
+            ApplyHPChange(ref slot, side, slotIndex, -amount, silent);
         }
 
         public void ApplyHealToHero(BattleSide side, int slotIndex, int amount)
@@ -142,7 +142,7 @@ namespace Project.Scripts.Services.Combat
             _eventBus.Publish(new HeroEnergyChangedEvent(side, slotIndex, 0, slot.MaxEnergy));
         }
 
-        private void ApplyHPChange(ref HeroSlotState slot, BattleSide side, int slotIndex, int delta)
+        private void ApplyHPChange(ref HeroSlotState slot, BattleSide side, int slotIndex, int delta, bool silent = false)
         {
             if (false == slot.IsAssigned || slot.MaxHP <= 0)
                 return;
@@ -151,7 +151,7 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             slot.CurrentHP = Math.Clamp(slot.CurrentHP + delta, 0, slot.MaxHP);
-            _eventBus.Publish(new HeroHPChangedEvent(side, slotIndex, slot.CurrentHP, slot.MaxHP));
+            _eventBus.Publish(new HeroHPChangedEvent(side, slotIndex, slot.CurrentHP, slot.MaxHP, silent));
 
             if (slot.CurrentHP > 0)
                 return;

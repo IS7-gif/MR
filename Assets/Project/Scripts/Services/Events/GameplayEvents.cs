@@ -41,12 +41,14 @@ namespace Project.Scripts.Services.Events
     {
         public int Current { get; }
         public int Max { get; }
+        public bool Silent { get; }
 
 
-        public EnemyHPChangedEvent(int current, int max)
+        public EnemyHPChangedEvent(int current, int max, bool silent = false)
         {
             Current = current;
             Max = max;
+            Silent = silent;
         }
     }
 
@@ -70,12 +72,14 @@ namespace Project.Scripts.Services.Events
     {
         public int Current { get; }
         public int Max { get; }
+        public bool Silent { get; }
 
 
-        public PlayerHPChangedEvent(int current, int max)
+        public PlayerHPChangedEvent(int current, int max, bool silent = false)
         {
             Current = current;
             Max = max;
+            Silent = silent;
         }
     }
 
@@ -85,14 +89,16 @@ namespace Project.Scripts.Services.Events
         public int SlotIndex { get; }
         public int Current { get; }
         public int Max { get; }
+        public bool Silent { get; }
 
 
-        public HeroHPChangedEvent(BattleSide side, int slotIndex, int current, int max)
+        public HeroHPChangedEvent(BattleSide side, int slotIndex, int current, int max, bool silent = false)
         {
             Side = side;
             SlotIndex = slotIndex;
             Current = current;
             Max = max;
+            Silent = silent;
         }
     }
 
@@ -259,5 +265,23 @@ namespace Project.Scripts.Services.Events
             Winner = winner;
             IsFlawless = isFlawless;
         }
+    }
+
+    public readonly struct BattleTimerChangedEvent
+    {
+        public float TimeRemaining { get; }
+        public bool IsWarning { get; }
+
+
+        public BattleTimerChangedEvent(float timeRemaining, bool isWarning)
+        {
+            TimeRemaining = timeRemaining;
+            IsWarning = isWarning;
+        }
+    }
+
+    public readonly struct OvertimeStartedEvent
+    {
+
     }
 }

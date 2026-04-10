@@ -18,7 +18,7 @@ MonoBehaviour:
   _knockbackDistance: 0.2
   _knockbackDuration: 0.3
   _knockbackEase: 6
-  _resultScreenDelay: 0.4
+  _resultScreenDelay: 1
   _hpBarLagDelay: 0.2
   _hpBarLagDuration: 1
   _hpBarLagEase: 9
@@ -32,6 +32,10 @@ MonoBehaviour:
   _sourceHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _attackTargetColor: {r: 1, g: 0.15, b: 0.15, a: 1}
   _healTargetColor: {r: 0.15, g: 1, b: 0.25, a: 1}
+  _flawlessDisplayDuration: 1
+  _flawlessFadeOutDuration: 0.35
+  _flawlessFlyDistance: 80
+  _flawlessFadeOutEase: 5
   _damageNumberColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   _healNumberColor: {r: 0.25, g: 1, b: 0.25, a: 1}
   _floatDamageDistance: 0.75

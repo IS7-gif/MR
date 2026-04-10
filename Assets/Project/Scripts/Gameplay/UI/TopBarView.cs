@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Gameplay.Battle.HUD;
 using Project.Scripts.Services.UISystem;
+using R3;
 using TMPro;
 using UnityEngine;
 
@@ -12,10 +13,10 @@ namespace Project.Scripts.Gameplay.UI
         [SerializeField] private RectTransform _topContainer;
 
         [Tooltip("Отображает имя противника")]
-        [SerializeField] private TMP_Text _enemyNameText;
+        [SerializeField] private TMP_Text _enemyNameTMP;
 
-        [Tooltip("Зарезервировано для таймера или дополнительного ярлыка - привязка добавится при готовности сервиса таймера")]
-        [SerializeField] private TMP_Text _secondaryText;
+        [Tooltip("таймер боя")]
+        [SerializeField] private TMP_Text _timerTMP;
 
 
         private Canvas _canvas;
@@ -25,8 +26,10 @@ namespace Project.Scripts.Gameplay.UI
         {
             _canvas = GetComponentInParent<Canvas>();
 
-            if (_enemyNameText)
-                _enemyNameText.text = ViewModel.EnemyName;
+            if (_enemyNameTMP)
+                _enemyNameTMP.text = ViewModel.EnemyName;
+
+            Disposables.Add(ViewModel.TimerSeconds.Subscribe(OnTimerSecondsChanged));
 
             ApplySafeArea();
             ApplyBoardWidth();
@@ -46,6 +49,16 @@ namespace Project.Scripts.Gameplay.UI
         }
 #endif
 
+
+        private void OnTimerSecondsChanged(int totalSeconds)
+        {
+            if (false == _timerTMP)
+                return;
+
+            var minutes = totalSeconds / 60;
+            var seconds = totalSeconds % 60;
+            _timerTMP.text = $"{minutes:00}:{seconds:00}";
+        }
 
         private void ApplySafeArea()
         {

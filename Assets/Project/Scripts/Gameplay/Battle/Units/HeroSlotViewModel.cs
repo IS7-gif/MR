@@ -20,10 +20,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
+        public Observable<float> SilentDrain => _silentDrain;
 
 
         private readonly Subject<int> _hit = new();
         private readonly Subject<int> _heal = new();
+        private readonly Subject<float> _silentDrain = new();
         private int _prevHP;
 
 
@@ -51,15 +53,29 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsActivatable.Value = IsAssigned && EnergyFill.Value >= 1f;
         }
 
-        public void UpdateHP(int current, int max)
+        public void UpdateHP(int current, int max, bool silent = false)
         {
+            var fill = max > 0 ? (float)current / max : 0f;
+
+            if (silent)
+            {
+                _prevHP = current;
+                _silentDrain.OnNext(fill);
+                if (current <= 0)
+                {
+                    HPFill.Value = fill;
+                    IsDefeated.Value = true;
+                }
+                return;
+            }
+
             if (current < _prevHP)
                 _hit.OnNext(_prevHP - current);
             else if (current > _prevHP)
                 _heal.OnNext(current - _prevHP);
 
             _prevHP = current;
-            HPFill.Value = max > 0 ? (float)current / max : 0f;
+            HPFill.Value = fill;
 
             if (current <= 0)
                 IsDefeated.Value = true;
@@ -73,6 +89,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsDefeated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
+            _silentDrain.Dispose();
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BattleViewConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
+            builder.RegisterInstance(_mainConfig.BattleTimerConfig);
 
             builder.Register<EventBus>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton);

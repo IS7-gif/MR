@@ -53,6 +53,18 @@ namespace Project.Scripts.Services.Combat
                 _eventBus.Publish(new PlayerDefeatedEvent());
         }
 
+        public void ForceApplyDamage(int amount)
+        {
+            if (CurrentHP <= 0 || amount <= 0)
+                return;
+
+            CurrentHP = Math.Max(0, CurrentHP - amount);
+            _eventBus.Publish(new PlayerHPChangedEvent(CurrentHP, MaxHP, silent: true));
+
+            if (CurrentHP == 0)
+                _eventBus.Publish(new PlayerDefeatedEvent());
+        }
+
         public void Dispose()
         {
             _subscriptions.Dispose();

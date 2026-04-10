@@ -24,8 +24,8 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Кривая ослабления для обеих фаз отбрасывания")]
         [SerializeField] private Ease _knockbackEase = Ease.OutQuad;
 
-        [Tooltip("Задержка в секундах перед появлением окна победы/поражения после завершения финальной анимации попадания")]
-        [SerializeField] private float _resultScreenDelay = 0.4f;
+        [Tooltip("Пауза в секундах перед появлением окна победы/поражения - даёт игроку момент осознать исход боя")]
+        [SerializeField] private float _resultScreenDelay = 1f;
 
         [Header("HP Bar Animation")]
         [Tooltip("Задержка в секундах перед началом опустошения лаг-полосы после получения урона")]

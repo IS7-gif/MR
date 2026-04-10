@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 5141049167624148490}
   - component: {fileID: 3745623684306351930}
   m_Layer: 5
-  m_Name: TopSafeAreaContainer
+  m_Name: TopBarView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -229,8 +229,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.UI.TopBarView
   _topContainer: {fileID: 1326549904979899173}
-  _enemyNameText: {fileID: 5703439899462562435}
-  _secondaryText: {fileID: 6030672861370117449}
+  _enemyNameTMP: {fileID: 5703439899462562435}
+  _timerTMP: {fileID: 6030672861370117449}
 --- !u!1 &6385752582986930602
 GameObject:
   m_ObjectHideFlags: 0
