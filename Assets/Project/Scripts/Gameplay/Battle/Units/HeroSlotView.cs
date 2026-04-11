@@ -1,7 +1,6 @@
 using DG.Tweening;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
-using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
@@ -10,10 +9,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
 {
     public class HeroSlotView : MonoBehaviour, ITargetable
     {
-        [Tooltip("Фоновый SpriteRenderer - определяет визуальные границы слота и масштабируется через SetSize")]
+        [Tooltip("Background SpriteRenderer - tinted with the hero element color; defines slot bounds and is scaled via SetSize")]
         [SerializeField] private SpriteRenderer _background;
 
-        [Tooltip("SpriteRenderer портрета - при назначении окрашивается в цвет элемента героя")]
+        [Tooltip("Portrait SpriteRenderer - displays the character sprite and flashes on hit")]
         [SerializeField] private SpriteRenderer _portrait;
 
         [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
@@ -124,13 +123,18 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (false == viewModel.IsAssigned)
                 return;
 
-            _portrait.color = viewModel.SlotColor;
+            if (_background)
+                _background.color = viewModel.SlotColor;
 
             if (viewModel.Portrait)
                 _portrait.sprite = viewModel.Portrait;
 
             viewModel.IsDefeated
-                .Subscribe(defeated => _portrait.color = defeated ? Color.gray : viewModel.SlotColor)
+                .Subscribe(defeated =>
+                {
+                    if (_background)
+                        _background.color = defeated ? Color.gray : viewModel.SlotColor;
+                })
                 .AddTo(_disposables);
         }
 
@@ -233,10 +237,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 return;
 
             _originalPortraitColor = _portrait.color;
-
-            viewModel.IsDefeated
-                .Subscribe(defeated => _originalPortraitColor = defeated ? Color.gray : viewModel.SlotColor)
-                .AddTo(_disposables);
 
             viewModel.Hit
                 .Subscribe(_ =>

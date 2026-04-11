@@ -16,6 +16,7 @@ MonoBehaviour:
   _uiReservedHeightPercent: 0.4
   _tileScale: 1.162
   _framePaddingPercent: 0
+  _frameExtraHeight: 0.08
   _maskTopPadding: -0.3
   _boardBottomPadding: 0.15
   _minMatchLength: 3

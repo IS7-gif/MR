@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleViewConfig
   _battleHUDViewPrefab: {fileID: 8010516392992138223, guid: a5c1a4861b5595a49a0a892fc037b33b, type: 3}
   _battleAreaTopPadding: 0.4
-  _playerAvatarSprite: {fileID: 21300000, guid: fb2e99b3351c91f42a85dc70b091754c, type: 3}
-  _enemyAvatarSprite: {fileID: 21300000, guid: fb2e99b3351c91f42a85dc70b091754c, type: 3}
+  _playerAvatarSprite: {fileID: 21300000, guid: 58f5ea7e8dabe60418bb926caa5a3bf1, type: 3}
+  _enemyAvatarSprite: {fileID: 21300000, guid: 390a127247ade0843b6e4f993c61122c, type: 3}

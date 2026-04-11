@@ -70,7 +70,7 @@ namespace Project.Scripts.Configs.Board
         public float UIReservedHeightPercent => _uiReservedHeightPercent;
         public float TileScale => _tileScale;
         public float FramePaddingPercent => _framePaddingPercent;
-        public float FrameExtraHeight    => _frameExtraHeight;
+        public float FrameExtraHeight => _frameExtraHeight;
         public float MaskTopPadding => _maskTopPadding;
         public float BoardBottomPadding => _boardBottomPadding;
         public int MinMatchLength => _minMatchLength;

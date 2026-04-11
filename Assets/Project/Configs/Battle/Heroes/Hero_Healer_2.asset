@@ -16,5 +16,5 @@ MonoBehaviour:
   _abilityType: 1
   _abilityPower: 50
   _maxEnergy: 20
-  _portrait: {fileID: 21300000, guid: fb2e99b3351c91f42a85dc70b091754c, type: 3}
+  _portrait: {fileID: 21300000, guid: 27e02dbeb09a77c46944c9428156ae3d, type: 3}
   _displayName: 
