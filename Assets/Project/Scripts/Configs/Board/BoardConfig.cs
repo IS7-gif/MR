@@ -1,45 +1,78 @@
 using Project.Scripts.Tiles;
 using UnityEngine;
+#if UNITY_EDITOR
+using System;
+#endif
 
 namespace Project.Scripts.Configs.Board
 {
     [CreateAssetMenu(fileName = "BoardConfig", menuName = "Configs/Board Config")]
     public class BoardConfig : ScriptableObject
     {
-        [Tooltip("Доля ширины экрана, зарезервированная как отступ с каждой стороны (0 = без отступа, 0.5 = половина экрана)")]
-        [SerializeField] [Range(0f, 0.5f)] private float _boardPaddingPercent = 0.08f;
+        [Header("Tile Grid")]
+        [Tooltip("Доля ширины экрана, зарезервированная как отступ вокруг сетки тайлов (0 = без отступа, 0.5 = половина экрана)")]
+        [Range(0f, 0.5f)]
+        [SerializeField] private float _tilePaddingPercent = 0.166f;
 
         [Tooltip("Доля высоты экрана, зарезервированная для UI (счёт, кнопки и т.д.) - доска не будет расширяться в эту область")]
-        [SerializeField] [Range(0f, 0.5f)] private float _uiReservedHeightPercent = 0.4f;
+        [Range(0f, 0.5f)]
+        [SerializeField] private float _uiReservedHeightPercent = 0.4f;
 
-        [Tooltip("Визуальный размер тайла относительно ячейки (1 = заполняет ячейку полностью, <1 = зазоры между тайлами)")]
-        [SerializeField] [Range(0.5f, 1f)] private float _tileScale = 0.85f;
+        [Tooltip("Визуальный размер тайла относительно ячейки (1 = заполняет ячейку полностью, <1 = зазоры, >1 = тайлы перекрываются прозрачными краями спрайта)")]
+        [Range(0.5f, 2f)]
+        [SerializeField] private float _tileScale = 1.162f;
 
-        [Tooltip("Дополнительное пространство в единицах Unity вокруг доски для спрайта рамки")]
-        [SerializeField] private float _framePadding = 0.1f;
+        [Header("Frame / Background")]
+        [Tooltip("Доля ширины экрана, зарезервированная как отступ вокруг рамки-фона доски. " +
+                 "Должна быть меньше TilePaddingPercent, чтобы рамка выступала за тайлы. " +
+                 "Равна TilePaddingPercent - рамка вплотную к тайлам. Больше - рамка меньше тайлов (нетипично).")]
+        [Range(0f, 0.5f)]
+        [SerializeField] private float _framePaddingPercent = 0f;
 
-        [Tooltip("Сколько дополнительных рядов тайлов маска спавна открывает выше доски (скрывает тайлы, появляющиеся сверху)")]
-        [SerializeField] private float _maskTopPadding = 2f;
+        [Tooltip("Дополнительная высота рамки-фона в Unity units поверх высоты тайловой сетки. " +
+                 "0 = рамка по высоте точно под тайлы. >0 = рамка вытягивается вверх, тайловая сетка центрируется внутри.")]
+        [Range(0f, 5f)]
+        [SerializeField] private float _frameExtraHeight = 0.08f;
 
-        [Tooltip("Фиксированный отступ между нижним краем экрана и нижним краем доски, в единицах ячеек (1 = высота одного тайла). Одинаков для всех разрешений.")]
-        [SerializeField] [Range(0f, 5f)] private float _boardBottomPaddingCells = 0.65f;
+        [Header("Board Layout")]
+        [Tooltip("Сколько рядов тайлов маска открывает выше рамки (>0 - скрывает спавн сверху, <0 - обрезает тайлы внутри рамки сверху)")]
+        [Range(-2f, 3f)]
+        [SerializeField] private float _maskTopPadding = -0.3f;
+
+        [Tooltip("Отступ между нижним краем экрана и нижним краем доски, в единицах frame-ячейки (1 = высота одного тайла при framePaddingPercent). Одинаков для всех разрешений.")]
+        [Range(0f, 5f)]
+        [SerializeField] private float _boardBottomPadding = 0.15f;
 
         [Tooltip("Минимальное количество тайлов в ряду/столбце для засчитывания совпадения")]
-        [SerializeField] [Range(2, 6)] private int _minMatchLength = 3;
+        [Range(2, 6)]
+        [SerializeField] private int _minMatchLength = 3;
 
         [Tooltip("Максимальное соотношение ширины к высоте игровой области. На широких экранах контент обрамляется до этого соотношения (0.5 = 1:2)")]
-        [SerializeField] [Range(0.3f, 1f)] private float _maxAspectRatio = 0.5f;
+        [Range(0.3f, 1f)]
+        [SerializeField] private float _maxAspectRatio = 0.5f;
 
         [Tooltip("Префаб для инстанцирования каждого тайла")]
+        [Space(10)]
         [SerializeField] private Tile _tilePrefab;
 
 
-        public float BoardPaddingPercent => _boardPaddingPercent;
+#if UNITY_EDITOR
+        public static event Action LayoutChanged;
+
+        
+        private void OnValidate()
+        {
+            LayoutChanged?.Invoke();
+        }
+#endif
+
+        public float TilePaddingPercent => _tilePaddingPercent;
         public float UIReservedHeightPercent => _uiReservedHeightPercent;
         public float TileScale => _tileScale;
-        public float FramePadding => _framePadding;
+        public float FramePaddingPercent => _framePaddingPercent;
+        public float FrameExtraHeight    => _frameExtraHeight;
         public float MaskTopPadding => _maskTopPadding;
-        public float BoardBottomPaddingCells => _boardBottomPaddingCells;
+        public float BoardBottomPadding => _boardBottomPadding;
         public int MinMatchLength => _minMatchLength;
         public float MaxAspectRatio => _maxAspectRatio;
         public Tile TilePrefab => _tilePrefab;

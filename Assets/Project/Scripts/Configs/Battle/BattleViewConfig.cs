@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using System;
+#endif
 
 namespace Project.Scripts.Configs.Battle
 {
@@ -9,6 +12,7 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private GameObject _battleHUDViewPrefab;
 
         [Tooltip("Смещение по Y в мировых координатах, добавляемое выше верхнего края доски для позиционирования корня боевого HUD")]
+        [Range(0f, 1f)]
         [SerializeField] private float _battleAreaTopPadding = 0.4f;
 
         [Tooltip("Спрайт портрета аватара игрока (null = без спрайта)")]
@@ -17,6 +21,12 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Спрайт портрета аватара врага (null = без спрайта)")]
         [SerializeField] private Sprite _enemyAvatarSprite;
 
+
+#if UNITY_EDITOR
+        public static event Action LayoutChanged;
+
+        private void OnValidate() => LayoutChanged?.Invoke();
+#endif
 
         public GameObject BattleHUDViewPrefab => _battleHUDViewPrefab;
         public float BattleAreaTopPadding => _battleAreaTopPadding;

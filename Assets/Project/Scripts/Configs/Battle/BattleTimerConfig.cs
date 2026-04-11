@@ -9,7 +9,7 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private float _battleDuration = 180f;
         
         [Tooltip("Порог оставшегося времени в секундах, при котором начинается фаза эскалации боя - запускает объявление и игровые модификаторы")]
-        [SerializeField] private float _escalationThreshold = 15f;
+        [SerializeField] private float _escalationThreshold = 30f;
 
         [Tooltip("Фиксированный урон в секунду, применяемый к каждому герою во время Овертайма - чем больше текущее HP, тем дольше выживание")]
         [SerializeField] private int _heroDrainPerSecond = 200;

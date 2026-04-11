@@ -19,7 +19,7 @@ namespace Project.Scripts.Services.Grid
         private readonly TilePool _pool;
         private readonly Tile[,] _tiles;
         private readonly GridState _state;
-        private readonly float _cellSize;
+        private float _cellSize;
         private Vector3 _origin;
 
 
@@ -39,6 +39,10 @@ namespace Project.Scripts.Services.Grid
 
         // IGridView
         public void SetOrigin(Vector3 origin) => _origin = origin;
+
+#if UNITY_EDITOR
+        public void SetCellSize(float cellSize) => _cellSize = cellSize;
+#endif
 
         public Vector3 GridToWorld(GridPoint pos) =>
             _origin + new Vector3(pos.X * _cellSize, pos.Y * _cellSize, 0f);

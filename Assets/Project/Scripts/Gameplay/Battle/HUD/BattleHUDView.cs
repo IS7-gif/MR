@@ -14,6 +14,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 {
     public class BattleHUDView : BaseView<BattleHUDViewModel>
     {
+        private const int FloatingNumberDefaultPoolCapacity = 4;
+        private const int FloatingNumberMaxPoolSize = 16;
+        
+        
         [Tooltip("Четыре вида слота героя для стороны игрока, упорядочены слева направо (индексы 0-3)")]
         [SerializeField] private HeroSlotView[] _playerHeroSlots;
 
@@ -72,6 +76,14 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 ViewModel.BoardTopWorldY + _battleViewConfig.BattleAreaTopPadding,
                 0f);
         }
+
+#if UNITY_EDITOR
+        public void RefreshPosition()
+        {
+            PositionHUD();
+            PublishBattleAreaCenter();
+        }
+#endif
 
         private void PublishBattleAreaCenter()
         {
@@ -140,8 +152,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 actionOnGet: c => c.gameObject.SetActive(true),
                 actionOnRelease: c => { c.Kill(); c.gameObject.SetActive(false); },
                 actionOnDestroy: c => { if (c) Destroy(c.gameObject); },
-                defaultCapacity: 4,
-                maxSize: 16);
+                defaultCapacity: FloatingNumberDefaultPoolCapacity,
+                maxSize: FloatingNumberMaxPoolSize);
 
             ViewModel.EnemyAvatar.Hit
                 .Subscribe(dmg => SpawnFloatingNumber(dmg, FloatingNumberType.Damage, _enemyAvatarSlot.HitAnchor))

@@ -11,35 +11,43 @@ namespace Project.Scripts.Gameplay.Battle.Board
         [SerializeField] private SpriteMask _spriteMask;
 
 
-        public void Setup(int width, int height, float cellSize, float framePadding, float maskTopPadding)
+        /// <param name="frameWidth">Ширина рамки-фона в Unity units (независимо от размера тайлов).</param>
+        /// <param name="frameHeight">Высота рамки-фона в Unity units (независимо от размера тайлов).</param>
+        /// <param name="tileCellSize">Размер ячейки тайла — используется только для маски спавна.</param>
+        /// <param name="maskTopPadding">Количество дополнительных рядов выше доски, которые скрывает маска.</param>
+        public void Setup(float frameWidth, float frameHeight, float tileCellSize, float maskTopPadding)
         {
             if (_frame)
             {
-                var parentScale = _frame.transform.parent
-                    ? _frame.transform.parent.lossyScale
-                    : Vector3.one;
-
+                // Делим на lossyScale самого frame (включает его собственный localScale),
+                // чтобы итоговый мировой размер точно совпал с frameWidth/frameHeight.
+                var worldScale = _frame.transform.lossyScale;
                 _frame.size = new Vector2(
-                    (width * cellSize + framePadding * 2f) / parentScale.x,
-                    (height * cellSize + framePadding * 2f) / parentScale.y
+                    frameWidth  / worldScale.x,
+                    frameHeight / worldScale.y
                 );
             }
 
             if (_spriteMask && _spriteMask.sprite)
             {
-                var targetWidth = width * cellSize + framePadding * 2f;
-                var targetHeight = (height + maskTopPadding) * cellSize + framePadding;
-                var spriteSize = _spriteMask.sprite.bounds.size;
+                // Маска покрывает рамку снизу (frameBottom) и расширяется вверх на maskTopPadding ячеек
+                // выше тайловой области, чтобы скрыть тайлы, падающие сверху.
+                // localPosition сдвигается вверх на половину расширения, сохраняя нижний край у frameBottom.
+                var maskExtraHeight = maskTopPadding * tileCellSize;
+                var maskHeight      = Mathf.Max(0.01f, frameHeight + maskExtraHeight);
+                var maskOffsetY     = maskExtraHeight * 0.5f;
 
+                var spriteSize = _spriteMask.sprite.bounds.size;
                 var parentScale = _spriteMask.transform.parent
                     ? _spriteMask.transform.parent.lossyScale
                     : Vector3.one;
 
                 _spriteMask.transform.localScale = new Vector3(
-                    targetWidth / (spriteSize.x * parentScale.x),
-                    targetHeight / (spriteSize.y * parentScale.y),
+                    frameWidth / (spriteSize.x * parentScale.x),
+                    maskHeight / (spriteSize.y * parentScale.y),
                     1f
                 );
+                _spriteMask.transform.localPosition = new Vector3(0f, maskOffsetY, 0f);
             }
         }
     }

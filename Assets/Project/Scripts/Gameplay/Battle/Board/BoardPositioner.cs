@@ -19,43 +19,55 @@ namespace Project.Scripts.Gameplay.Battle.Board
             Apply();
         }
 
-        public void Apply(float cellSize = -1f)
+        public void Apply(float tileCellSize = -1f)
         {
             var cam = Camera.main;
             if (!cam || !_boardConfig || !_levelConfig)
                 return;
 
-            if (cellSize < 0f)
-                cellSize = ComputeCellSize(cam);
+            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions(cam);
 
-            transform.position = ComputeBoardCenter(cam, cellSize);
+            if (tileCellSize < 0f)
+                tileCellSize = ComputeTileCellSize(cam);
+
+            transform.position = ComputeBoardCenter(cam, frameHeight, frameCellSize);
 
             var boardView = GetComponent<BoardView>();
             if (boardView)
-                boardView.Setup(_levelConfig.Width, _levelConfig.Height, cellSize,
-                    _boardConfig.FramePadding, _boardConfig.MaskTopPadding);
+                boardView.Setup(frameWidth, frameHeight, tileCellSize, _boardConfig.MaskTopPadding);
         }
 
 
-        private Vector3 ComputeBoardCenter(Camera cam, float cellSize)
+        private Vector3 ComputeBoardCenter(Camera cam, float frameHeight, float frameCellSize)
         {
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var boardHeight = _levelConfig.Height * cellSize;
-            var bottomPadding = _boardConfig.BoardBottomPaddingCells * cellSize;
+            var bottomPadding = _boardConfig.BoardBottomPadding * frameCellSize;
 
-            return new Vector3(
-                cam.transform.position.x,
-                camBottomY + bottomPadding + boardHeight * 0.5f,
-                0f
-            );
+            return new Vector3(cam.transform.position.x, camBottomY + bottomPadding + frameHeight * 0.5f, 0f);
         }
 
-        private float ComputeCellSize(Camera cam)
+        private (float width, float height, float cellSize) ComputeFrameDimensions(Camera cam)
         {
             var camHeight = cam.orthographicSize * 2f;
             var camWidth = camHeight * GetAspect(cam);
+            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var byWidth = camWidth * (1f - _boardConfig.BoardPaddingPercent) / _levelConfig.Width;
+            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _levelConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var cellSize = Mathf.Min(byWidth, byHeight);
+
+            var frameWidth  = _levelConfig.Width  * cellSize;
+            var frameHeight = _levelConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
+            return (frameWidth, frameHeight, cellSize);
+        }
+
+        private float ComputeTileCellSize(Camera cam)
+        {
+            var camHeight = cam.orthographicSize * 2f;
+            var camWidth = camHeight * GetAspect(cam);
+            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
+
+            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _levelConfig.Width;
             var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
 
             return Mathf.Min(byWidth, byHeight);
@@ -64,9 +76,8 @@ namespace Project.Scripts.Gameplay.Battle.Board
         private static float GetAspect(Camera cam)
         {
             var h = UnityEngine.Device.Screen.height;
-            return h > 0
-                ? (float)UnityEngine.Device.Screen.width / h
-                : cam.aspect;
+            
+            return h > 0 ? (float)UnityEngine.Device.Screen.width / h : cam.aspect;
         }
     }
 }

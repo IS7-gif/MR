@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a6964c0f264d5a48a0193de5b3060fd, type: 3}
-  m_Name: VoidTileConfig
+  m_Name: Tile_Void
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.TileConfig
   _kind: 14
-  _sprite: {fileID: 21300000, guid: 879c2ca5d35e1054cbee163f55f2888a, type: 3}
+  _sprite: {fileID: 21300000, guid: e606f0ed2ee7bd04b9beebdb4ab6fe71, type: 3}
   _behaviour: {fileID: 11400000, guid: db5a8548d6cefc448812af07804ca8f2, type: 2}

@@ -63,6 +63,7 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
+        private TilePool _pool;
         private float _cellSize;
         private int _lastWidth;
         private int _lastHeight;
@@ -105,12 +106,20 @@ namespace Project.Scripts.Gameplay
         {
             if (_moveBarService?.IsEnabled == true)
                 _uiService?.Close<MoveBarView>();
+            
             _uiService?.Close<TopBarView>();
+            
             if (_battleHUDView)
                 _battleHUDView.Close();
+            
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
+            
+#if UNITY_EDITOR
+            BoardConfig.LayoutChanged -= OnLayoutChanged;
+            BattleViewConfig.LayoutChanged -= OnBattleLayoutChanged;
+#endif
         }
 
 
@@ -170,18 +179,17 @@ namespace Project.Scripts.Gameplay
             if (_moveBarService.IsEnabled)
                 await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
-            var cellSize = ComputeCellSize();
-            var boardCenter = ComputeBoardCenter(cellSize);
+            var cellSize = ComputeTileCellSize();
+            var (frameWidth, frameHeight, _) = ComputeFrameDimensions();
+            var boardCenter = ComputeBoardCenter();
             _boardView.transform.position = boardCenter;
 
-            var boardTopWorldY = boardCenter.y + _levelConfig.Height * cellSize * 0.5f;
-            var boardHalfWidth = _levelConfig.Width * cellSize * 0.5f;
+            var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
+            var boardHalfWidth = frameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, cellSize);
 
             await _uiService.Show<TopBarView, BattleHUDViewModel>(_battleHUDViewModel);
 
-            // InputService is created here so BattleHUDView can subscribe to its events.
-            // The input map is enabled later via InitAsync, so no input fires until then.
             _inputService = new InputService(_inputConfig);
 
             var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
@@ -196,14 +204,16 @@ namespace Project.Scripts.Gameplay
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
 
 #if UNITY_EDITOR
+            _pool = pool;
             _gridManager = gridManager;
             _cellSize = cellSize;
             _lastWidth = Screen.width;
             _lastHeight = Screen.height;
+            BoardConfig.LayoutChanged += OnLayoutChanged;
+            BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
 #endif
 
-            _boardView.Setup(_levelConfig.Width, _levelConfig.Height, cellSize,
-                _boardConfig.FramePadding, _boardConfig.MaskTopPadding);
+            _boardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig);
 
@@ -246,44 +256,74 @@ namespace Project.Scripts.Gameplay
         }
 
 #if UNITY_EDITOR
-        private void ApplyLiveResize()
+        private void OnLayoutChanged()  => ApplyLiveLayout();
+        private void OnBattleLayoutChanged() => _battleHUDView?.RefreshPosition();
+
+        private void ApplyLiveResize() => ApplyLiveLayout();
+
+        private void ApplyLiveLayout()
         {
-            var boardCenter = ComputeBoardCenter(_cellSize);
+            _cellSize = ComputeTileCellSize();
+            var (frameWidth, frameHeight, _) = ComputeFrameDimensions();
+            var boardCenter = ComputeBoardCenter();
             _boardView.transform.position = boardCenter;
+
+            _gridManager.SetCellSize(_cellSize);
 
             var newOrigin = ComputeGridOrigin(boardCenter, _cellSize);
             _gridManager.SetOrigin(newOrigin);
             _gridManager.RepositionAllTiles();
 
-            var boardTopWorldY = boardCenter.y + _levelConfig.Height * _cellSize * 0.5f;
-            var boardHalfWidth = _levelConfig.Width * _cellSize * 0.5f;
+            _boardView.Setup(frameWidth, frameHeight, _cellSize, _boardConfig.MaskTopPadding);
+            _pool.UpdateScale(_cellSize, _boardConfig.TileScale);
+
+            var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
+            var boardHalfWidth = frameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
+
+            _battleHUDView?.RefreshPosition();
         }
 #endif
 
-        private float ComputeCellSize()
+        private (float width, float height, float cellSize) ComputeFrameDimensions()
+        {
+            var cam  = Camera.main;
+            var camHeight = cam.orthographicSize * 2f;
+            var camWidth = camHeight * cam.aspect;
+            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
+
+            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _levelConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var cellSize = Mathf.Min(byWidth, byHeight);
+
+            var frameWidth  = _levelConfig.Width  * cellSize;
+            var frameHeight = _levelConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
+            return (frameWidth, frameHeight, cellSize);
+        }
+
+        private float ComputeTileCellSize()
         {
             var cam = Camera.main;
             var camHeight = cam.orthographicSize * 2f;
             var camWidth = camHeight * cam.aspect;
             var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var cellSizeByWidth = effectiveWidth * (1f - _boardConfig.BoardPaddingPercent) / _levelConfig.Width;
-            var cellSizeByHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _levelConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
 
-            return Mathf.Min(cellSizeByWidth, cellSizeByHeight);
+            return Mathf.Min(byWidth, byHeight);
         }
 
-        private Vector3 ComputeBoardCenter(float cellSize)
+        private Vector3 ComputeBoardCenter()
         {
             var cam = Camera.main;
+            var (_, frameHeight, frameCellSize) = ComputeFrameDimensions();
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var boardHeight = _levelConfig.Height * cellSize;
-            var bottomPadding = _boardConfig.BoardBottomPaddingCells * cellSize;
+            var bottomPadding = _boardConfig.BoardBottomPadding * frameCellSize;
 
             return new Vector3(
                 cam.transform.position.x,
-                camBottomY + bottomPadding + boardHeight * 0.5f,
+                camBottomY + bottomPadding + frameHeight * 0.5f,
                 0f
             );
         }

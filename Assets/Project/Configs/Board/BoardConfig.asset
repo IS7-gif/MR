@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d3fb30c2784ab14f8662ac32eebd3b3, type: 3}
   m_Name: BoardConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BoardConfig
-  _boardPaddingPercent: 0.08
+  _tilePaddingPercent: 0.166
   _uiReservedHeightPercent: 0.4
-  _tileScale: 0.85
-  _framePadding: 0.1
-  _maskTopPadding: 2
-  _boardBottomPaddingCells: 0.65
+  _tileScale: 1.162
+  _framePaddingPercent: 0
+  _maskTopPadding: -0.3
+  _boardBottomPadding: 0.15
   _minMatchLength: 3
   _maxAspectRatio: 0.5
   _tilePrefab: {fileID: 1773954573927491530, guid: a5207b55f0bde394299f025baad22fc0, type: 3}
