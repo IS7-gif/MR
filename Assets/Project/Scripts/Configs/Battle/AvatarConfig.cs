@@ -25,6 +25,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Множитель энергии для тайлов, не совпадающих с типом ячейки аватара")]
         [SerializeField] private float _secondaryTileMultiplier = 1f;
 
+        [Tooltip("Portrait sprite displayed in the avatar slot (null = empty frame)")]
+        [SerializeField] private Sprite _portrait;
+
 
         public int MaxHP => _maxHP;
         public int MaxEnergy => _maxEnergy;
@@ -32,5 +35,6 @@ namespace Project.Scripts.Configs.Battle
         public int AbilityPower => _abilityPower;
         public float PrimaryTileMultiplier => _primaryTileMultiplier;
         public float SecondaryTileMultiplier => _secondaryTileMultiplier;
+        public Sprite Portrait => _portrait;
     }
 }

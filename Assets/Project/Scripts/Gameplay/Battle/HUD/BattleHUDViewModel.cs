@@ -84,7 +84,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             PlayerAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Player,
-                _battleViewConfig.PlayerAvatarSprite,
+                _levelConfig.PlayerAvatarConfig.Portrait,
                 _playerState.CurrentHP,
                 _playerState.MaxHP,
                 _battleAnimationConfig,
@@ -93,7 +93,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             EnemyAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Enemy,
-                _battleViewConfig.EnemyAvatarSprite,
+                _levelConfig.EnemyAvatarConfig.Portrait,
                 _enemyState.CurrentHP,
                 _enemyState.MaxHP,
                 _battleAnimationConfig,
