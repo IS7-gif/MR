@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.UI;
@@ -11,6 +12,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
 {
     public class AvatarSlotView : MonoBehaviour, ITargetable
     {
+        private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
+        private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
+
         [Tooltip("Фоновый SpriteRenderer - определяет границы слота и масштабируется через SetSize")]
         [SerializeField] private SpriteRenderer _background;
 
@@ -42,11 +46,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private AvatarSlotViewModel _viewModel;
         private IAvatarGroupDefenseService _groupDefense;
         private BattleAnimationConfig _config;
+        private UnitDeathConfig _deathConfig;
         private CompositeDisposable _disposables;
         private Color _originalPortraitColor;
         private Vector3 _originalLocalPos;
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
+        private MaterialPropertyBlock _portraitPropertyBlock;
 
 
         private void OnDestroy()
@@ -57,11 +63,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
         }
 
 
-        public void Bind(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, IAvatarGroupDefenseService groupDefense)
+        public void Bind(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, IAvatarGroupDefenseService groupDefense, UnitDeathConfig deathConfig)
         {
             _viewModel = viewModel;
             _groupDefense = groupDefense;
             _config = viewModel.AnimConfig;
+            _deathConfig = deathConfig;
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
             _originalLocalPos = transform.localPosition;
@@ -70,6 +77,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindHPBars(viewModel);
             BindEnergyBar(viewModel, pulseCoordinator);
             BindHitReaction(viewModel);
+            BindDeathState(viewModel);
         }
 
         public bool IsValidTarget(UnitDescriptor source)
@@ -123,6 +131,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void BindPortrait(AvatarSlotViewModel viewModel)
         {
+            if (_background)
+                _background.color = viewModel.SlotColor;
+
             if (false == _portrait)
                 return;
 
@@ -141,8 +152,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             viewModel.SilentDrain
                 .Subscribe(fill =>
                 {
-                    _hpBar?.SetFill(fill);
-                    _hpLagBar?.SetFill(fill);
+                    _hpBar?.SnapFill(fill);
+                    _hpLagBar?.SnapFill(fill);
                 })
                 .AddTo(_disposables);
 
@@ -217,6 +228,58 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 })
                 .AddTo(_disposables);
         }
+
+        private void BindDeathState(AvatarSlotViewModel viewModel)
+        {
+            viewModel.IsDefeated
+                .Subscribe(defeated =>
+                {
+                    var visuals = _deathConfig ? _deathConfig.AvatarDeathVisuals : default;
+
+                    if (_background && visuals.ChangeBackgroundColor)
+                        _background.color = defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor;
+
+                    if (visuals.ApplyDeathFill)
+                        SetPortraitDeathFill(defeated);
+
+                    if (_portrait && visuals.DisablePortrait)
+                        _portrait.enabled = false == defeated;
+
+                    if (visuals.DisableHpBar)
+                    {
+                        if (_hpBar)
+                            _hpBar.gameObject.SetActive(false == defeated);
+
+                        if (_hpLagBar)
+                            _hpLagBar.gameObject.SetActive(false == defeated);
+                    }
+
+                    if (_energyBar && visuals.DisableEnergyBar)
+                        _energyBar.gameObject.SetActive(false == defeated);
+                })
+                .AddTo(_disposables);
+        }
+
+        private void SetPortraitDeathFill(bool active)
+        {
+            if (false == _portrait)
+                return;
+
+            _portraitPropertyBlock ??= new MaterialPropertyBlock();
+
+            if (false == active)
+            {
+                _portraitPropertyBlock.Clear();
+                _portrait.SetPropertyBlock(_portraitPropertyBlock);
+                return;
+            }
+
+            _portraitPropertyBlock.Clear();
+            _portraitPropertyBlock.SetFloat(FillEnabledShaderId, 1f);
+            _portraitPropertyBlock.SetFloat(FillReplaceShaderId, 1f);
+            _portrait.SetPropertyBlock(_portraitPropertyBlock);
+        }
+
 
         private void PlayHitFlash()
         {

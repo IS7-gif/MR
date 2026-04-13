@@ -1,4 +1,5 @@
 using System;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
@@ -14,13 +15,15 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
+        private readonly DebugConfig _debugConfig;
         private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly CompositeDisposable _subscriptions = new();
 
 
-        public EnemyStateService(EventBus eventBus, LevelConfig levelConfig, IAvatarGroupDefenseService groupDefense)
+        public EnemyStateService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig, IAvatarGroupDefenseService groupDefense)
         {
             _eventBus = eventBus;
+            _debugConfig = debugConfig;
             _groupDefense = groupDefense;
             MaxHP = levelConfig.EnemyAvatarConfig.MaxHP;
             CurrentHP = levelConfig.EnemyAvatarConfig.MaxHP;
@@ -43,7 +46,8 @@ namespace Project.Scripts.Services.Combat
             if (!_groupDefense.IsExposed(BattleSide.Enemy))
                 return;
 
-            Debug.Log($"[Combat] Damage applied to enemy for {amount} (HP: {CurrentHP} → {Math.Max(0, CurrentHP - amount)}/{MaxHP})");
+            if (_debugConfig.LogCombatDamage)
+                Debug.Log($"[Combat] Damage applied to enemy for {amount} (HP: {CurrentHP} → {Math.Max(0, CurrentHP - amount)}/{MaxHP})");
             CurrentHP = Math.Max(0, CurrentHP - amount);
             _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
 

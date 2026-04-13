@@ -8,9 +8,9 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleViewConfig", menuName = "Configs/Battle/Battle View Config")]
     public class BattleViewConfig : ScriptableObject
     {
-        [Tooltip("Смещение по Y в мировых координатах, добавляемое выше верхнего края доски для позиционирования корня боевого HUD")]
-        [Range(0f, 1f)]
-        [SerializeField] private float _battleAreaTopPadding = 0.4f;
+        [Tooltip("Отступ в мировых координатах между верхним краем доски и нижним краем BattleHUDView. 0 — вплотную.")]
+        [Range(0f, 2f)]
+        [SerializeField] private float _battleHUDBottomOffset = 0.4f;
         
         [Tooltip("Префаб компонента BattleHUDView - корень отображения боя в мировом пространстве")]
         [Space(10)]
@@ -24,6 +24,6 @@ namespace Project.Scripts.Configs.Battle
 #endif
 
         public GameObject BattleHUDViewPrefab => _battleHUDViewPrefab;
-        public float BattleAreaTopPadding => _battleAreaTopPadding;
+        public float BattleHUDBottomOffset => _battleHUDBottomOffset;
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Project.Scripts.Configs;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Events
@@ -8,12 +9,20 @@ namespace Project.Scripts.Services.Events
     public class EventBus : IAsyncDisposable
     {
         private readonly Dictionary<Type, List<Delegate>> _subscribers = new();
+        private readonly DebugConfig _debugConfig;
+
+
+        public EventBus(DebugConfig debugConfig)
+        {
+            _debugConfig = debugConfig;
+        }
 
 
         public ValueTask DisposeAsync()
         {
             _subscribers.Clear();
-            Debug.Log("EventBus disposed");
+            if (_debugConfig.LogEventBus)
+                Debug.Log("EventBus disposed");
             return default;
         }
 

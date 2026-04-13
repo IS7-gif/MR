@@ -10,11 +10,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
     public class AvatarSlotViewModel : IDisposable
     {
         public BattleSide Side { get; }
+        public Color SlotColor { get; }
         public Sprite Portrait { get; }
         public BattleAnimationConfig AnimConfig { get; }
         public EventBus EventBus { get; }
         public HeroActionType AbilityType { get; }
         public ReactiveProperty<float> HPFill { get; }
+        public ReactiveProperty<bool> IsDefeated { get; } = new(false);
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
         public Observable<float> SilentDrain => _silentDrain;
@@ -28,10 +30,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private int _prevHP;
 
 
-        public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Sprite portrait,
+        public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Color slotColor, Sprite portrait,
             int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType)
         {
             Side = side;
+            SlotColor = slotColor;
             Portrait = portrait;
             AnimConfig = animConfig;
             EventBus = eventBus;
@@ -41,14 +44,21 @@ namespace Project.Scripts.Gameplay.Battle.Units
             EnergyBar = new AvatarChargeBarViewModel(eventBus, side);
 
             if (side == BattleSide.Player)
+            {
                 _subscriptions.Add(eventBus.Subscribe<PlayerHPChangedEvent>(OnPlayerHPChanged));
+                _subscriptions.Add(eventBus.Subscribe<PlayerDefeatedEvent>(_ => IsDefeated.Value = true));
+            }
             else
+            {
                 _subscriptions.Add(eventBus.Subscribe<EnemyHPChangedEvent>(OnEnemyHPChanged));
+                _subscriptions.Add(eventBus.Subscribe<EnemyDefeatedEvent>(_ => IsDefeated.Value = true));
+            }
         }
 
         public void Dispose()
         {
             HPFill.Dispose();
+            IsDefeated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
             _silentDrain.Dispose();

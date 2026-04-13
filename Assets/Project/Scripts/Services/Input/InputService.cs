@@ -20,6 +20,7 @@ namespace Project.Scripts.Services.Input
         private bool _isDragging;
         private bool _dragStarted;
         private Vector2 _lastPosition;
+        private InputDevice _activeDragDevice;
 
 
         public InputService(InputConfig config)
@@ -75,6 +76,14 @@ namespace Project.Scripts.Services.Input
 
         private void OnPressStarted(InputAction.CallbackContext ctx)
         {
+            var device = ctx.control?.device;
+            if (null == device)
+                return;
+
+            if (_isDragging)
+                return;
+
+            _activeDragDevice = device;
             _isDragging = true;
             _dragStarted = false;
         }
@@ -89,17 +98,26 @@ namespace Project.Scripts.Services.Input
 
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
+            var device = ctx.control?.device;
+            if (_activeDragDevice != null && _activeDragDevice != device)
+                return;
+
             _isDragging = false;
             _dragStarted = false;
+            _activeDragDevice = null;
             OnDragCanceled?.Invoke();
         }
 
         private void OnPointPerformed(InputAction.CallbackContext ctx)
         {
-            var current = ctx.ReadValue<Vector2>();
-
             if (false == _isDragging)
                 return;
+
+            var device = ctx.control?.device;
+            if (_activeDragDevice != device)
+                return;
+
+            var current = ctx.ReadValue<Vector2>();
 
             if (false == _dragStarted)
             {

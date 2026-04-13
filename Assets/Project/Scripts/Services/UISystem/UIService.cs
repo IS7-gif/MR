@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs;
 using UnityEngine;
+using VContainer;
 using ZLinq;
 
 namespace Project.Scripts.Services.UISystem
@@ -27,20 +29,29 @@ namespace Project.Scripts.Services.UISystem
         private readonly Dictionary<Type, GameObject> _registeredViews = new();
         private readonly Dictionary<Type, IView> _activeViews = new();
         private readonly Dictionary<Type, UILayer> _viewLayers = new();
+        private DebugConfig _debugConfig;
 
 
         private void Awake()
         {
             SetupCanvasLayers();
         }
-        
+
+
+        [Inject]
+        public void Construct(DebugConfig debugConfig)
+        {
+            _debugConfig = debugConfig;
+        }
+
 
         public void RegisterView<TView>(GameObject prefab, UILayer layer) where TView : MonoBehaviour, IView
         {
             var type = typeof(TView);
             _registeredViews[type] = prefab;
             _viewLayers[type] = layer;
-            Debug.Log($"View {type.Name} registered on layer {layer}");
+            if (_debugConfig.LogUIEvents)
+                Debug.Log($"View {type.Name} registered on layer {layer}");
         }
 
         public async UniTask<TView> Show<TView, TViewModel>(TViewModel viewModel)
@@ -84,7 +95,8 @@ namespace Project.Scripts.Services.UISystem
 
             _activeViews[viewType] = view;
 
-            Debug.Log($"View {viewType.Name} shown");
+            if (_debugConfig.LogUIEvents)
+                Debug.Log($"View {viewType.Name} shown");
             return view;
         }
 
@@ -130,7 +142,8 @@ namespace Project.Scripts.Services.UISystem
 
             _activeViews[viewType] = view;
 
-            Debug.Log($"View {viewType.Name} shown");
+            if (_debugConfig.LogUIEvents)
+                Debug.Log($"View {viewType.Name} shown");
             return view;
         }
 
@@ -140,6 +153,7 @@ namespace Project.Scripts.Services.UISystem
 
             if (false == _activeViews.TryGetValue(viewType, out var view))
             {
+                if (_debugConfig.LogUIEvents)
                 Debug.LogWarning($"View {viewType.Name} is not active");
                 return;
             }

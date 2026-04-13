@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
@@ -10,6 +11,7 @@ using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Tiles;
 using R3;
 using UnityEngine;
 
@@ -26,6 +28,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public IAvatarGroupDefenseService GroupDefense { get; }
         public string EnemyName => _levelConfig.BotConfig ? _levelConfig.BotConfig.OpponentName : string.Empty;
         public BattleAnimationConfig BattleAnimConfig => _battleAnimationConfig;
+        public UnitDeathConfig DeathConfig { get; private set; }
         public float BoardTopWorldY => _boardBounds.BoardTopWorldY;
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
@@ -40,8 +43,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly IHeroService _heroService;
         private readonly TileKindPaletteConfig _palette;
         private readonly LevelConfig _levelConfig;
+        private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly IBoardBoundsProvider _boardBounds;
         private readonly BattleTimerConfig _battleTimerConfig;
+        private readonly UnitDeathConfig _unitDeathConfig;
         private HeroSlotViewModel[] _playerHeroSlots;
         private HeroSlotViewModel[] _enemyHeroSlots;
         private readonly ReactiveProperty<int> _timerSeconds;
@@ -56,11 +61,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             IHeroService heroService,
             TileKindPaletteConfig palette,
             LevelConfig levelConfig,
+            SlotLayoutConfig slotLayoutConfig,
             IBoardBoundsProvider boardBounds,
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
             IAvatarGroupDefenseService groupDefense,
-            BattleTimerConfig battleTimerConfig)
+            BattleTimerConfig battleTimerConfig,
+            UnitDeathConfig unitDeathConfig)
         {
             _eventBus = eventBus;
             _enemyState = enemyState;
@@ -70,20 +77,26 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _heroService = heroService;
             _palette = palette;
             _levelConfig = levelConfig;
+            _slotLayoutConfig = slotLayoutConfig;
             _boardBounds = boardBounds;
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
             GroupDefense = groupDefense;
             _battleTimerConfig = battleTimerConfig;
+            _unitDeathConfig = unitDeathConfig;
             _timerSeconds = new ReactiveProperty<int>((int)battleTimerConfig.BattleDuration);
         }
 
 
         protected override UniTask OnInitializeAsync()
         {
+            DeathConfig = _unitDeathConfig;
+            var avatarColor = _palette.GetColor(_slotLayoutConfig.AvatarSlotKind, Color.gray);
+
             PlayerAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Player,
+                avatarColor,
                 _levelConfig.PlayerAvatarConfig.Portrait,
                 _playerState.CurrentHP,
                 _playerState.MaxHP,
@@ -93,6 +106,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             EnemyAvatar = new AvatarSlotViewModel(
                 _eventBus,
                 BattleSide.Enemy,
+                avatarColor,
                 _levelConfig.EnemyAvatarConfig.Portrait,
                 _enemyState.CurrentHP,
                 _enemyState.MaxHP,

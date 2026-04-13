@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
@@ -36,6 +37,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Префаб с компонентом FloatingDamageNumber")]
         [SerializeField] private FloatingDamageNumber _floatingDamagePrefab;
 
+        [Tooltip("Пустой дочерний объект, размещённый на нижней границе визуала HUD; используется для позиционирования от верхнего края доски")]
+        [SerializeField] private Transform _bottomAnchor;
+
 
         private IInputService _inputService;
         private BattleViewConfig _battleViewConfig;
@@ -71,10 +75,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         private void PositionHUD()
         {
-            transform.position = new Vector3(
-                ViewModel.BoardCenterX,
-                ViewModel.BoardTopWorldY + _battleViewConfig.BattleAreaTopPadding,
-                0f);
+            var bottomTargetY = ViewModel.BoardTopWorldY + _battleViewConfig.BattleHUDBottomOffset;
+            var pivotY = _bottomAnchor
+                ? bottomTargetY - _bottomAnchor.localPosition.y
+                : bottomTargetY;
+            transform.position = new Vector3(ViewModel.BoardCenterX, pivotY, 0f);
         }
 
 #if UNITY_EDITOR
@@ -96,8 +101,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         private void BindSlots()
         {
-            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense);
-            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense);
+            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense, ViewModel.DeathConfig);
+            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense, ViewModel.DeathConfig);
 
             BindHeroRow(_playerHeroSlots, ViewModel.PlayerHeroSlots);
             BindHeroRow(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
@@ -112,7 +117,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             for (var i = 0; i < count; i++)
             {
                 if (views[i])
-                    views[i].Bind(viewModels[i], ViewModel.PulseCoordinator, ViewModel.BattleAnimConfig);
+                    views[i].Bind(viewModels[i], ViewModel.PulseCoordinator, ViewModel.BattleAnimConfig, ViewModel.DeathConfig);
             }
         }
 

@@ -25,6 +25,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
         }
 
 
+        public void SnapFill(float normalized)
+        {
+            _fillTween?.Kill();
+            _fillTween = null;
+            SetFill(normalized);
+        }
+
         public void SetFill(float normalized)
         {
             _currentNormalized = Mathf.Clamp01(normalized);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Tiles.Behaviours;
 using Project.Scripts.Services.Events;
@@ -36,6 +37,7 @@ namespace Project.Scripts.Services.Board
         private readonly EventBus _eventBus;
         private readonly SpecialTileResolver _specialTileResolver;
         private readonly SwapComboResolver _swapComboResolver;
+        private readonly DebugConfig _debugConfig;
         private bool _isProcessing;
 
 
@@ -43,7 +45,8 @@ namespace Project.Scripts.Services.Board
             IGravityHandler gravity, IMatchFinder matchFinder, ISwapInputHandler swapHandler,
             IMoveChecker moveChecker, CascadeEnergyConfig cascadeEnergyConfig,
             IGameStateService gameStateService, IMoveBarService moveBarService,
-            SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver)
+            SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver,
+            DebugConfig debugConfig)
         {
             _eventBus = eventBus;
             _state = state;
@@ -58,6 +61,7 @@ namespace Project.Scripts.Services.Board
             _moveBarService = moveBarService;
             _specialTileResolver = specialTileResolver;
             _swapComboResolver = swapComboResolver;
+            _debugConfig = debugConfig;
         }
 
         public UniTask InitAsync()
@@ -183,7 +187,8 @@ namespace Project.Scripts.Services.Board
                 if (energyByKind.Count > 0)
                 {
                     _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
-                    Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
+                    if (_debugConfig.LogCascades)
+                        Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
                 }
 
                 if (moveUsed)

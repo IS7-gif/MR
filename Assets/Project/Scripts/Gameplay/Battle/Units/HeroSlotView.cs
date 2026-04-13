@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Shared.Heroes;
@@ -9,6 +10,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
 {
     public class HeroSlotView : MonoBehaviour, ITargetable
     {
+        private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
+        private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
+
         [Tooltip("Background SpriteRenderer - tinted with the hero element color; defines slot bounds and is scaled via SetSize")]
         [SerializeField] private SpriteRenderer _background;
 
@@ -18,33 +22,35 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
         [SerializeField] private SpriteRenderer _glow;
 
+        [Tooltip("Корневой объект секции HP (содержит фон, HPBar и HPLagBar) - скрывается целиком при смерти")]
+        [SerializeField] private GameObject _hpBarContainer;
+
         [Tooltip("Основная полоса HP - мгновенно обновляется при получении урона")]
         [SerializeField] private BarRenderer _hpBar;
 
         [Tooltip("Лаг-полоса HP позади основной полосы - опустошается с задержкой после получения урона")]
         [SerializeField] private BarRenderer _hpLagBar;
 
-        [Tooltip("Полоса энергии - окрашена в цвет элемента героя")]
+        [Tooltip("Полоса энергии")]
         [SerializeField] private BarRenderer _energyBar;
 
         [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
         [SerializeField] private Transform _hitAnchor;
-
 
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
         public UnitDescriptor Descriptor => UnitDescriptor.Hero(_viewModel.Side, _viewModel.SlotIndex, _viewModel.ActionType);
         public bool IsReadySource => _viewModel != null && _viewModel.IsAssigned && _viewModel.IsActivatable.CurrentValue;
         public Bounds WorldBounds => _background ? _background.bounds : new Bounds(transform.position, Vector3.one);
 
-
         private HeroSlotViewModel _viewModel;
         private BattleAnimationConfig _config;
+        private UnitDeathConfig _deathConfig;
         private CompositeDisposable _disposables;
         private Color _originalPortraitColor;
         private Vector3 _originalLocalPos;
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
-
+        private MaterialPropertyBlock _portraitPropertyBlock;
 
         private void OnDestroy()
         {
@@ -53,14 +59,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _disposables?.Dispose();
         }
 
-
-        public void Bind(HeroSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config)
+        public void Bind(HeroSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config, UnitDeathConfig deathConfig)
         {
             _viewModel = viewModel;
             _config = config;
+            _deathConfig = deathConfig;
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
             _originalLocalPos = transform.localPosition;
+            ResetPortraitDeathFill();
 
             BindPortrait(viewModel);
             BindHPBars(viewModel);
@@ -112,12 +119,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _glow.gameObject.SetActive(active);
         }
 
-
         private void BindPortrait(HeroSlotViewModel viewModel)
         {
             if (false == _portrait)
                 return;
 
+            ResetPortraitDeathFill();
             _portrait.enabled = viewModel.IsAssigned;
 
             if (false == viewModel.IsAssigned)
@@ -132,8 +139,16 @@ namespace Project.Scripts.Gameplay.Battle.Units
             viewModel.IsDefeated
                 .Subscribe(defeated =>
                 {
-                    if (_background)
-                        _background.color = defeated ? Color.gray : viewModel.SlotColor;
+                    var visuals = _deathConfig ? _deathConfig.HeroDeathVisuals : default;
+
+                    if (_background && visuals.ChangeBackgroundColor)
+                        _background.color = defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor;
+
+                    if (visuals.ApplyDeathFill)
+                        SetPortraitDeathFill(defeated);
+
+                    if (_portrait && visuals.DisablePortrait)
+                        _portrait.enabled = false == defeated;
                 })
                 .AddTo(_disposables);
         }
@@ -152,8 +167,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             viewModel.SilentDrain
                 .Subscribe(fill =>
                 {
-                    _hpBar?.SetFill(fill);
-                    _hpLagBar?.SetFill(fill);
+                    _hpBar?.SnapFill(fill);
+                    _hpLagBar?.SnapFill(fill);
                 })
                 .AddTo(_disposables);
 
@@ -184,11 +199,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             viewModel.IsDefeated
                 .Subscribe(defeated =>
                 {
-                    if (_hpBar)
-                        _hpBar.gameObject.SetActive(false == defeated);
-
-                    if (_hpLagBar)
-                        _hpLagBar.gameObject.SetActive(false == defeated);
+                    if (_deathConfig && _deathConfig.HeroDeathVisuals.DisableHpBar && _hpBarContainer)
+                        _hpBarContainer.SetActive(false == defeated);
                 })
                 .AddTo(_disposables);
         }
@@ -198,7 +210,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (false == _energyBar || false == viewModel.IsAssigned)
                 return;
 
-            _energyBar.SetFillColor(viewModel.SlotColor);
             _energyBar.SetFill(viewModel.EnergyFill.CurrentValue);
 
             viewModel.EnergyFill
@@ -227,7 +238,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 .AddTo(_disposables);
 
             viewModel.IsDefeated
-                .Subscribe(defeated => _energyBar.gameObject.SetActive(false == defeated))
+                .Subscribe(defeated =>
+                {
+                    if (_deathConfig && _deathConfig.HeroDeathVisuals.DisableEnergyBar)
+                        _energyBar.gameObject.SetActive(false == defeated);
+                })
                 .AddTo(_disposables);
         }
 
@@ -281,6 +296,31 @@ namespace Project.Scripts.Gameplay.Battle.Units
                         .DOLocalMoveY(_originalLocalPos.y, halfDuration)
                         .SetEase(_config.KnockbackEase);
                 });
+        }
+
+        private void SetPortraitDeathFill(bool active)
+        {
+            if (false == _portrait)
+                return;
+
+            _portraitPropertyBlock ??= new MaterialPropertyBlock();
+
+            if (false == active)
+            {
+                _portraitPropertyBlock.Clear();
+                _portrait.SetPropertyBlock(_portraitPropertyBlock);
+                return;
+            }
+
+            _portraitPropertyBlock.Clear();
+            _portraitPropertyBlock.SetFloat(FillEnabledShaderId, 1f);
+            _portraitPropertyBlock.SetFloat(FillReplaceShaderId, 1f);
+            _portrait.SetPropertyBlock(_portraitPropertyBlock);
+        }
+
+        private void ResetPortraitDeathFill()
+        {
+            SetPortraitDeathFill(false);
         }
     }
 }

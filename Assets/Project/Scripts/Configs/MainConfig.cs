@@ -25,6 +25,8 @@ namespace Project.Scripts.Configs
         [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
         [SerializeField] private SlotLayoutConfig _slotLayoutConfig;
         [SerializeField] private BattleTimerConfig _battleTimerConfig;
+        [SerializeField] private UnitDeathConfig _unitDeathConfig;
+        [SerializeField] private DebugConfig _debugConfig;
 
 
         public AudioMusicConfig AudioMusicConfig => _audioMusicConfig;
@@ -42,5 +44,7 @@ namespace Project.Scripts.Configs
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
         public BattleTimerConfig BattleTimerConfig => _battleTimerConfig;
+        public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;
+        public DebugConfig DebugConfig => _debugConfig;
     }
 }

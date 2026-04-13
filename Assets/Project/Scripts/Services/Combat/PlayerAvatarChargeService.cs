@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
@@ -22,14 +23,16 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
+        private readonly DebugConfig _debugConfig;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly AvatarEnergyFormula _formula;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public PlayerAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
+        public PlayerAvatarChargeService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
         {
             _eventBus = eventBus;
+            _debugConfig = debugConfig;
             var config = levelConfig.PlayerAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
             AbilityType = config.AbilityType;
@@ -71,7 +74,8 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             var snap = _engine.Snapshot;
-            Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady));
+            if (_debugConfig.LogEnergyAccumulation)
+                Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady));
             PublishEnergyChanged();
         }
 

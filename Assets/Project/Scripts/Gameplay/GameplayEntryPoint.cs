@@ -60,6 +60,7 @@ namespace Project.Scripts.Gameplay
         private GameAudioController _gameAudioController;
         private IBattleTimerService _battleTimerService;
         private IOvertimeService _overtimeService;
+        private DebugConfig _debugConfig;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -143,7 +144,8 @@ namespace Project.Scripts.Gameplay
             BattleHUDViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
-            IOvertimeService overtimeService)
+            IOvertimeService overtimeService,
+            DebugConfig debugConfig)
         {
             _eventBus = eventBus;
             _audioService = audioService;
@@ -164,6 +166,7 @@ namespace Project.Scripts.Gameplay
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
             _overtimeService = overtimeService;
+            _debugConfig = debugConfig;
         }
 
 
@@ -193,6 +196,7 @@ namespace Project.Scripts.Gameplay
             _inputService = new InputService(_inputConfig);
 
             var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
+            hudGo.name = _battleViewConfig.BattleHUDViewPrefab.name;
             _battleHUDView = hudGo.GetComponent<BattleHUDView>();
             _battleHUDView.SetDependencies(_inputService, _battleViewConfig, _boardBoundsProvider);
             await _battleHUDView.InitializeAsync(_battleHUDViewModel);
@@ -236,7 +240,8 @@ namespace Project.Scripts.Gameplay
                 _gameStateService,
                 _moveBarService,
                 specialTileResolver,
-                swapComboResolver);
+                swapComboResolver,
+                _debugConfig);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
