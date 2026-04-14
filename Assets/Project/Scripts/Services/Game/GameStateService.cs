@@ -17,7 +17,6 @@ namespace Project.Scripts.Services.Game
         private readonly ReactiveProperty<GameState> _state = new(GameState.Playing);
         private IDisposable _winSub;
         private IDisposable _loseSub;
-        private IDisposable _overtimeSub;
 
 
         public GameStateService(EventBus eventBus, IPlayerStateService playerState)
@@ -26,7 +25,6 @@ namespace Project.Scripts.Services.Game
             _playerState = playerState;
             _winSub = _eventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             _loseSub = _eventBus.Subscribe<PlayerDefeatedEvent>(OnPlayerDefeated);
-            _overtimeSub = _eventBus.Subscribe<OvertimeStartedEvent>(OnOvertimeStarted);
         }
 
 
@@ -39,7 +37,6 @@ namespace Project.Scripts.Services.Game
         {
             _winSub?.Dispose();
             _loseSub?.Dispose();
-            _overtimeSub?.Dispose();
             _state.Dispose();
         }
 
@@ -61,14 +58,6 @@ namespace Project.Scripts.Services.Game
 
             _eventBus.Publish(new GameResultEvent(BattleSide.Enemy, isFlawless: false));
             SetState(GameState.Lose);
-        }
-
-        private void OnOvertimeStarted(OvertimeStartedEvent _)
-        {
-            if (!IsPlaying)
-                return;
-
-            SetState(GameState.Overtime);
         }
     }
 }

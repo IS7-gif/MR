@@ -33,6 +33,7 @@ namespace Project.Scripts.Services.Board
         private readonly IMoveChecker _moveChecker;
         private readonly CascadeEnergyConfig _cascadeEnergyConfig;
         private readonly IGameStateService _gameStateService;
+        private readonly IBoardRuntimeService _boardRuntimeService;
         private readonly IMoveBarService _moveBarService;
         private readonly EventBus _eventBus;
         private readonly SpecialTileResolver _specialTileResolver;
@@ -44,7 +45,7 @@ namespace Project.Scripts.Services.Board
         public BoardOrchestrator(EventBus eventBus, IGridState state, IGridView view, IGridOperations gridOps,
             IGravityHandler gravity, IMatchFinder matchFinder, ISwapInputHandler swapHandler,
             IMoveChecker moveChecker, CascadeEnergyConfig cascadeEnergyConfig,
-            IGameStateService gameStateService, IMoveBarService moveBarService,
+            IGameStateService gameStateService, IBoardRuntimeService boardRuntimeService, IMoveBarService moveBarService,
             SpecialTileResolver specialTileResolver, SwapComboResolver swapComboResolver,
             DebugConfig debugConfig)
         {
@@ -58,6 +59,7 @@ namespace Project.Scripts.Services.Board
             _moveChecker = moveChecker;
             _cascadeEnergyConfig = cascadeEnergyConfig;
             _gameStateService = gameStateService;
+            _boardRuntimeService = boardRuntimeService;
             _moveBarService = moveBarService;
             _specialTileResolver = specialTileResolver;
             _swapComboResolver = swapComboResolver;
@@ -86,7 +88,7 @@ namespace Project.Scripts.Services.Board
             if (_isProcessing)
                 return;
 
-            if (false == _gameStateService.IsPlaying)
+            if (false == CanAcceptInput())
                 return;
 
             if (false == _moveBarService.HasMoves)
@@ -110,9 +112,13 @@ namespace Project.Scripts.Services.Board
                 return;
             }
 
+            var runtimeVersion = _boardRuntimeService.CaptureVersion();
             _isProcessing = true;
             try
             {
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 var fromKind = fromTile.Config.Kind;
                 var toKind = toTile.Config.Kind;
                 var fromIsSpecial = fromKind.IsSpecial();
@@ -120,26 +126,43 @@ namespace Project.Scripts.Services.Board
 
                 await _gridOps.SwapTiles(request.From, request.To);
 
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 var waves = new List<List<MatchResult>>();
                 var energyByKind = new Dictionary<TileKind, float>();
                 var moveUsed = false;
 
                 if (fromIsSpecial && toIsSpecial)
                 {
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     _moveBarService.TryConsume();
 
                     var stateBefore = _state.GetGridState();
-                    await ExecuteSwapCombo(fromKind, toKind, request.To, request.From, fromTile, toTile);
+                    await ExecuteSwapCombo(fromKind, toKind, request.To, request.From, fromTile, toTile, runtimeVersion);
+
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     var stateAfter = _state.GetGridState();
 
                     _eventBus.Publish(new BombActivatedEvent());
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
-                    await RunPostActivationFlow(waves, request.PivotPosition);
+                    await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
+
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     moveUsed = true;
                 }
                 else if (fromIsSpecial || toIsSpecial)
                 {
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     _moveBarService.TryConsume();
 
                     Tile specialTile, partnerTile;
@@ -159,13 +182,21 @@ namespace Project.Scripts.Services.Board
                     }
 
                     var stateBefore = _state.GetGridState();
-                    await ActivateSpecialWithPartner(specialTile, partnerTile, specialFinalPos);
+                    await ActivateSpecialWithPartner(specialTile, partnerTile, specialFinalPos, runtimeVersion);
+
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     var stateAfter = _state.GetGridState();
 
                     _eventBus.Publish(new BombActivatedEvent());
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
 
-                    await RunPostActivationFlow(waves, request.PivotPosition);
+                    await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
+
+                    if (false == CanContinueFlow(runtimeVersion))
+                        return;
+
                     moveUsed = true;
                 }
                 else
@@ -173,25 +204,38 @@ namespace Project.Scripts.Services.Board
                     var matches = _matchFinder.FindMatches(_state.GetGridState());
 
                     if (matches.Count == 0)
-                        await _gridOps.SwapTiles(request.To, request.From);
+                    {
+                        if (CanContinueFlow(runtimeVersion))
+                            await _gridOps.SwapTiles(request.To, request.From);
+
+                        if (false == CanContinueFlow(runtimeVersion))
+                            return;
+                    }
                     else
                     {
+                        if (false == CanContinueFlow(runtimeVersion))
+                            return;
+
                         _moveBarService.TryConsume();
-                        await ProcessMatchChain(matches, waves, request.PivotPosition, true);
+                        await ProcessMatchChain(matches, waves, request.PivotPosition, true, runtimeVersion);
+
+                        if (false == CanContinueFlow(runtimeVersion))
+                            return;
+
                         moveUsed = true;
                     }
                 }
 
                 AccumulateMatchEnergy(waves, _cascadeEnergyConfig, energyByKind);
 
-                if (energyByKind.Count > 0)
+                if (energyByKind.Count > 0 && CanContinueFlow(runtimeVersion))
                 {
                     _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
                     if (_debugConfig.LogCascades)
                         Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
                 }
 
-                if (moveUsed)
+                if (moveUsed && CanContinueFlow(runtimeVersion))
                     _eventBus.Publish(new MoveUsedEvent());
             }
             finally
@@ -201,8 +245,11 @@ namespace Project.Scripts.Services.Board
             }
         }
 
-        private async UniTask ActivateSpecialWithPartner(Tile specialTile, Tile partnerTile, GridPoint specialFinalPos)
+        private async UniTask ActivateSpecialWithPartner(Tile specialTile, Tile partnerTile, GridPoint specialFinalPos, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             if (specialTile.Config.Kind == TileKind.Storm)
                 specialTile.SetPayloadKind(partnerTile.Kind);
 
@@ -210,34 +257,37 @@ namespace Project.Scripts.Services.Board
         }
 
         private async UniTask ExecuteSwapCombo(TileKind kindA, TileKind kindB,
-            GridPoint posA, GridPoint posB, Tile tileA, Tile tileB)
+            GridPoint posA, GridPoint posB, Tile tileA, Tile tileB, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             var comboType = _swapComboResolver.Resolve(kindA, kindB);
 
             switch (comboType)
             {
                 case SwapComboType.StormStorm:
-                    await ExecuteStormStormCombo(posA, posB);
+                    await ExecuteStormStormCombo(posA, posB, runtimeVersion);
                     break;
 
                 case SwapComboType.StormBomb:
                 {
                     var stormPos = kindA == TileKind.Storm ? posA : posB;
-                    await ExecuteStormBombCombo(stormPos);
+                    await ExecuteStormBombCombo(stormPos, runtimeVersion);
                     break;
                 }
 
                 case SwapComboType.StormLine:
                 {
                     var stormPos = kindA == TileKind.Storm ? posA : posB;
-                    await ExecuteStormLineCombo(stormPos);
+                    await ExecuteStormLineCombo(stormPos, runtimeVersion);
                     break;
                 }
 
                 case SwapComboType.BombBomb:
                 {
                     var doubleRadius = GetBombDoubleRadius(tileA, tileB);
-                    await ExecuteBombBombCombo(posA, posB, doubleRadius);
+                    await ExecuteBombBombCombo(posA, posB, doubleRadius, runtimeVersion);
                     break;
                 }
 
@@ -246,26 +296,40 @@ namespace Project.Scripts.Services.Board
                     var bombPos = kindA == TileKind.Bomb ? posA : posB;
                     var bombTile = kindA == TileKind.Bomb ? tileA : tileB;
                     var radius = GetBombRadius(bombTile);
-                    await ExecuteBombLineCombo(posA, posB, bombPos, radius);
+                    await ExecuteBombLineCombo(posA, posB, bombPos, radius, runtimeVersion);
                     break;
                 }
 
                 case SwapComboType.LineLine:
-                    await ExecuteLineLineCombo(posA, posB);
+                    await ExecuteLineLineCombo(posA, posB, runtimeVersion);
                     break;
             }
         }
 
-        private async UniTask ExecuteStormStormCombo(GridPoint posA, GridPoint posB)
+        private async UniTask ExecuteStormStormCombo(GridPoint posA, GridPoint posB, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await UniTask.WhenAll(_gridOps.ConsumeTile(posA), _gridOps.ConsumeTile(posB));
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             var allPositions = _state.GetAllOccupied();
             await _gridOps.ActivateTiles(allPositions);
         }
 
-        private async UniTask ExecuteStormBombCombo(GridPoint stormPos)
+        private async UniTask ExecuteStormBombCombo(GridPoint stormPos, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await _gridOps.ConsumeTile(stormPos);
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             var bombPositions = _state.GetAllOfKind(TileKind.Bomb);
             if (bombPositions.Count == 0)
                 return;
@@ -273,9 +337,16 @@ namespace Project.Scripts.Services.Board
             await _gridOps.ActivateTiles(bombPositions);
         }
 
-        private async UniTask ExecuteStormLineCombo(GridPoint stormPos)
+        private async UniTask ExecuteStormLineCombo(GridPoint stormPos, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await _gridOps.ConsumeTile(stormPos);
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             var linePositions = _state.GetAllOfKind(TileKind.LineRuneH);
             linePositions.AddRange(_state.GetAllOfKind(TileKind.LineRuneV));
             if (linePositions.Count == 0)
@@ -284,9 +355,15 @@ namespace Project.Scripts.Services.Board
             await _gridOps.ActivateTiles(linePositions);
         }
 
-        private async UniTask ExecuteBombBombCombo(GridPoint posA, GridPoint posB, int doubleRadius)
+        private async UniTask ExecuteBombBombCombo(GridPoint posA, GridPoint posB, int doubleRadius, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await UniTask.WhenAll(_gridOps.ConsumeTile(posA), _gridOps.ConsumeTile(posB));
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
 
             var explosion = new HashSet<GridPoint>(_state.GetNeighboursInRadius(posA, doubleRadius));
             var ps = _state.GetNeighboursInRadius(posB, doubleRadius);
@@ -297,9 +374,15 @@ namespace Project.Scripts.Services.Board
         }
 
         private async UniTask ExecuteBombLineCombo(GridPoint posA, GridPoint posB,
-            GridPoint bombPos, int bombRadius)
+            GridPoint bombPos, int bombRadius, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await UniTask.WhenAll(_gridOps.ConsumeTile(posA), _gridOps.ConsumeTile(posB));
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
 
             var area = new HashSet<GridPoint>(_state.GetNeighboursInRadius(bombPos, bombRadius));
             var row = _state.GetAllInRow(bombPos.Y);
@@ -313,9 +396,15 @@ namespace Project.Scripts.Services.Board
             await _gridOps.ActivateTiles(new List<GridPoint>(area));
         }
 
-        private async UniTask ExecuteLineLineCombo(GridPoint posA, GridPoint posB)
+        private async UniTask ExecuteLineLineCombo(GridPoint posA, GridPoint posB, int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             await UniTask.WhenAll(_gridOps.ConsumeTile(posA), _gridOps.ConsumeTile(posB));
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
 
             var cross = new HashSet<GridPoint>(_state.GetAllInRow(posA.Y));
             var col = _state.GetAllInColumn(posA.X);
@@ -325,21 +414,37 @@ namespace Project.Scripts.Services.Board
             await _gridOps.ActivateTiles(new List<GridPoint>(cross));
         }
 
-        private async UniTask RunPostActivationFlow(List<List<MatchResult>> waves, GridPoint pivotPosition)
+        private async UniTask RunPostActivationFlow(List<List<MatchResult>> waves, GridPoint pivotPosition, int runtimeVersion)
         {
-            await _gravity.ApplyGravity();
-            await _gravity.SpawnNewTiles();
-            var chainMatches = _matchFinder.FindMatches(_state.GetGridState());
-            if (chainMatches.Count > 0)
-                await ProcessMatchChain(chainMatches, waves, pivotPosition, false);
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
 
-            await EnsureMovesAvailable();
+            await _gravity.ApplyGravity();
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
+            await _gravity.SpawnNewTiles();
+
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
+            var chainMatches = _matchFinder.FindMatches(_state.GetGridState());
+            if (chainMatches.Count > 0 && CanContinueFlow(runtimeVersion))
+                await ProcessMatchChain(chainMatches, waves, pivotPosition, false, runtimeVersion);
+
+            if (CanContinueFlow(runtimeVersion))
+                await EnsureMovesAvailable(runtimeVersion);
         }
 
-        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<List<MatchResult>> waves, GridPoint pivotPosition, bool spawnSpecials)
+        private async UniTask ProcessMatchChain(List<MatchResult> matches, List<List<MatchResult>> waves, GridPoint pivotPosition, bool spawnSpecials,
+            int runtimeVersion)
         {
             while (matches.Count > 0)
             {
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 var cascadeLevel = waves.Count + 1;
                 _eventBus.Publish(new MatchPlayedEvent(cascadeLevel));
                 waves.Add(new List<MatchResult>(matches));
@@ -347,31 +452,70 @@ namespace Project.Scripts.Services.Board
                 var specialPlacements = spawnSpecials && cascadeLevel == 1
                     ? _specialTileResolver.Resolve(matches, pivotPosition) : null;
                 await _gridOps.RemoveMatches(matches, specialPlacements);
+
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 await _gravity.ApplyGravity();
+
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 await _gravity.SpawnNewTiles();
+
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 matches = _matchFinder.FindMatches(_state.GetGridState());
             }
 
-            await EnsureMovesAvailable();
+            if (CanContinueFlow(runtimeVersion))
+                await EnsureMovesAvailable(runtimeVersion);
         }
 
-        private async UniTask EnsureMovesAvailable()
+        private async UniTask EnsureMovesAvailable(int runtimeVersion)
         {
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             if (_moveChecker.HasPossibleMoves())
                 return;
 
             for (var i = 0; i < ShuffleMaxAttempts; i++)
             {
                 await _gridOps.ShuffleGrid();
+
+                if (false == CanContinueFlow(runtimeVersion))
+                    return;
+
                 if (_moveChecker.HasPossibleMoves())
                     return;
             }
 
+            if (false == CanContinueFlow(runtimeVersion))
+                return;
+
             _gridOps.ForceInjectMove();
 
             var immediateMatches = _matchFinder.FindMatches(_state.GetGridState());
-            if (immediateMatches.Count > 0)
-                await ProcessMatchChain(immediateMatches, new List<List<MatchResult>>(), GridPoint.Zero, false);
+            if (immediateMatches.Count > 0 && CanContinueFlow(runtimeVersion))
+                await ProcessMatchChain(immediateMatches, new List<List<MatchResult>>(), GridPoint.Zero, false, runtimeVersion);
+        }
+
+        private bool CanAcceptInput()
+        {
+            return _gameStateService.IsPlaying && _boardRuntimeService.CanAcceptInput;
+        }
+
+        private bool CanContinueFlow(int runtimeVersion)
+        {
+            if (false == _gameStateService.IsPlaying)
+                return false;
+
+            if (false == _boardRuntimeService.IsRunning)
+                return false;
+
+            return _boardRuntimeService.IsCurrent(runtimeVersion);
         }
 
         private static int GetBombRadius(Tile tile)

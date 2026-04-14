@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
+using Project.Scripts.Services.Board;
 using Project.Scripts.Shared;
 
 namespace Project.Scripts.Services.Grid
@@ -12,25 +13,34 @@ namespace Project.Scripts.Services.Grid
         private readonly IGridView _view;
         private readonly TilePool _pool;
         private readonly LevelConfig _config;
+        private readonly IBoardRuntimeService _boardRuntimeService;
 
 
-        public GravityHandler(IGridState state, IGridView view, TilePool pool, LevelConfig config)
+        public GravityHandler(IGridState state, IGridView view, TilePool pool, LevelConfig config,
+            IBoardRuntimeService boardRuntimeService)
         {
             _state = state;
             _view = view;
             _pool = pool;
             _config = config;
+            _boardRuntimeService = boardRuntimeService;
         }
 
 
         public async UniTask ApplyGravity()
         {
+            if (false == IsBoardFlowRunning())
+                return;
+
             var tasks = new List<UniTask>();
             for (var x = 0; x < _config.Width; x++)
             {
                 var writeY = 0;
                 for (var readY = 0; readY < _config.Height; readY++)
                 {
+                    if (false == IsBoardFlowRunning())
+                        return;
+
                     var tile = _view.GetTile(new GridPoint(x, readY));
                     if (!tile)
                         continue;
@@ -53,10 +63,16 @@ namespace Project.Scripts.Services.Grid
 
         public async UniTask SpawnNewTiles()
         {
+            if (false == IsBoardFlowRunning())
+                return;
+
             var emptyPositions = new List<GridPoint>();
             for (var x = 0; x < _config.Width; x++)
                 for (var y = _config.Height - 1; y >= 0; y--)
                 {
+                    if (false == IsBoardFlowRunning())
+                        return;
+
                     var pos = new GridPoint(x, y);
                     if (!_view.GetTile(pos))
                         emptyPositions.Add(pos);
@@ -69,6 +85,9 @@ namespace Project.Scripts.Services.Grid
             var tasks = new List<UniTask>();
             for (var i = 0; i < emptyPositions.Count; i++)
             {
+                if (false == IsBoardFlowRunning())
+                    return;
+
                 var pos = emptyPositions[i];
                 var tileConfig = _view.ResolveRegularTile();
                 var tile = _pool.Get();
@@ -80,6 +99,11 @@ namespace Project.Scripts.Services.Grid
             }
 
             await UniTask.WhenAll(tasks);
+        }
+
+        private bool IsBoardFlowRunning()
+        {
+            return _boardRuntimeService.IsRunning;
         }
     }
 }

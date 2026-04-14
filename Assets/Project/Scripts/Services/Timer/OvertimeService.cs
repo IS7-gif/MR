@@ -45,6 +45,9 @@ namespace Project.Scripts.Services.Timer
 
         public void Begin()
         {
+            if (_isActive)
+                return;
+
             _isActive = true;
             _drainAccumulator = 0f;
 

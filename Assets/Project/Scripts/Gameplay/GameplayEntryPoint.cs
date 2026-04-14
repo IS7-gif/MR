@@ -49,6 +49,7 @@ namespace Project.Scripts.Gameplay
         private UIService _uiService;
         private MoveBarViewModel _moveBarViewModel;
         private IGameStateService _gameStateService;
+        private IBoardRuntimeService _boardRuntimeService;
         private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
         private BattleHUDViewModel _battleHUDViewModel;
@@ -141,6 +142,7 @@ namespace Project.Scripts.Gameplay
             UIService uiService,
             MoveBarViewModel moveBarViewModel,
             IGameStateService gameStateService,
+            IBoardRuntimeService boardRuntimeService,
             IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter,
             BattleHUDViewModel battleHUDViewModel,
@@ -162,6 +164,7 @@ namespace Project.Scripts.Gameplay
             _uiService = uiService;
             _moveBarViewModel = moveBarViewModel;
             _gameStateService = gameStateService;
+            _boardRuntimeService = boardRuntimeService;
             _moveBarService = moveBarService;
             _gameResultPresenter = gameResultPresenter;
             _battleHUDViewModel = battleHUDViewModel;
@@ -206,7 +209,7 @@ namespace Project.Scripts.Gameplay
 
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
-            var gridManager = new GridManager(_levelConfig, _animConfig, pool, cellSize);
+            var gridManager = new GridManager(_levelConfig, _animConfig, pool, cellSize, _boardRuntimeService);
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
 
 #if UNITY_EDITOR
@@ -221,7 +224,7 @@ namespace Project.Scripts.Gameplay
 
             _boardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
 
-            var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig);
+            var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig, _boardRuntimeService);
 
             _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold, _inputConfig.ReanchorOnUnlock);
 
@@ -240,6 +243,7 @@ namespace Project.Scripts.Gameplay
                 moveChecker,
                 _cascadeEnergyConfig,
                 _gameStateService,
+                _boardRuntimeService,
                 _moveBarService,
                 specialTileResolver,
                 swapComboResolver,

@@ -42,8 +42,10 @@ namespace Project.Scripts.DI
             builder.Register<GameResultPresenter>(Lifetime.Singleton);
             builder.Register<IReadyPulseCoordinator, ReadyPulseCoordinator>(Lifetime.Singleton);
 
+            builder.Register<IBoardRuntimeService, BoardRuntimeService>(Lifetime.Singleton);
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
             builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
+            builder.Register<IOvertimeTransitionCoordinator, OvertimeTransitionCoordinator>(Lifetime.Singleton);
             builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<BoardAnnouncementService>().As<IBoardAnnouncementService>();
             builder.RegisterEntryPoint<BattleEscalationService>();

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
+using Project.Scripts.Services.Board;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Tiles;
@@ -14,19 +14,21 @@ namespace Project.Scripts.Services.Grid
 {
     public class GridManager : IGridView, IGridOperations
     {
+        public IGridState State => _state;
+        
+        
         private readonly LevelConfig _levelConfig;
         private readonly BoardAnimationConfig _animConfig;
         private readonly TilePool _pool;
         private readonly Tile[,] _tiles;
         private readonly GridState _state;
+        private readonly IBoardRuntimeService _boardRuntimeService;
         private float _cellSize;
         private Vector3 _origin;
+       
 
-
-        public IGridState State => _state;
-
-
-        public GridManager(LevelConfig levelConfig, BoardAnimationConfig animConfig, TilePool pool, float cellSize)
+        public GridManager(LevelConfig levelConfig, BoardAnimationConfig animConfig, TilePool pool, float cellSize,
+            IBoardRuntimeService boardRuntimeService)
         {
             _levelConfig = levelConfig;
             _animConfig = animConfig;
@@ -34,8 +36,8 @@ namespace Project.Scripts.Services.Grid
             _cellSize = cellSize;
             _tiles = new Tile[levelConfig.Width, levelConfig.Height];
             _state = new GridState(levelConfig.Width, levelConfig.Height);
+            _boardRuntimeService = boardRuntimeService;
         }
-
 
         // IGridView
         public void SetOrigin(Vector3 origin) => _origin = origin;
@@ -114,7 +116,6 @@ namespace Project.Scripts.Services.Grid
         }
 #endif
 
-
         // IGridOperations
         public async UniTask PopulateGrid()
         {
@@ -140,32 +141,74 @@ namespace Project.Scripts.Services.Grid
 
         public async UniTask RemoveMatches(List<MatchResult> matches, Dictionary<GridPoint, SpecialTileSpawnData> specialPlacements)
         {
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             var posSet = new HashSet<GridPoint>();
             for (var i = 0; i < matches.Count; i++)
                 for (var j = 0; j < matches[i].Positions.Count; j++)
                     posSet.Add(matches[i].Positions[j]);
 
             await ProcessRemovals(new List<GridPoint>(posSet), specialPlacements);
+
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             await ProcessScheduledRemovals();
         }
 
         public async UniTask ActivateBySwap(GridPoint pos)
         {
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             await ProcessRemovals(new List<GridPoint> { pos }, null);
+
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             await ProcessScheduledRemovals();
         }
 
         public async UniTask ActivateTiles(List<GridPoint> positions)
         {
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             if (positions.Count == 0)
                 return;
 
             await ProcessRemovals(positions, null);
+
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             await ProcessScheduledRemovals();
         }
 
         public async UniTask ConsumeTile(GridPoint pos)
         {
+            if (false == IsBoardFlowRunning())
+                return;
+
             if (false == _state.IsValidPosition(pos))
                 return;
 
@@ -174,6 +217,13 @@ namespace Project.Scripts.Services.Grid
                 return;
 
             await tile.Animator.AnimateDestroy();
+
+            if (false == IsBoardFlowRunning())
+                return;
+
+            if (_tiles[pos.X, pos.Y] != tile)
+                return;
+
             _tiles[pos.X, pos.Y] = null;
             _state.ClearCell(pos);
             _pool.Release(tile);
@@ -202,6 +252,9 @@ namespace Project.Scripts.Services.Grid
 
         public async UniTask ShuffleGrid()
         {
+            if (false == IsBoardFlowRunning())
+                return;
+
             var positions = new List<GridPoint>();
             var configs = new List<TileConfig>();
             for (var x = 0; x < _levelConfig.Width; x++)
@@ -250,17 +303,30 @@ namespace Project.Scripts.Services.Grid
 
         public async UniTask CollapseAll()
         {
+            ClearPendingScheduledRemovals();
+
+            for (var x = 0; x < _levelConfig.Width; x++)
+                for (var y = 0; y < _levelConfig.Height; y++)
+                {
+                    var tile = _tiles[x, y];
+                    if (tile)
+                        tile.Animator.StopActiveAnimations();
+                }
+
             var tasks = new List<UniTask>();
             for (var x = 0; x < _levelConfig.Width; x++)
                 for (var y = 0; y < _levelConfig.Height; y++)
                 {
                     var tile = _tiles[x, y];
+
                     if (tile)
                         tasks.Add(tile.Animator.AnimateCollapse());
                 }
 
             if (tasks.Count > 0)
                 await UniTask.WhenAll(tasks);
+
+            _boardRuntimeService.MarkFrozen();
         }
 
         public void ForceInjectMove()
@@ -277,20 +343,44 @@ namespace Project.Scripts.Services.Grid
             ReInitTileAt(3, 0, configT);
         }
 
-
         private async UniTask ProcessScheduledRemovals()
         {
             while (_state.ScheduledRemovals.Count > 0)
             {
+                if (false == IsBoardFlowRunning())
+                {
+                    ClearPendingScheduledRemovals();
+                    return;
+                }
+
                 await UniTask.Delay(TimeSpan.FromSeconds(_animConfig.ChainReactionWaveDelay));
+
+                if (false == IsBoardFlowRunning())
+                {
+                    ClearPendingScheduledRemovals();
+                    return;
+                }
+
                 var batch = new List<GridPoint>(_state.ScheduledRemovals);
                 _state.ClearScheduledRemovals();
                 await ProcessRemovals(batch, null);
+
+                if (false == IsBoardFlowRunning())
+                {
+                    ClearPendingScheduledRemovals();
+                    return;
+                }
             }
         }
 
         private async UniTask ProcessRemovals(List<GridPoint> positions, Dictionary<GridPoint, SpecialTileSpawnData> specialPlacements)
         {
+            if (false == IsBoardFlowRunning())
+            {
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
             var toDestroy = new List<(GridPoint pos, Tile tile)>(positions.Count);
             for (var i = 0; i < positions.Count; i++)
             {
@@ -314,39 +404,79 @@ namespace Project.Scripts.Services.Grid
 
             await UniTask.WhenAll(destroyTasks);
 
-            for (var i = 0; i < toDestroy.Count; i++)
+            if (false == IsBoardFlowRunning())
             {
-                var (pos, tile) = toDestroy[i];
-                tile.Config.Behaviour.OnTileDestroyed(pos, _state, tile.PayloadKind);
-                _tiles[pos.X, pos.Y] = null;
-                _state.ClearCell(pos);
-                _pool.Release(tile);
+                ClearPendingScheduledRemovals();
+                return;
             }
+
+            ReleaseDestroyedTiles(toDestroy, invokeBehaviours: true);
 
             if (null == specialPlacements || specialPlacements.Count == 0)
                 return;
 
-            var spawnTasks = new List<UniTask>(specialPlacements.Count);
-            foreach (var kvp in specialPlacements)
+            if (false == IsBoardFlowRunning())
             {
-                var pos = kvp.Key;
+                ClearPendingScheduledRemovals();
+                return;
+            }
+
+            var spawnTasks = new List<UniTask>(specialPlacements.Count);
+            var specialPairs = new List<KeyValuePair<GridPoint, SpecialTileSpawnData>>(specialPlacements);
+            for (var i = 0; i < specialPairs.Count; i++)
+            {
+                if (false == IsBoardFlowRunning())
+                {
+                    ClearPendingScheduledRemovals();
+                    return;
+                }
+
+                var pos = specialPairs[i].Key;
                 if (false == _state.IsValidPosition(pos))
                     continue;
 
                 if (_tiles[pos.X, pos.Y])
                     continue;
 
-                var data = kvp.Value;
+                var data = specialPairs[i].Value;
                 var specialTile = _pool.Get();
                 specialTile.transform.position = GridToWorld(pos);
                 specialTile.Init(data.Config, pos, data.PayloadKind);
                 _tiles[pos.X, pos.Y] = specialTile;
                 _state.SetKind(pos, data.Config.Kind);
+
                 spawnTasks.Add(specialTile.Animator.AnimateSpawn());
             }
 
             if (spawnTasks.Count > 0)
                 await UniTask.WhenAll(spawnTasks);
+        }
+
+        private bool IsBoardFlowRunning()
+        {
+            return _boardRuntimeService.IsRunning;
+        }
+
+        private void ClearPendingScheduledRemovals()
+        {
+            _state.ClearScheduledRemovals();
+        }
+
+        private void ReleaseDestroyedTiles(List<(GridPoint pos, Tile tile)> toDestroy, bool invokeBehaviours)
+        {
+            for (var i = 0; i < toDestroy.Count; i++)
+            {
+                var (pos, tile) = toDestroy[i];
+                if (_tiles[pos.X, pos.Y] != tile)
+                    continue;
+
+                if (invokeBehaviours)
+                    tile.Config.Behaviour.OnTileDestroyed(pos, _state, tile.PayloadKind);
+
+                _tiles[pos.X, pos.Y] = null;
+                _state.ClearCell(pos);
+                _pool.Release(tile);
+            }
         }
 
         private void ReInitTileAt(int x, int y, TileConfig config)
