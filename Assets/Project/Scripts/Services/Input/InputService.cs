@@ -18,7 +18,6 @@ namespace Project.Scripts.Services.Input
         private InputAction _pointAction;
         private InputActionMap _map;
         private bool _isDragging;
-        private bool _dragStarted;
         private Vector2 _lastPosition;
         private InputDevice _activeDragDevice;
 
@@ -56,6 +55,7 @@ namespace Project.Scripts.Services.Input
             _pressAction.started += OnPressStarted;
             _pressAction.canceled += OnPressCanceled;
             _pointAction.performed += OnPointPerformed;
+            Application.focusChanged += OnApplicationFocusChanged;
 
             asset.bindingMask = null;
             _map.Enable();
@@ -70,6 +70,7 @@ namespace Project.Scripts.Services.Input
             _pressAction.started -= OnPressStarted;
             _pressAction.canceled -= OnPressCanceled;
             _pointAction.performed -= OnPointPerformed;
+            Application.focusChanged -= OnApplicationFocusChanged;
             _map?.Disable();
         }
 
@@ -81,11 +82,16 @@ namespace Project.Scripts.Services.Input
                 return;
 
             if (_isDragging)
+                ResetDrag(true);
+
+            if (false == TryReadCurrentPosition(device, out var currentPosition))
                 return;
 
             _activeDragDevice = device;
+
             _isDragging = true;
-            _dragStarted = false;
+            _lastPosition = currentPosition;
+            OnDragStarted?.Invoke(_lastPosition);
         }
 
         public void ReanchorDrag()
@@ -93,19 +99,23 @@ namespace Project.Scripts.Services.Input
             if (false == _isDragging)
                 return;
 
-            _dragStarted = false;
+            if (false == TryReadCurrentPosition(_activeDragDevice, out var currentPosition))
+            {
+                ResetDrag(true);
+                return;
+            }
+
+            _lastPosition = currentPosition;
+            OnDragStarted?.Invoke(_lastPosition);
         }
 
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
             var device = ctx.control?.device;
-            if (_activeDragDevice != null && _activeDragDevice != device)
+            if (_activeDragDevice != null && _activeDragDevice != device && _pressAction != null && _pressAction.IsPressed())
                 return;
 
-            _isDragging = false;
-            _dragStarted = false;
-            _activeDragDevice = null;
-            OnDragCanceled?.Invoke();
+            ResetDrag(true);
         }
 
         private void OnPointPerformed(InputAction.CallbackContext ctx)
@@ -118,12 +128,9 @@ namespace Project.Scripts.Services.Input
                 return;
 
             var current = ctx.ReadValue<Vector2>();
-
-            if (false == _dragStarted)
+            if (false == IsFinite(current))
             {
-                _dragStarted = true;
-                _lastPosition = current;
-                OnDragStarted?.Invoke(_lastPosition);
+                ResetDrag(true);
                 return;
             }
 
@@ -132,6 +139,50 @@ namespace Project.Scripts.Services.Input
 
             if (delta.sqrMagnitude > 0.001f)
                 OnDragDelta?.Invoke(delta);
+        }
+
+        private void OnApplicationFocusChanged(bool hasFocus)
+        {
+            if (hasFocus)
+                return;
+
+            ResetDrag(true);
+        }
+
+        private void ResetDrag(bool notifyCanceled)
+        {
+            if (false == _isDragging && null == _activeDragDevice)
+                return;
+
+            _isDragging = false;
+            _lastPosition = default;
+            _activeDragDevice = null;
+
+            if (notifyCanceled)
+                OnDragCanceled?.Invoke();
+        }
+
+        private static bool IsFinite(Vector2 position)
+        {
+            return float.IsFinite(position.x) && float.IsFinite(position.y);
+        }
+
+        private static bool TryReadCurrentPosition(InputDevice device, out Vector2 position)
+        {
+            switch (device)
+            {
+                case Mouse mouse:
+                    position = mouse.position.ReadValue();
+                    return IsFinite(position);
+
+                case Touchscreen touchscreen:
+                    position = touchscreen.primaryTouch.position.ReadValue();
+                    return IsFinite(position);
+
+                default:
+                    position = default;
+                    return false;
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Project.Scripts.Services.Input
         private Camera _camera;
         private GridPoint _startGridPos;
         private bool _hasPendingSwap;
+        private Vector2 _accumulatedScreenDelta;
 
 
         public SwapInputHandler(IInputService input, IGridState state, IGridView view, float worldThreshold, bool reanchorOnUnlock)
@@ -55,6 +56,7 @@ namespace Project.Scripts.Services.Input
             if (BoardEdit.BoardEditMode.IsActive)
                 return;
 #endif
+            _accumulatedScreenDelta = Vector2.zero;
             var worldPos = ScreenToWorld(screenPos);
             _startGridPos = _view.WorldToGrid(worldPos);
             _hasPendingSwap = _state.IsValidPosition(_startGridPos) && _view.GetTile(_startGridPos) != null;
@@ -65,7 +67,9 @@ namespace Project.Scripts.Services.Input
             if (false == _hasPendingSwap)
                 return;
 
-            var worldDelta = ScreenDeltaToWorld(screenDelta);
+            _accumulatedScreenDelta += screenDelta;
+
+            var worldDelta = ScreenDeltaToWorld(_accumulatedScreenDelta);
             if (worldDelta.magnitude < _worldThreshold)
                 return;
 
@@ -90,6 +94,7 @@ namespace Project.Scripts.Services.Input
         private void HandleDragCanceled()
         {
             _hasPendingSwap = false;
+            _accumulatedScreenDelta = Vector2.zero;
         }
 
         private Vector3 ScreenToWorld(Vector2 screenPos)
