@@ -1,8 +1,10 @@
 using System;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Timer;
 
 namespace Project.Scripts.Services.Timer
 {
@@ -12,11 +14,13 @@ namespace Project.Scripts.Services.Timer
         private readonly IHeroService _heroService;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
-        private readonly IAvatarGroupDefenseService _groupDefense;
+        private readonly EventBus _eventBus;
         private readonly IGameStateService _gameStateService;
 
         private bool _isActive;
         private float _drainAccumulator;
+        private OvertimeDrainCursor _playerCursor;
+        private OvertimeDrainCursor _enemyCursor;
 
 
         public bool IsActive => _isActive;
@@ -27,14 +31,14 @@ namespace Project.Scripts.Services.Timer
             IHeroService heroService,
             IPlayerStateService playerState,
             IEnemyStateService enemyState,
-            IAvatarGroupDefenseService groupDefense,
+            EventBus eventBus,
             IGameStateService gameStateService)
         {
             _config = config;
             _heroService = heroService;
             _playerState = playerState;
             _enemyState = enemyState;
-            _groupDefense = groupDefense;
+            _eventBus = eventBus;
             _gameStateService = gameStateService;
         }
 
@@ -43,6 +47,12 @@ namespace Project.Scripts.Services.Timer
         {
             _isActive = true;
             _drainAccumulator = 0f;
+
+            _playerCursor.Initialize(_heroService.GetSlots(BattleSide.Player));
+            _enemyCursor.Initialize(_heroService.GetSlots(BattleSide.Enemy));
+
+            _eventBus.Publish(new OvertimeDrainTargetChangedEvent(BattleSide.Player, _playerCursor.TargetIndex));
+            _eventBus.Publish(new OvertimeDrainTargetChangedEvent(BattleSide.Enemy, _enemyCursor.TargetIndex));
         }
 
         public void Tick(float deltaTime)
@@ -65,25 +75,34 @@ namespace Project.Scripts.Services.Timer
             var heroDamage = (int)Math.Ceiling(_config.HeroDrainPerSecond * _config.DrainTickInterval * ticks);
             var avatarDamage = (int)Math.Ceiling(_config.AvatarDrainPerSecond * _config.DrainTickInterval * ticks);
 
-            DrainHeroes(BattleSide.Player, heroDamage);
-            DrainHeroes(BattleSide.Enemy, heroDamage);
-
-            if (_groupDefense.IsExposed(BattleSide.Player))
-                _playerState.ForceApplyDamage(avatarDamage);
-
-            if (_groupDefense.IsExposed(BattleSide.Enemy))
-                _enemyState.ForceApplyDamage(avatarDamage);
+            DrainSide(BattleSide.Player, ref _playerCursor, heroDamage, avatarDamage);
+            DrainSide(BattleSide.Enemy, ref _enemyCursor, heroDamage, avatarDamage);
         }
 
-        private void DrainHeroes(BattleSide side, int damage)
+
+        private void DrainSide(BattleSide side, ref OvertimeDrainCursor cursor, int heroDamage, int avatarDamage)
         {
             var slots = _heroService.GetSlots(side);
-            for (var i = 0; i < slots.Count; i++)
-            {
-                if (false == slots[i].IsAlive)
-                    continue;
 
-                _heroService.ApplyDamageToHero(side, i, damage, silent: true);
+            if (cursor.AdvanceIfDead(slots))
+                _eventBus.Publish(new OvertimeDrainTargetChangedEvent(side, cursor.TargetIndex));
+
+            if (cursor.IsDrainingAvatar)
+            {
+                if (side == BattleSide.Player)
+                    _playerState.ForceApplyDamage(avatarDamage);
+                else
+                    _enemyState.ForceApplyDamage(avatarDamage);
+                return;
+            }
+
+            var idx = cursor.TargetIndex;
+            _heroService.ApplyDamageToHero(side, idx, heroDamage, silent: true);
+
+            if (false == slots[idx].IsAlive)
+            {
+                cursor.AdvanceIfDead(slots);
+                _eventBus.Publish(new OvertimeDrainTargetChangedEvent(side, cursor.TargetIndex));
             }
         }
     }

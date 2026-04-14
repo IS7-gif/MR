@@ -295,4 +295,17 @@ namespace Project.Scripts.Services.Events
     {
 
     }
+
+    public readonly struct OvertimeDrainTargetChangedEvent
+    {
+        public BattleSide Side { get; }
+        public int TargetIndex { get; }
+
+
+        public OvertimeDrainTargetChangedEvent(BattleSide side, int targetIndex)
+        {
+            Side = side;
+            TargetIndex = targetIndex;
+        }
+    }
 }
