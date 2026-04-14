@@ -248,6 +248,21 @@ namespace Project.Scripts.Services.Grid
             await UniTask.WhenAll(tasks);
         }
 
+        public async UniTask CollapseAll()
+        {
+            var tasks = new List<UniTask>();
+            for (var x = 0; x < _levelConfig.Width; x++)
+                for (var y = 0; y < _levelConfig.Height; y++)
+                {
+                    var tile = _tiles[x, y];
+                    if (tile)
+                        tasks.Add(tile.Animator.AnimateCollapse());
+                }
+
+            if (tasks.Count > 0)
+                await UniTask.WhenAll(tasks);
+        }
+
         public void ForceInjectMove()
         {
             if (_levelConfig.RegularTiles.Length < 2 || _levelConfig.Width < 4)

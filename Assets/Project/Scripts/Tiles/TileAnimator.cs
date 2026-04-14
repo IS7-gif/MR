@@ -37,6 +37,11 @@ namespace Project.Scripts.Tiles
             return transform.DOScale(Vector3.zero, _config.DestroyDuration).SetEase(_config.DestroyEase).ToUniTask();
         }
 
+        public UniTask AnimateCollapse()
+        {
+            return transform.DOScale(Vector3.zero, _config.CollapseAllDuration).SetEase(_config.CollapseAllEase).ToUniTask();
+        }
+
         public UniTask AnimateSpawn()
         {
             transform.localScale = Vector3.zero;

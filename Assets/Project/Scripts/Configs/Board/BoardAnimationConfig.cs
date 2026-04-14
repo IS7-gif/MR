@@ -27,6 +27,13 @@ namespace Project.Scripts.Configs.Board
         [Tooltip("Пауза в секундах между последовательными волнами цепной реакции (бомба - линейная руна - следующий взрыв и т.д.)")]
         [SerializeField] private float _chainReactionWaveDelay = 0.12f;
 
+        [Header("Overtime")]
+        [Tooltip("Длительность анимации схлопывания всех тайлов при старте овертайма")]
+        [SerializeField] private float _collapseAllDuration = 0.6f;
+
+        [Tooltip("Кривая ослабления для схлопывания тайлов при овертайме")]
+        [SerializeField] private Ease _collapseAllEase = Ease.InBack;
+
 
         public float SwapDuration => _swapDuration;
         public float FallDuration => _fallDuration;
@@ -35,5 +42,7 @@ namespace Project.Scripts.Configs.Board
         public Ease DestroyEase => _destroyEase;
         public float SpawnDuration => _spawnDuration;
         public float ChainReactionWaveDelay => _chainReactionWaveDelay;
+        public float CollapseAllDuration => _collapseAllDuration;
+        public Ease CollapseAllEase => _collapseAllEase;
     }
 }

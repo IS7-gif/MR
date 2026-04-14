@@ -60,6 +60,7 @@ namespace Project.Scripts.Gameplay
         private GameAudioController _gameAudioController;
         private IBattleTimerService _battleTimerService;
         private IOvertimeService _overtimeService;
+        private OvertimeBoardAnimator _overtimeBoardAnimator;
         private DebugConfig _debugConfig;
 
 #if UNITY_EDITOR
@@ -114,6 +115,7 @@ namespace Project.Scripts.Gameplay
                 _battleHUDView.Close();
             
             _orchestrator?.Dispose();
+            _overtimeBoardAnimator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
             
@@ -243,6 +245,7 @@ namespace Project.Scripts.Gameplay
                 swapComboResolver,
                 _debugConfig);
 
+            _overtimeBoardAnimator = new OvertimeBoardAnimator(_eventBus, gridManager);
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 
