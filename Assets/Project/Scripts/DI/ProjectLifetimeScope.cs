@@ -31,6 +31,8 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
             builder.RegisterInstance(_mainConfig.BattleTimerConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);
+            builder.RegisterInstance(_mainConfig.AutoEnergyConfig);
+            builder.RegisterInstance(_mainConfig.EscalationConfig);
             builder.RegisterInstance(_mainConfig.DebugConfig);
 
             builder.Register<EventBus>(Lifetime.Singleton);

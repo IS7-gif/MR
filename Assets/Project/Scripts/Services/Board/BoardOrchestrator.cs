@@ -149,7 +149,9 @@ namespace Project.Scripts.Services.Board
                     var stateAfter = _state.GetGridState();
 
                     _eventBus.Publish(new BombActivatedEvent());
-                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
+                    var comboMultiplier = _cascadeEnergyConfig.GetSpecialTileMultiplier(fromKind)
+                                         * _cascadeEnergyConfig.GetSpecialTileMultiplier(toKind);
+                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind, comboMultiplier);
 
                     await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
 
@@ -190,7 +192,8 @@ namespace Project.Scripts.Services.Board
                     var stateAfter = _state.GetGridState();
 
                     _eventBus.Publish(new BombActivatedEvent());
-                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind);
+                    var specialMultiplier = _cascadeEnergyConfig.GetSpecialTileMultiplier(specialTile.Config.Kind);
+                    AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind, specialMultiplier);
 
                     await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
 
@@ -604,7 +607,8 @@ namespace Project.Scripts.Services.Board
             return sb.ToString();
         }
 
-        private static void AccumulateGridDiffEnergy(TileKind[,] before, TileKind[,] after, Dictionary<TileKind, float> energy)
+        private static void AccumulateGridDiffEnergy(TileKind[,] before, TileKind[,] after,
+            Dictionary<TileKind, float> energy, float multiplier = 1f)
         {
             var width = before.GetLength(0);
             var height = before.GetLength(1);
@@ -620,7 +624,7 @@ namespace Project.Scripts.Services.Board
                     if (after[x, y] != kindBefore)
                     {
                         energy.TryGetValue(kindBefore, out var current);
-                        energy[kindBefore] = current + 1f;
+                        energy[kindBefore] = current + multiplier;
                     }
                 }
             }

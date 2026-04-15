@@ -5,6 +5,7 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
+using R3;
 
 namespace Project.Scripts.Services.Combat
 {
@@ -16,16 +17,19 @@ namespace Project.Scripts.Services.Combat
         private readonly EventBus _eventBus;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
+        private readonly IEscalationModifierService _escalationModifier;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
-        private IDisposable _subscription;
+        private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig, IPlayerStateService playerState, IEnemyStateService enemyState)
+        public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
+            IPlayerStateService playerState, IEnemyStateService enemyState, IEscalationModifierService escalationModifier)
         {
             _eventBus = eventBus;
             _playerState = playerState;
             _enemyState = enemyState;
+            _escalationModifier = escalationModifier;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes, slotLayoutConfig.HeroSlotKinds);
             InitSlots(_enemySlots, levelConfig.EnemyHeroes, slotLayoutConfig.HeroSlotKinds);
@@ -33,7 +37,8 @@ namespace Project.Scripts.Services.Combat
             PublishInitialHPEvents(_playerSlots, BattleSide.Player);
             PublishInitialHPEvents(_enemySlots, BattleSide.Enemy);
 
-            _subscription = _eventBus.Subscribe<EnergyGeneratedEvent>(OnEnergyGenerated);
+            _subscriptions.Add(_eventBus.Subscribe<EnergyGeneratedEvent>(OnEnergyGenerated));
+            _subscriptions.Add(_eventBus.Subscribe<AutoEnergyTickEvent>(OnAutoEnergyTick));
         }
 
 
@@ -115,8 +120,7 @@ namespace Project.Scripts.Services.Combat
 
         public void Dispose()
         {
-            _subscription?.Dispose();
-            _subscription = null;
+            _subscriptions.Dispose();
         }
 
 
@@ -158,19 +162,41 @@ namespace Project.Scripts.Services.Combat
 
             slot.CurrentEnergy = 0f;
             _eventBus.Publish(new HeroEnergyChangedEvent(side, slotIndex, 0, slot.MaxEnergy));
-            _eventBus.Publish(new HeroDefeatedEvent(side, slotIndex));
+            _eventBus.Publish(new HeroDefeatedEvent(side, slotIndex, slot.SlotKind));
         }
 
         private ref HeroSlotState GetSlotRef(BattleSide side, int slotIndex)
         {
             var slots = side == BattleSide.Player ? _playerSlots : _enemySlots;
+            
             return ref slots[slotIndex];
+        }
+
+        private void OnAutoEnergyTick(AutoEnergyTickEvent e)
+        {
+            DistributeAutoTickToSlots(_playerSlots, BattleSide.Player, e.EnergyAmount);
+            DistributeAutoTickToSlots(_enemySlots, BattleSide.Enemy, e.EnergyAmount);
+        }
+
+        private void DistributeAutoTickToSlots(HeroSlotState[] slots, BattleSide side, float amount)
+        {
+            for (var i = 0; i < slots.Length; i++)
+            {
+                ref var slot = ref slots[i];
+
+                if (!slot.CanAccumulateEnergy)
+                    continue;
+
+                slot.CurrentEnergy = MathF.Min(slot.MaxEnergy, slot.CurrentEnergy + amount);
+                _eventBus.Publish(new HeroEnergyChangedEvent(side, i, (int)slot.CurrentEnergy, slot.MaxEnergy));
+            }
         }
 
         private void OnEnergyGenerated(EnergyGeneratedEvent e)
         {
+            var cascadeMultiplier = _escalationModifier.CascadeEnergyMultiplier;
             foreach (var pair in e.EnergyByKind)
-                DistributeToSlots(_playerSlots, BattleSide.Player, pair.Key, pair.Value);
+                DistributeToSlots(_playerSlots, BattleSide.Player, pair.Key, pair.Value * cascadeMultiplier);
         }
 
         private void DistributeToSlots(HeroSlotState[] slots, BattleSide side, TileKind kind, float amount)

@@ -10,6 +10,7 @@ using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Timer;
+using Project.Scripts.Shared.Timer;
 using VContainer;
 using VContainer.Unity;
 
@@ -35,6 +36,10 @@ namespace Project.Scripts.DI
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();
             builder.RegisterEntryPoint<EnemyAvatarChargeService>().As<IEnemyAvatarChargeService>();
+            builder.RegisterEntryPoint<AutoEnergyTickService>().As<IBattleEscalationModifier>();
+            builder.Register<EscalationModifierService>(Lifetime.Singleton)
+                .As<IEscalationModifierService>()
+                .As<IBattleEscalationModifier>();
             builder.Register<IAbilityExecutionService, AbilityExecutionService>(Lifetime.Singleton);
 
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);

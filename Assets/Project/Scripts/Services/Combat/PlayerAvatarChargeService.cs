@@ -24,19 +24,25 @@ namespace Project.Scripts.Services.Combat
 
         private readonly EventBus _eventBus;
         private readonly DebugConfig _debugConfig;
+        private readonly IEscalationModifierService _escalationModifier;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly AvatarEnergyFormula _formula;
+        private readonly float _deadHeroTileMultiplier;
+        private readonly HashSet<TileKind> _bonusKinds = new();
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public PlayerAvatarChargeService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
+        public PlayerAvatarChargeService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig,
+            SlotLayoutConfig slotLayoutConfig, IEscalationModifierService escalationModifier)
         {
             _eventBus = eventBus;
             _debugConfig = debugConfig;
+            _escalationModifier = escalationModifier;
             var config = levelConfig.PlayerAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
             AbilityType = config.AbilityType;
             AbilityPower = config.AbilityPower;
+            _deadHeroTileMultiplier = config.DeadHeroTileMultiplier;
             _formula = new AvatarEnergyFormula(
                 slotLayoutConfig.AvatarSlotKind,
                 config.PrimaryTileMultiplier,
@@ -47,6 +53,8 @@ namespace Project.Scripts.Services.Combat
         public void Start()
         {
             _subscriptions.Add(_eventBus.Subscribe<EnergyGeneratedEvent>(OnEnergyGenerated));
+            _subscriptions.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            _subscriptions.Add(_eventBus.Subscribe<AutoEnergyTickEvent>(OnAutoEnergyTick));
         }
 
         public void Dispose()
@@ -62,24 +70,48 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             PublishEnergyChanged();
+            
             return true;
         }
 
 
+        private void OnAutoEnergyTick(AutoEnergyTickEvent e)
+        {
+            var added = _engine.TryAddEnergy(e.EnergyAmount);
+            if (added > 0f)
+                PublishEnergyChanged();
+        }
+
+        private void OnHeroDefeated(HeroDefeatedEvent e)
+        {
+            if (e.Side != BattleSide.Player)
+                return;
+
+            if (_bonusKinds.Add(e.SlotKind))
+                _eventBus.Publish(new AvatarTileBonusActivatedEvent(BattleSide.Player, e.SlotKind));
+        }
+
         private void OnEnergyGenerated(EnergyGeneratedEvent e)
         {
-            var gain = _formula.Calculate(e.EnergyByKind);
+            var gain = _bonusKinds.Count > 0
+                ? _formula.Calculate(e.EnergyByKind, _bonusKinds, _deadHeroTileMultiplier)
+                : _formula.Calculate(e.EnergyByKind);
+
+            var cascadeMultiplier = _escalationModifier.CascadeEnergyMultiplier;
+            gain *= cascadeMultiplier;
+
             var added = _engine.TryAddEnergy(gain);
             if (added <= 0f)
                 return;
 
             var snap = _engine.Snapshot;
             if (_debugConfig.LogEnergyAccumulation)
-                Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady));
+                Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady, cascadeMultiplier));
             PublishEnergyChanged();
         }
 
-        private string BuildAvatarEnergyLog(IReadOnlyDictionary<TileKind, float> energyByKind, float gain, float added, int current, int max, bool isReady)
+        private string BuildAvatarEnergyLog(IReadOnlyDictionary<TileKind, float> energyByKind, float gain, float added,
+            int current, int max, bool isReady, float cascadeMultiplier)
         {
             var sb = new System.Text.StringBuilder();
             sb.AppendLine("[PlayerAvatar] == Energy formula ==");
@@ -91,10 +123,20 @@ namespace Project.Scripts.Services.Combat
 
                 var mult = pair.Key == _formula.AvatarKind ? _formula.PrimaryMultiplier : _formula.SecondaryMultiplier;
                 var label = pair.Key == _formula.AvatarKind ? "primary" : "secondary";
+
+                if (_bonusKinds.Contains(pair.Key))
+                {
+                    label += " +dead-hero-bonus";
+                    mult *= _deadHeroTileMultiplier;
+                }
+
                 sb.AppendLine($"  {pair.Key}: {pair.Value:F2} × {mult:F2} ({label}) = {pair.Value * mult:F2}");
             }
 
-            sb.Append($"  Gain={gain:F2}  Added={added:F2}  Charge={current}/{max}{(isReady ? " - READY" : string.Empty)}");
+            if (_escalationModifier.IsEscalationActive)
+                sb.AppendLine($"  Cascade multiplier: ×{cascadeMultiplier:F2} (escalation)");
+
+            sb.Append($"  Formula={gain:F2}  Really added={added:F2}  Bar={current}/{max}{(isReady ? " - READY" : string.Empty)}");
             return sb.ToString();
         }
 

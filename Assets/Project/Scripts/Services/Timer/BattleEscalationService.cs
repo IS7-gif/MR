@@ -17,7 +17,7 @@ namespace Project.Scripts.Services.Timer
         private readonly EventBus _eventBus;
         private readonly IBoardAnnouncementService _announcementService;
 
-        private readonly List<IBattleEscalationModifier> _modifiers = new();
+        private readonly List<IBattleEscalationModifier> _modifiers;
         private readonly IDisposable _timerSub;
         private bool _escalationTriggered;
 
@@ -26,12 +26,14 @@ namespace Project.Scripts.Services.Timer
             BattleTimerConfig timerConfig,
             BattleAnimationConfig animConfig,
             EventBus eventBus,
-            IBoardAnnouncementService announcementService)
+            IBoardAnnouncementService announcementService,
+            IEnumerable<IBattleEscalationModifier> modifiers)
         {
             _timerConfig = timerConfig;
             _animConfig = animConfig;
             _eventBus = eventBus;
             _announcementService = announcementService;
+            _modifiers = new List<IBattleEscalationModifier>(modifiers);
 
             _timerSub = _eventBus.Subscribe<BattleTimerChangedEvent>(OnTimerChanged);
         }

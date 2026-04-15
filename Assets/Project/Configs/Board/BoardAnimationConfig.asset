@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274bcba0308258448ba48b5d237ba4c6, type: 3}
   m_Name: BoardAnimationConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.AnimationConfig
-  _swapDuration: 0.2
-  _fallDuration: 0.15
+  _swapDuration: 0.17
+  _fallDuration: 0.12
   _fallEase: 30
   _destroyDuration: 0.1
   _destroyEase: 26
   _spawnDuration: 0.15
+  _chainReactionWaveDelay: 0.1
+  _collapseAllDuration: 0.6
+  _collapseAllEase: 26

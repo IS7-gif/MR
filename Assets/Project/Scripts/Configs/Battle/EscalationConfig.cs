@@ -1,0 +1,18 @@
+using UnityEngine;
+
+namespace Project.Scripts.Configs.Battle
+{
+    [CreateAssetMenu(fileName = "EscalationConfig", menuName = "Configs/Battle/Escalation Config")]
+    public class EscalationConfig : ScriptableObject
+    {
+        [Tooltip("Множитель скорости автозаполнения энергии при эскалации (например, 2 = тики идут вдвое быстрее)")]
+        [SerializeField] private float _autoEnergyIntervalMultiplier = 2f;
+
+        [Tooltip("Множитель на итоговое количество энергии от каскадов при эскалации (1 = без изменений)")]
+        [SerializeField] private float _cascadeEnergyMultiplier = 1f;
+
+
+        public float AutoEnergyIntervalMultiplier => _autoEnergyIntervalMultiplier;
+        public float CascadeEnergyMultiplier => _cascadeEnergyMultiplier;
+    }
+}

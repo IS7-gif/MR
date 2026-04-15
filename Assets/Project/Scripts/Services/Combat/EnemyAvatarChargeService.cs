@@ -6,6 +6,7 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Avatar;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
+using R3;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Combat
@@ -20,17 +21,24 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
+        private readonly IEscalationModifierService _escalationModifier;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly AvatarEnergyFormula _formula;
+        private readonly float _deadHeroTileMultiplier;
+        private readonly HashSet<TileKind> _bonusKinds = new();
+        private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
-        public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig)
+        public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
+            IEscalationModifierService escalationModifier)
         {
             _eventBus = eventBus;
+            _escalationModifier = escalationModifier;
             var config = levelConfig.EnemyAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
             AbilityType = config.AbilityType;
             AbilityPower = config.AbilityPower;
+            _deadHeroTileMultiplier = config.DeadHeroTileMultiplier;
             _formula = new AvatarEnergyFormula(
                 slotLayoutConfig.AvatarSlotKind,
                 config.PrimaryTileMultiplier,
@@ -40,7 +48,15 @@ namespace Project.Scripts.Services.Combat
 
         public void Start()
         {
+            _subscriptions.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            _subscriptions.Add(_eventBus.Subscribe<AutoEnergyTickEvent>(OnAutoEnergyTick));
         }
+
+        public void Dispose()
+        {
+            _subscriptions.Dispose();
+        }
+
 
         public void AddEnergy(int amount)
         {
@@ -51,7 +67,11 @@ namespace Project.Scripts.Services.Combat
 
         public void AddEnergyFromCascades(IReadOnlyDictionary<TileKind, float> energyByKind)
         {
-            var gain = _formula.Calculate(energyByKind);
+            var gain = _bonusKinds.Count > 0
+                ? _formula.Calculate(energyByKind, _bonusKinds, _deadHeroTileMultiplier)
+                : _formula.Calculate(energyByKind);
+
+            gain *= _escalationModifier.CascadeEnergyMultiplier;
 
             var added = _engine.TryAddEnergy(gain);
             if (added <= 0f)
@@ -67,6 +87,7 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             PublishEnergyChanged();
+            
             return true;
         }
 
@@ -81,8 +102,22 @@ namespace Project.Scripts.Services.Combat
             _eventBus.Publish(new EnemyAvatarActivatedEvent(AbilityType, AbilityPower));
         }
 
-        public void Dispose() { }
 
+        private void OnAutoEnergyTick(AutoEnergyTickEvent e)
+        {
+            var added = _engine.TryAddEnergy(e.EnergyAmount);
+            if (added > 0f)
+                PublishEnergyChanged();
+        }
+
+        private void OnHeroDefeated(HeroDefeatedEvent e)
+        {
+            if (e.Side != BattleSide.Enemy)
+                return;
+
+            if (_bonusKinds.Add(e.SlotKind))
+                _eventBus.Publish(new AvatarTileBonusActivatedEvent(BattleSide.Enemy, e.SlotKind));
+        }
 
         private void PublishEnergyChanged()
         {

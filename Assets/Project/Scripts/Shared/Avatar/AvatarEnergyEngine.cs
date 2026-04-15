@@ -4,7 +4,7 @@ namespace Project.Scripts.Shared.Avatar
 {
     public sealed class AvatarEnergyEngine
     {
-        public AvatarEnergyState Snapshot => new AvatarEnergyState((int)_currentEnergy, _maxEnergy);
+        public AvatarEnergyState Snapshot => new AvatarEnergyState(Mathf.RoundToInt(_currentEnergy), _maxEnergy);
 
 
         private int _maxEnergy;

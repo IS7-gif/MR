@@ -106,12 +106,27 @@ namespace Project.Scripts.Services.Events
     {
         public BattleSide Side { get; }
         public int SlotIndex { get; }
+        public TileKind SlotKind { get; }
 
 
-        public HeroDefeatedEvent(BattleSide side, int slotIndex)
+        public HeroDefeatedEvent(BattleSide side, int slotIndex, TileKind slotKind)
         {
             Side = side;
             SlotIndex = slotIndex;
+            SlotKind = slotKind;
+        }
+    }
+
+    public readonly struct AvatarTileBonusActivatedEvent
+    {
+        public BattleSide Side { get; }
+        public TileKind Kind { get; }
+
+
+        public AvatarTileBonusActivatedEvent(BattleSide side, TileKind kind)
+        {
+            Side = side;
+            Kind = kind;
         }
     }
 
@@ -294,6 +309,28 @@ namespace Project.Scripts.Services.Events
     public readonly struct OvertimeStartedEvent
     {
 
+    }
+
+    public readonly struct EscalationModifiersAppliedEvent
+    {
+        public float CascadeEnergyMultiplier { get; }
+
+
+        public EscalationModifiersAppliedEvent(float cascadeEnergyMultiplier)
+        {
+            CascadeEnergyMultiplier = cascadeEnergyMultiplier;
+        }
+    }
+
+    public readonly struct AutoEnergyTickEvent
+    {
+        public float EnergyAmount { get; }
+
+
+        public AutoEnergyTickEvent(float energyAmount)
+        {
+            EnergyAmount = energyAmount;
+        }
     }
 
     public readonly struct OvertimeDrainTargetChangedEvent

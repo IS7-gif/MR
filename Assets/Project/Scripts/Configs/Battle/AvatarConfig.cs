@@ -25,6 +25,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Множитель энергии для тайлов, не совпадающих с типом ячейки аватара")]
         [SerializeField] private float _secondaryTileMultiplier = 1f;
 
+        [Tooltip("Дополнительный множитель энергии для тайлов цвета мёртвого героя (стакается с основным множителем)")]
+        [SerializeField] private float _deadHeroTileMultiplier = 2f;
+
         [Tooltip("Portrait sprite displayed in the avatar slot (null = empty frame)")]
         [SerializeField] private Sprite _portrait;
 
@@ -35,6 +38,7 @@ namespace Project.Scripts.Configs.Battle
         public int AbilityPower => _abilityPower;
         public float PrimaryTileMultiplier => _primaryTileMultiplier;
         public float SecondaryTileMultiplier => _secondaryTileMultiplier;
+        public float DeadHeroTileMultiplier => _deadHeroTileMultiplier;
         public Sprite Portrait => _portrait;
     }
 }

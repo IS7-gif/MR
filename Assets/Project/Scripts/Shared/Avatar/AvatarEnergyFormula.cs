@@ -28,5 +28,20 @@ namespace Project.Scripts.Shared.Avatar
 
             return total;
         }
+
+        public float Calculate(IReadOnlyDictionary<TileKind, float> energyByKind,
+            HashSet<TileKind> bonusKinds, float bonusMultiplier)
+        {
+            var total = 0f;
+            foreach (var pair in energyByKind)
+            {
+                var multiplier = pair.Key == AvatarKind ? PrimaryMultiplier : SecondaryMultiplier;
+                if (bonusKinds.Contains(pair.Key))
+                    multiplier *= bonusMultiplier;
+                total += pair.Value * multiplier;
+            }
+
+            return total;
+        }
     }
 }

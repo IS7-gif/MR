@@ -16,3 +16,6 @@ MonoBehaviour:
   _multiMatchMultiplier: 1.15
   _lShapeMultiplier: 1.2
   _tShapeMultiplier: 1.35
+  _bombEnergyMultiplier: 1.3
+  _lineRuneEnergyMultiplier: 1.3
+  _stormEnergyMultiplier: 1.5
