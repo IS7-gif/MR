@@ -17,15 +17,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public HeroActionType AbilityType { get; }
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool> IsDefeated { get; } = new(false);
+        public Observable<HealthBarUpdate> HealthBarUpdated => _healthBarUpdated;
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
-        public Observable<float> SilentDrain => _silentDrain;
         public AvatarChargeBarViewModel EnergyBar { get; }
 
 
+        private readonly Subject<HealthBarUpdate> _healthBarUpdated = new();
         private readonly Subject<int> _hit = new();
         private readonly Subject<int> _heal = new();
-        private readonly Subject<float> _silentDrain = new();
         private readonly CompositeDisposable _subscriptions = new();
         private int _prevHP;
 
@@ -41,17 +41,18 @@ namespace Project.Scripts.Gameplay.Battle.Units
             AbilityType = abilityType;
             _prevHP = initialHP;
             HPFill = new ReactiveProperty<float>(maxHP > 0 ? (float)initialHP / maxHP : 1f);
+            IsDefeated.Value = initialHP <= 0;
             EnergyBar = new AvatarChargeBarViewModel(eventBus, side);
 
             if (side == BattleSide.Player)
             {
                 _subscriptions.Add(eventBus.Subscribe<PlayerHPChangedEvent>(OnPlayerHPChanged));
-                _subscriptions.Add(eventBus.Subscribe<PlayerDefeatedEvent>(_ => IsDefeated.Value = true));
+                _subscriptions.Add(eventBus.Subscribe<PlayerDefeatedEvent>(_ => OnDefeated()));
             }
             else
             {
                 _subscriptions.Add(eventBus.Subscribe<EnemyHPChangedEvent>(OnEnemyHPChanged));
-                _subscriptions.Add(eventBus.Subscribe<EnemyDefeatedEvent>(_ => IsDefeated.Value = true));
+                _subscriptions.Add(eventBus.Subscribe<EnemyDefeatedEvent>(_ => OnDefeated()));
             }
         }
 
@@ -59,9 +60,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             HPFill.Dispose();
             IsDefeated.Dispose();
+            _healthBarUpdated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
-            _silentDrain.Dispose();
             EnergyBar.Dispose();
             _subscriptions.Dispose();
         }
@@ -80,21 +81,43 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private void ApplyHPChanged(int current, int max, bool silent = false)
         {
             var fill = max > 0 ? (float)current / max : 0f;
-
-            if (silent)
-            {
-                _prevHP = current;
-                _silentDrain.OnNext(fill);
-                return;
-            }
-
-            if (current < _prevHP)
-                _hit.OnNext(_prevHP - current);
-            else if (current > _prevHP)
-                _heal.OnNext(current - _prevHP);
+            var previousHP = _prevHP;
 
             _prevHP = current;
             HPFill.Value = fill;
+
+            if (silent)
+            {
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+
+                if (current <= 0)
+                    IsDefeated.Value = true;
+
+                return;
+            }
+
+            if (current < previousHP)
+            {
+                _hit.OnNext(previousHP - current);
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Damage));
+            }
+            else if (current > previousHP)
+            {
+                _heal.OnNext(current - previousHP);
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal));
+            }
+            else
+            {
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+            }
+
+            if (current <= 0)
+                IsDefeated.Value = true;
+        }
+
+        private void OnDefeated()
+        {
+            IsDefeated.Value = true;
         }
     }
 }

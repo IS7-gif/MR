@@ -18,14 +18,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
+        public Observable<HealthBarUpdate> HealthBarUpdated => _healthBarUpdated;
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
-        public Observable<float> SilentDrain => _silentDrain;
 
 
+        private readonly Subject<HealthBarUpdate> _healthBarUpdated = new();
         private readonly Subject<int> _hit = new();
         private readonly Subject<int> _heal = new();
-        private readonly Subject<float> _silentDrain = new();
         private int _prevHP;
 
 
@@ -45,6 +45,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             HPFill = new ReactiveProperty<float>(state.IsAssigned && state.MaxHP > 0 ? (float)state.CurrentHP / state.MaxHP : 1f);
             _prevHP = state.IsAssigned ? state.CurrentHP : 0;
+            IsDefeated.Value = state.IsAssigned && state.CurrentHP <= 0;
         }
 
         public void UpdateEnergy(int current, int max)
@@ -56,26 +57,35 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public void UpdateHP(int current, int max, bool silent = false)
         {
             var fill = max > 0 ? (float)current / max : 0f;
-
-            if (silent)
-            {
-                _prevHP = current;
-                _silentDrain.OnNext(fill);
-                if (current <= 0)
-                {
-                    HPFill.Value = fill;
-                    IsDefeated.Value = true;
-                }
-                return;
-            }
-
-            if (current < _prevHP)
-                _hit.OnNext(_prevHP - current);
-            else if (current > _prevHP)
-                _heal.OnNext(current - _prevHP);
+            var previousHP = _prevHP;
 
             _prevHP = current;
             HPFill.Value = fill;
+
+            if (silent)
+            {
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+
+                if (current <= 0)
+                    IsDefeated.Value = true;
+
+                return;
+            }
+
+            if (current < previousHP)
+            {
+                _hit.OnNext(previousHP - current);
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Damage));
+            }
+            else if (current > previousHP)
+            {
+                _heal.OnNext(current - previousHP);
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal));
+            }
+            else
+            {
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+            }
 
             if (current <= 0)
                 IsDefeated.Value = true;
@@ -87,9 +97,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsActivatable.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();
+            _healthBarUpdated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
-            _silentDrain.Dispose();
         }
     }
 }

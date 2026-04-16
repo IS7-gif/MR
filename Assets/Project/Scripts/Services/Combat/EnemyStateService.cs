@@ -3,6 +3,7 @@ using Project.Scripts.Configs;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Rules;
 using R3;
 using UnityEngine;
 
@@ -40,39 +41,43 @@ namespace Project.Scripts.Services.Combat
 
         public void ApplyDamage(int amount)
         {
-            if (CurrentHP <= 0)
+            if (amount <= 0)
                 return;
 
-            if (!_groupDefense.IsExposed(BattleSide.Enemy))
+            if (false == _groupDefense.IsExposed(BattleSide.Enemy))
                 return;
 
             if (_debugConfig.LogCombatDamage)
                 Debug.Log($"[Combat] Damage applied to enemy for {amount} (HP: {CurrentHP} → {Math.Max(0, CurrentHP - amount)}/{MaxHP})");
-            CurrentHP = Math.Max(0, CurrentHP - amount);
-            _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
-
-            if (CurrentHP == 0)
-                _eventBus.Publish(new EnemyDefeatedEvent());
+            ApplyHealthDelta(-amount);
         }
 
         public void ApplyHeal(int amount)
         {
-            if (CurrentHP >= MaxHP || amount <= 0)
+            if (amount <= 0)
                 return;
 
-            CurrentHP = Math.Min(MaxHP, CurrentHP + amount);
-            _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP));
+            ApplyHealthDelta(amount);
         }
 
         public void ForceApplyDamage(int amount)
         {
-            if (CurrentHP <= 0 || amount <= 0)
+            if (amount <= 0)
                 return;
 
-            CurrentHP = Math.Max(0, CurrentHP - amount);
-            _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP, silent: true));
+            ApplyHealthDelta(-amount, silent: true);
+        }
 
-            if (CurrentHP == 0)
+        private void ApplyHealthDelta(int delta, bool silent = false)
+        {
+            var result = HealthChangeRules.Apply(CurrentHP, MaxHP, delta);
+            if (false == result.WasChanged)
+                return;
+
+            CurrentHP = result.CurrentHP;
+            _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP, silent));
+
+            if (result.BecameDefeated)
                 _eventBus.Publish(new EnemyDefeatedEvent());
         }
 
@@ -85,7 +90,7 @@ namespace Project.Scripts.Services.Combat
 
         private void OnHeroActivated(HeroActivatedEvent e)
         {
-            if (e.Side == BattleSide.Enemy && e.ActionType == HeroActionType.HealAlly)
+            if (e is { Side: BattleSide.Enemy, ActionType: HeroActionType.HealAlly })
                 ApplyHeal(e.ActionValue);
         }
     }

@@ -72,6 +72,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
             _originalLocalPos = transform.localPosition;
+            ResetPortraitDeathFill();
 
             BindPortrait(viewModel);
             BindHPBars(viewModel);
@@ -82,12 +83,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         public bool IsValidTarget(UnitDescriptor source)
         {
-            if (null == _viewModel)
+            if (null == _viewModel || _viewModel.IsDefeated.CurrentValue)
                 return false;
 
             if (source.ActionType == HeroActionType.DealDamage && _viewModel.Side == BattleSide.Enemy)
             {
-                if (_groupDefense != null && !_groupDefense.IsExposed(BattleSide.Enemy))
+                if (_groupDefense != null && false == _groupDefense.IsExposed(BattleSide.Enemy))
                     return false;
 
                 return true;
@@ -137,6 +138,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (false == _portrait)
                 return;
 
+            ResetPortraitDeathFill();
             _portrait.sprite = viewModel.Portrait;
             _originalPortraitColor = _portrait.color;
         }
@@ -144,41 +146,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private void BindHPBars(AvatarSlotViewModel viewModel)
         {
             if (_hpBar)
-                _hpBar.SetFill(viewModel.HPFill.CurrentValue);
+                _hpBar.SnapFill(viewModel.HPFill.CurrentValue);
 
             if (_hpLagBar)
-                _hpLagBar.SetFill(viewModel.HPFill.CurrentValue);
+                _hpLagBar.SnapFill(viewModel.HPFill.CurrentValue);
 
-            viewModel.SilentDrain
-                .Subscribe(fill =>
-                {
-                    _hpBar?.SnapFill(fill);
-                    _hpLagBar?.SnapFill(fill);
-                })
-                .AddTo(_disposables);
-
-            viewModel.HPFill
-                .Skip(1)
-                .Subscribe(fill =>
-                {
-                    var isDamage = _hpBar != null && fill < _hpBar.CurrentNormalized;
-
-                    if (isDamage)
-                    {
-                        _hpBar?.SetFill(fill);
-
-                        if (_config)
-                            _hpLagBar?.SetFillAnimated(fill, _config.HPBarLagDuration, _config.HPBarLagDelay);
-                        else
-                            _hpLagBar?.SetFill(fill);
-                    }
-                    else
-                    {
-                        var healDuration = _config ? _config.HPBarHealDuration : 0.4f;
-                        _hpBar?.SetFillAnimated(fill, healDuration);
-                        _hpLagBar?.SetFillAnimated(fill, healDuration);
-                    }
-                })
+            viewModel.HealthBarUpdated
+                .Subscribe(ApplyHealthBarUpdate)
                 .AddTo(_disposables);
         }
 
@@ -187,7 +161,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (false == _energyBar)
                 return;
 
-            _energyBar.SetFill(viewModel.EnergyBar.FillFraction.CurrentValue);
+            _energyBar.SnapFill(viewModel.EnergyBar.FillFraction.CurrentValue);
 
             viewModel.EnergyBar.FillFraction
                 .Skip(1)
@@ -236,6 +210,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 {
                     var visuals = _deathConfig ? _deathConfig.AvatarDeathVisuals : default;
 
+                    if (defeated)
+                        FinalizeDeathState(viewModel.HPFill.CurrentValue);
+
                     if (_background && visuals.ChangeBackgroundColor)
                         _background.color = defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor;
 
@@ -260,6 +237,50 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 .AddTo(_disposables);
         }
 
+        private void ApplyHealthBarUpdate(HealthBarUpdate update)
+        {
+            if (update.Mode == HealthBarUpdateMode.Snap)
+            {
+                _hpBar?.SnapFill(update.Fill);
+                _hpLagBar?.SnapFill(update.Fill);
+                return;
+            }
+
+            if (update.Mode == HealthBarUpdateMode.Damage)
+            {
+                _hpBar?.SetFill(update.Fill);
+
+                if (_config)
+                    _hpLagBar?.SetFillAnimated(update.Fill, _config.HPBarLagDuration, _config.HPBarLagDelay);
+                else
+                    _hpLagBar?.SetFill(update.Fill);
+
+                return;
+            }
+
+            var healDuration = _config ? _config.HPBarHealDuration : 0.4f;
+            _hpBar?.SetFillAnimated(update.Fill, healDuration);
+            _hpLagBar?.SetFillAnimated(update.Fill, healDuration);
+        }
+
+        private void FinalizeDeathState(float hpFill)
+        {
+            _hitFlashTween?.Kill();
+            _hitFlashTween = null;
+            _knockbackTween?.Kill();
+            _knockbackTween = null;
+            transform.localPosition = _originalLocalPos;
+
+            if (_portrait)
+                _portrait.color = _originalPortraitColor;
+
+            _hpBar?.SnapFill(hpFill);
+            _hpLagBar?.SnapFill(hpFill);
+
+            if (_energyBar)
+                _energyBar.SnapFill(_viewModel.EnergyBar.FillFraction.CurrentValue);
+        }
+
         private void SetPortraitDeathFill(bool active)
         {
             if (false == _portrait)
@@ -278,6 +299,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _portraitPropertyBlock.SetFloat(FillEnabledShaderId, 1f);
             _portraitPropertyBlock.SetFloat(FillReplaceShaderId, 1f);
             _portrait.SetPropertyBlock(_portraitPropertyBlock);
+        }
+
+        private void ResetPortraitDeathFill()
+        {
+            SetPortraitDeathFill(false);
         }
 
 

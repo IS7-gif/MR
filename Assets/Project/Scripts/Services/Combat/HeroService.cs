@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared.Rules;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 using R3;
@@ -151,13 +152,14 @@ namespace Project.Scripts.Services.Combat
             if (false == slot.IsAssigned || slot.MaxHP <= 0)
                 return;
 
-            if (false == slot.IsAlive)
+            var result = HealthChangeRules.Apply(slot.CurrentHP, slot.MaxHP, delta);
+            if (false == result.WasChanged)
                 return;
 
-            slot.CurrentHP = Math.Clamp(slot.CurrentHP + delta, 0, slot.MaxHP);
+            slot.CurrentHP = result.CurrentHP;
             _eventBus.Publish(new HeroHPChangedEvent(side, slotIndex, slot.CurrentHP, slot.MaxHP, silent));
 
-            if (slot.CurrentHP > 0)
+            if (false == result.BecameDefeated)
                 return;
 
             slot.CurrentEnergy = 0f;

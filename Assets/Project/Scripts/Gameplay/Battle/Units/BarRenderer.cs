@@ -21,14 +21,19 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void OnDestroy()
         {
-            _fillTween?.Kill();
+            StopAnimation();
         }
 
 
-        public void SnapFill(float normalized)
+        public void StopAnimation()
         {
             _fillTween?.Kill();
             _fillTween = null;
+        }
+
+        public void SnapFill(float normalized)
+        {
+            StopAnimation();
             SetFill(normalized);
         }
 

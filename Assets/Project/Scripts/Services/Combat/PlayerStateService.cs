@@ -2,6 +2,7 @@ using System;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Rules;
 using R3;
 
 namespace Project.Scripts.Services.Combat
@@ -31,43 +32,47 @@ namespace Project.Scripts.Services.Combat
 
         public void Heal(int amount)
         {
-            if (CurrentHP >= MaxHP || amount <= 0)
+            if (amount <= 0)
                 return;
 
-            CurrentHP = Math.Min(MaxHP, CurrentHP + amount);
-            _eventBus.Publish(new PlayerHPChangedEvent(CurrentHP, MaxHP));
+            ApplyHealthDelta(amount);
         }
 
         public void TakeDamage(int amount)
         {
-            if (CurrentHP <= 0 || amount <= 0)
+            if (amount <= 0)
                 return;
 
-            if (!_groupDefense.IsExposed(BattleSide.Player))
+            if (false == _groupDefense.IsExposed(BattleSide.Player))
                 return;
 
-            CurrentHP = Math.Max(0, CurrentHP - amount);
-            _eventBus.Publish(new PlayerHPChangedEvent(CurrentHP, MaxHP));
-
-            if (CurrentHP == 0)
-                _eventBus.Publish(new PlayerDefeatedEvent());
+            ApplyHealthDelta(-amount);
         }
 
         public void ForceApplyDamage(int amount)
         {
-            if (CurrentHP <= 0 || amount <= 0)
+            if (amount <= 0)
                 return;
 
-            CurrentHP = Math.Max(0, CurrentHP - amount);
-            _eventBus.Publish(new PlayerHPChangedEvent(CurrentHP, MaxHP, silent: true));
-
-            if (CurrentHP == 0)
-                _eventBus.Publish(new PlayerDefeatedEvent());
+            ApplyHealthDelta(-amount, silent: true);
         }
 
         public void Dispose()
         {
             _subscriptions.Dispose();
+        }
+
+        private void ApplyHealthDelta(int delta, bool silent = false)
+        {
+            var result = HealthChangeRules.Apply(CurrentHP, MaxHP, delta);
+            if (false == result.WasChanged)
+                return;
+
+            CurrentHP = result.CurrentHP;
+            _eventBus.Publish(new PlayerHPChangedEvent(CurrentHP, MaxHP, silent));
+
+            if (result.BecameDefeated)
+                _eventBus.Publish(new PlayerDefeatedEvent());
         }
 
 
