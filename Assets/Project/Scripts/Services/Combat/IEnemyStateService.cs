@@ -6,6 +6,6 @@ namespace Project.Scripts.Services.Combat
         int MaxHP { get; }
         void ApplyDamage(int amount);
         void ApplyHeal(int amount);
-        void ForceApplyDamage(int amount);
+        void ForceApplyDamage(int amount, bool suppressDefeatedEvent = false);
     }
 }

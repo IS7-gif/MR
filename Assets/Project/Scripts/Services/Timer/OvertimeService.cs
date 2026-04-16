@@ -5,6 +5,7 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Timer;
+using Random = System.Random;
 
 namespace Project.Scripts.Services.Timer
 {
@@ -16,6 +17,8 @@ namespace Project.Scripts.Services.Timer
         private readonly IEnemyStateService _enemyState;
         private readonly EventBus _eventBus;
         private readonly IGameStateService _gameStateService;
+
+        private readonly Random _random = new();
 
         private bool _isActive;
         private float _drainAccumulator;
@@ -78,10 +81,37 @@ namespace Project.Scripts.Services.Timer
             var heroDamage = (int)Math.Ceiling(_config.HeroDrainPerSecond * _config.DrainTickInterval * ticks);
             var avatarDamage = (int)Math.Ceiling(_config.AvatarDrainPerSecond * _config.DrainTickInterval * ticks);
 
+            var playerHpBefore = _playerState.CurrentHP;
+            var enemyHpBefore = _enemyState.CurrentHP;
+
             DrainSide(BattleSide.Player, ref _playerCursor, heroDamage, avatarDamage);
             DrainSide(BattleSide.Enemy, ref _enemyCursor, heroDamage, avatarDamage);
+
+            var playerDied = playerHpBefore > 0 && _playerState.CurrentHP <= 0;
+            var enemyDied = enemyHpBefore > 0 && _enemyState.CurrentHP <= 0;
+
+            if (playerDied && enemyDied)
+                ResolveSimultaneousDeath(playerHpBefore, enemyHpBefore);
+            else if (playerDied)
+                _eventBus.Publish(new PlayerDefeatedEvent());
+            else if (enemyDied)
+                _eventBus.Publish(new EnemyDefeatedEvent());
         }
 
+
+        private void ResolveSimultaneousDeath(int playerHpBefore, int enemyHpBefore)
+        {
+            bool playerWins;
+            if (playerHpBefore != enemyHpBefore)
+                playerWins = playerHpBefore > enemyHpBefore;
+            else
+                playerWins = _random.Next(2) == 0; // TODO: replace with draw system
+
+            if (playerWins)
+                _eventBus.Publish(new EnemyDefeatedEvent());
+            else
+                _eventBus.Publish(new PlayerDefeatedEvent());
+        }
 
         private void DrainSide(BattleSide side, ref OvertimeDrainCursor cursor, int heroDamage, int avatarDamage)
         {
@@ -93,9 +123,9 @@ namespace Project.Scripts.Services.Timer
             if (cursor.IsDrainingAvatar)
             {
                 if (side == BattleSide.Player)
-                    _playerState.ForceApplyDamage(avatarDamage);
+                    _playerState.ForceApplyDamage(avatarDamage, suppressDefeatedEvent: true);
                 else
-                    _enemyState.ForceApplyDamage(avatarDamage);
+                    _enemyState.ForceApplyDamage(avatarDamage, suppressDefeatedEvent: true);
                 return;
             }
 

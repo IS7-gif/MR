@@ -60,15 +60,15 @@ namespace Project.Scripts.Services.Combat
             ApplyHealthDelta(amount);
         }
 
-        public void ForceApplyDamage(int amount)
+        public void ForceApplyDamage(int amount, bool suppressDefeatedEvent = false)
         {
             if (amount <= 0)
                 return;
 
-            ApplyHealthDelta(-amount, silent: true);
+            ApplyHealthDelta(-amount, silent: true, suppressDefeatedEvent: suppressDefeatedEvent);
         }
 
-        private void ApplyHealthDelta(int delta, bool silent = false)
+        private void ApplyHealthDelta(int delta, bool silent = false, bool suppressDefeatedEvent = false)
         {
             var result = HealthChangeRules.Apply(CurrentHP, MaxHP, delta);
             if (false == result.WasChanged)
@@ -77,7 +77,7 @@ namespace Project.Scripts.Services.Combat
             CurrentHP = result.CurrentHP;
             _eventBus.Publish(new EnemyHPChangedEvent(CurrentHP, MaxHP, silent));
 
-            if (result.BecameDefeated)
+            if (result.BecameDefeated && false == suppressDefeatedEvent)
                 _eventBus.Publish(new EnemyDefeatedEvent());
         }
 
