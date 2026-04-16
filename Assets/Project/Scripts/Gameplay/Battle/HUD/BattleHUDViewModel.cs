@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
@@ -9,9 +8,9 @@ using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
-using Project.Scripts.Shared.Tiles;
 using R3;
 using UnityEngine;
 
@@ -23,6 +22,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public AvatarSlotViewModel EnemyAvatar { get; private set; }
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
+        public IBattleActionRuntimeService BattleActionRuntime => _battleActionRuntimeService;
         public IReadyPulseCoordinator PulseCoordinator { get; }
         public IAbilityExecutionService AbilityExecution { get; }
         public IAvatarGroupDefenseService GroupDefense { get; }
@@ -45,6 +45,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly LevelConfig _levelConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly IBoardBoundsProvider _boardBounds;
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly BattleTimerConfig _battleTimerConfig;
         private readonly UnitDeathConfig _unitDeathConfig;
         private HeroSlotViewModel[] _playerHeroSlots;
@@ -63,6 +64,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             LevelConfig levelConfig,
             SlotLayoutConfig slotLayoutConfig,
             IBoardBoundsProvider boardBounds,
+            IBattleActionRuntimeService battleActionRuntimeService,
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
             IAvatarGroupDefenseService groupDefense,
@@ -79,11 +81,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _levelConfig = levelConfig;
             _slotLayoutConfig = slotLayoutConfig;
             _boardBounds = boardBounds;
+            _battleActionRuntimeService = battleActionRuntimeService;
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
             GroupDefense = groupDefense;
             _battleTimerConfig = battleTimerConfig;
             _unitDeathConfig = unitDeathConfig;
+
             _timerSeconds = new ReactiveProperty<int>((int)battleTimerConfig.BattleDuration);
         }
 
@@ -101,7 +105,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _playerState.CurrentHP,
                 _playerState.MaxHP,
                 _battleAnimationConfig,
-                _levelConfig.PlayerAvatarConfig.AbilityType);
+                _levelConfig.PlayerAvatarConfig.AbilityType,
+                _battleActionRuntimeService);
 
             EnemyAvatar = new AvatarSlotViewModel(
                 _eventBus,
@@ -111,7 +116,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _enemyState.CurrentHP,
                 _enemyState.MaxHP,
                 _battleAnimationConfig,
-                _levelConfig.EnemyAvatarConfig.AbilityType);
+                _levelConfig.EnemyAvatarConfig.AbilityType,
+                _battleActionRuntimeService);
+
 
             _playerHeroSlots = CreateHeroSlotViewModels(
                 BattleSide.Player,
@@ -191,7 +198,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                     : Color.gray;
                 var portrait = config ? config.Portrait : null;
 
-                slots[i] = new HeroSlotViewModel(i, side, state, color, portrait);
+                slots[i] = new HeroSlotViewModel(i, side, state, color, portrait, _battleActionRuntimeService);
             }
 
             return slots;

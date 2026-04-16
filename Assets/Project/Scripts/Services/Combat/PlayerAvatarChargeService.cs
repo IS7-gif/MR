@@ -4,7 +4,9 @@ using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Avatar;
+using Project.Scripts.Shared.Rules;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 using R3;
@@ -25,6 +27,7 @@ namespace Project.Scripts.Services.Combat
         private readonly EventBus _eventBus;
         private readonly DebugConfig _debugConfig;
         private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly AvatarEnergyFormula _formula;
         private readonly float _deadHeroTileMultiplier;
@@ -33,11 +36,13 @@ namespace Project.Scripts.Services.Combat
 
 
         public PlayerAvatarChargeService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig,
-            SlotLayoutConfig slotLayoutConfig, IEscalationModifierService escalationModifier)
+            SlotLayoutConfig slotLayoutConfig, IEscalationModifierService escalationModifier,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _debugConfig = debugConfig;
             _escalationModifier = escalationModifier;
+            _battleActionRuntimeService = battleActionRuntimeService;
             var config = levelConfig.PlayerAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
             AbilityType = config.AbilityType;
@@ -65,6 +70,9 @@ namespace Project.Scripts.Services.Combat
 
         public bool TryRelease()
         {
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AvatarActivation).IsAllowed)
+                return false;
+
             var released = _engine.TryRelease();
             if (released <= 0)
                 return false;
@@ -107,6 +115,7 @@ namespace Project.Scripts.Services.Combat
             var snap = _engine.Snapshot;
             if (_debugConfig.LogEnergyAccumulation)
                 Debug.Log(BuildAvatarEnergyLog(e.EnergyByKind, gain, added, snap.CurrentEnergy, snap.MaxEnergy, snap.IsReady, cascadeMultiplier));
+            
             PublishEnergyChanged();
         }
 

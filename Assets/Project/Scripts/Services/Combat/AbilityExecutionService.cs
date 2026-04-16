@@ -1,4 +1,5 @@
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Rules;
 
@@ -11,6 +12,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly EventBus _eventBus;
 
 
@@ -20,6 +22,7 @@ namespace Project.Scripts.Services.Combat
             IPlayerStateService playerState,
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
+            IBattleActionRuntimeService battleActionRuntimeService,
             EventBus eventBus)
         {
             _playerAvatarCharge = playerAvatarCharge;
@@ -27,12 +30,16 @@ namespace Project.Scripts.Services.Combat
             _playerState = playerState;
             _enemyState = enemyState;
             _groupDefense = groupDefense;
+            _battleActionRuntimeService = battleActionRuntimeService;
             _eventBus = eventBus;
         }
 
 
         public void Execute(UnitDescriptor source, UnitDescriptor target)
         {
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilityCommit).IsAllowed)
+                return;
+
             if (source.Side != BattleSide.Player)
                 return;
 

@@ -1,5 +1,7 @@
 using System;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Rules;
 using R3;
 using UnityEngine;
 
@@ -26,7 +28,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private readonly Subject<HealthBarUpdate> _healthBarUpdated = new();
         private readonly Subject<int> _hit = new();
         private readonly Subject<int> _heal = new();
+        private readonly CompositeDisposable _subscriptions = new();
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private int _prevHP;
+        private bool _isEnergyReady;
 
 
         public HeroSlotViewModel(
@@ -34,7 +39,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BattleSide side,
             HeroSlotState state,
             Color color,
-            Sprite portrait)
+            Sprite portrait,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             SlotIndex = slotIndex;
             Side = side;
@@ -42,16 +48,22 @@ namespace Project.Scripts.Gameplay.Battle.Units
             ActionType = state.ActionType;
             SlotColor = color;
             Portrait = portrait;
+            _battleActionRuntimeService = battleActionRuntimeService;
 
             HPFill = new ReactiveProperty<float>(state.IsAssigned && state.MaxHP > 0 ? (float)state.CurrentHP / state.MaxHP : 1f);
             _prevHP = state.IsAssigned ? state.CurrentHP : 0;
             IsDefeated.Value = state.IsAssigned && state.CurrentHP <= 0;
+            _isEnergyReady = state.IsAssigned && state.MaxEnergy > 0 && state.CurrentEnergy >= state.MaxEnergy;
+            RefreshActivatable();
+
+            _subscriptions.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshActivatable()));
         }
 
         public void UpdateEnergy(int current, int max)
         {
             EnergyFill.Value = max > 0 ? (float)current / max : 0f;
-            IsActivatable.Value = IsAssigned && EnergyFill.Value >= 1f;
+            _isEnergyReady = max > 0 && current >= max;
+            RefreshActivatable();
         }
 
         public void UpdateHP(int current, int max, bool silent = false)
@@ -100,6 +112,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _healthBarUpdated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
+            _subscriptions.Dispose();
+        }
+
+
+        private void RefreshActivatable()
+        {
+            var canActivate = _battleActionRuntimeService.Evaluate(BattleActionKind.HeroActivation).IsAllowed;
+            IsActivatable.Value = IsAssigned && _isEnergyReady && canActivate;
         }
     }
 }

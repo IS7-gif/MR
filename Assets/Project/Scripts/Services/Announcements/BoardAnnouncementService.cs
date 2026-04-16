@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.UI.Windows;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.UISystem;
-using UnityEngine;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Announcements
@@ -16,8 +14,7 @@ namespace Project.Scripts.Services.Announcements
         private const int InitialPoolSize = 2;
 
 
-        private readonly UIConfig _uiConfig;
-        private readonly BattleAnimationConfig _animConfig;
+        private readonly BoardAnnouncementConfig _config;
         private readonly IBoardBoundsProvider _boardBounds;
         private readonly UIService _uiService;
 
@@ -26,13 +23,11 @@ namespace Project.Scripts.Services.Announcements
 
 
         public BoardAnnouncementService(
-            UIConfig uiConfig,
-            BattleAnimationConfig animConfig,
+            BoardAnnouncementConfig config,
             IBoardBoundsProvider boardBounds,
             UIService uiService)
         {
-            _uiConfig = uiConfig;
-            _animConfig = animConfig;
+            _config = config;
             _boardBounds = boardBounds;
             _uiService = uiService;
         }
@@ -40,7 +35,7 @@ namespace Project.Scripts.Services.Announcements
 
         public void Start()
         {
-            if (!_uiConfig.BoardAnnouncementViewPrefab)
+            if (false == _config.ViewPrefab)
                 return;
 
             for (var i = 0; i < InitialPoolSize; i++)
@@ -49,7 +44,7 @@ namespace Project.Scripts.Services.Announcements
 
         public async UniTask Show(string text, BoardAnnouncementParams @params = null)
         {
-            if (!_uiConfig.BoardAnnouncementViewPrefab)
+            if (false == _config.ViewPrefab)
                 return;
 
             var view = GetOrCreate();
@@ -77,11 +72,11 @@ namespace Project.Scripts.Services.Announcements
 
         private BoardAnnouncementViewModel BuildViewModel(string text, BoardAnnouncementParams @params)
         {
-            var textColor = @params?.TextColor ?? Color.white;
-            var displayDuration = @params?.DisplayDuration ?? _animConfig.AnnouncementDisplayDuration;
-            var fadeOutDuration = @params?.FadeOutDuration ?? _animConfig.AnnouncementFadeOutDuration;
-            var flyDistance = @params?.FlyDistance ?? _animConfig.AnnouncementFlyDistance;
-            var fadeOutEase = @params?.FadeOutEase ?? _animConfig.AnnouncementFadeOutEase;
+            var textColor = @params?.TextColor ?? _config.TextColor;
+            var displayDuration = @params?.DisplayDuration ?? _config.DisplayDuration;
+            var fadeOutDuration = @params?.FadeOutDuration ?? _config.FadeOutDuration;
+            var flyDistance = @params?.FlyDistance ?? _config.FlyDistance;
+            var fadeOutEase = @params?.FadeOutEase ?? _config.FadeOutEase;
 
             return new BoardAnnouncementViewModel(
                 text,
@@ -90,7 +85,7 @@ namespace Project.Scripts.Services.Announcements
                 fadeOutDuration,
                 flyDistance,
                 fadeOutEase,
-                _boardBounds.BattleAreaCenterWorldY);
+                _boardBounds.BattleAreaCenterWorldY + _config.VerticalWorldOffset);
         }
 
         private BoardAnnouncementView GetOrCreate()
@@ -104,10 +99,11 @@ namespace Project.Scripts.Services.Announcements
         private BoardAnnouncementView CreateInstance()
         {
             var parent = _uiService.GetLayerRoot(UILayer.Popup);
-            var go = UnityEngine.Object.Instantiate(_uiConfig.BoardAnnouncementViewPrefab, parent);
+            var go = UnityEngine.Object.Instantiate(_config.ViewPrefab, parent);
             var view = go.GetComponent<BoardAnnouncementView>();
             go.SetActive(false);
             _all.Add(view);
+            
             return view;
         }
     }

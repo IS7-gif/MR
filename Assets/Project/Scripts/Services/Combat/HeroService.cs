@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Rules;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
@@ -19,18 +20,21 @@ namespace Project.Scripts.Services.Combat
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
         private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
 
         public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
-            IPlayerStateService playerState, IEnemyStateService enemyState, IEscalationModifierService escalationModifier)
+            IPlayerStateService playerState, IEnemyStateService enemyState, IEscalationModifierService escalationModifier,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
             _enemyState = enemyState;
             _escalationModifier = escalationModifier;
+            _battleActionRuntimeService = battleActionRuntimeService;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes, slotLayoutConfig.HeroSlotKinds);
             InitSlots(_enemySlots, levelConfig.EnemyHeroes, slotLayoutConfig.HeroSlotKinds);
@@ -55,6 +59,9 @@ namespace Project.Scripts.Services.Combat
 
         public void TryActivate(BattleSide side, int slotIndex)
         {
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.HeroActivation).IsAllowed)
+                return;
+
             if (slotIndex is < 0 or >= SlotCount)
                 return;
 
@@ -83,6 +90,9 @@ namespace Project.Scripts.Services.Combat
         {
             actionType = default;
             actionValue = 0;
+
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilityCommit).IsAllowed)
+                return false;
 
             if (slotIndex is < 0 or >= SlotCount)
                 return false;

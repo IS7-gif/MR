@@ -1,6 +1,10 @@
+using System;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Rules;
+using R3;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.Targeting
@@ -13,14 +17,18 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         private IInputService _input;
         private TargetingRegistry _registry;
         private IAbilityExecutionService _abilityExecution;
+        private IBattleActionRuntimeService _battleActionRuntimeService;
         private Camera _cam;
         private ITargetable _source;
         private ITargetable _target;
         private Vector2 _currentScreenPos;
+        private int _actionSessionVersion = -1;
+        private IDisposable _runtimeStateSubscription;
 
 
         private void OnDestroy()
         {
+            ClearSelection();
             Unsubscribe();
         }
 
@@ -29,22 +37,28 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             IInputService input,
             TargetingRegistry registry,
             IAbilityExecutionService abilityExecution,
+            IBattleActionRuntimeService battleActionRuntimeService,
             Camera cam)
         {
             Unsubscribe();
             _input = input;
             _registry = registry;
             _abilityExecution = abilityExecution;
+            _battleActionRuntimeService = battleActionRuntimeService;
             _cam = cam;
 
             _input.OnDragStarted += HandleDragStarted;
             _input.OnDragDelta += HandleDragDelta;
             _input.OnDragCanceled += HandleDragCanceled;
+            _runtimeStateSubscription = _battleActionRuntimeService.State.Subscribe(_ => OnRuntimeStateChanged());
         }
 
 
         private void HandleDragStarted(Vector2 screenPos)
         {
+            if (false == CanStartSelection())
+                return;
+
             _currentScreenPos = screenPos;
 
             var unit = _registry.FindAtPosition(screenPos, _cam, OffsetPx);
@@ -52,6 +66,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             if (unit == null || false == unit.IsReadySource || unit.Descriptor.Side != BattleSide.Player)
                 return;
 
+            _actionSessionVersion = _battleActionRuntimeService.CaptureVersion();
             _source = unit;
             _source.SetSourceHighlight(true);
         }
@@ -60,6 +75,12 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         {
             if (null == _source)
                 return;
+
+            if (false == CanContinueSelection())
+            {
+                ClearSelection();
+                return;
+            }
 
             _currentScreenPos += screenDelta;
 
@@ -83,23 +104,71 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
 
         private void HandleDragCanceled()
         {
-            if (_source != null && _target != null)
+            if (_source != null && _target != null && CanCommitSelection())
                 _abilityExecution.Execute(_source.Descriptor, _target.Descriptor);
 
-            _source?.SetSourceHighlight(false);
-            _target?.SetTargetHighlight(false, default);
-            _source = null;
-            _target = null;
+            ClearSelection();
         }
 
         private void Unsubscribe()
         {
+            _runtimeStateSubscription?.Dispose();
+            _runtimeStateSubscription = null;
+
             if (null == _input)
                 return;
 
             _input.OnDragStarted -= HandleDragStarted;
             _input.OnDragDelta -= HandleDragDelta;
             _input.OnDragCanceled -= HandleDragCanceled;
+        }
+
+        private bool CanStartSelection()
+        {
+            if (null == _battleActionRuntimeService)
+                return false;
+
+            return _battleActionRuntimeService.Evaluate(BattleActionKind.AbilitySourceSelect).IsAllowed;
+        }
+
+        private bool CanContinueSelection()
+        {
+            if (null == _battleActionRuntimeService)
+                return false;
+
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilitySourceSelect).IsAllowed)
+                return false;
+
+            return _battleActionRuntimeService.IsCurrent(_actionSessionVersion);
+        }
+
+        private bool CanCommitSelection()
+        {
+            if (null == _battleActionRuntimeService)
+                return false;
+
+            if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilityCommit).IsAllowed)
+                return false;
+
+            return _battleActionRuntimeService.IsCurrent(_actionSessionVersion);
+        }
+
+        private void OnRuntimeStateChanged()
+        {
+            if (_source == null && _target == null)
+                return;
+
+            if (false == _battleActionRuntimeService.CanAcceptNormalActions)
+                ClearSelection();
+        }
+
+        private void ClearSelection()
+        {
+            _source?.SetSourceHighlight(false);
+            _target?.SetTargetHighlight(false, default);
+            _source = null;
+            _target = null;
+            _actionSessionVersion = -1;
         }
     }
 }

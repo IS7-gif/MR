@@ -1,6 +1,7 @@
 using System;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
@@ -31,7 +32,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
 
         public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Color slotColor, Sprite portrait,
-            int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType)
+            int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             Side = side;
             SlotColor = slotColor;
@@ -42,7 +44,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _prevHP = initialHP;
             HPFill = new ReactiveProperty<float>(maxHP > 0 ? (float)initialHP / maxHP : 1f);
             IsDefeated.Value = initialHP <= 0;
-            EnergyBar = new AvatarChargeBarViewModel(eventBus, side);
+            EnergyBar = new AvatarChargeBarViewModel(eventBus, side, battleActionRuntimeService);
 
             if (side == BattleSide.Player)
             {

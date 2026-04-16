@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
@@ -144,7 +143,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                     if (_enemyHeroSlots[i])
                         registry.Register(_enemyHeroSlots[i]);
 
-            _targetingInputHandler.Init(_inputService, registry, ViewModel.AbilityExecution, Camera.main);
+            _targetingInputHandler.Init(_inputService, registry, ViewModel.AbilityExecution, ViewModel.BattleActionRuntime, Camera.main);
         }
 
         private void SetupFloatingNumbers()

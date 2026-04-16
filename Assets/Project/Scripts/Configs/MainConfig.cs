@@ -40,6 +40,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Настройки UI: шрифты, цвета, анимации интерфейса")]
         [SerializeField] private UIConfig _uiConfig;
 
+        [Tooltip("Объявления над доской: prefab, позиция и анимация обычных сообщений и countdown")]
+        [SerializeField] private BoardAnnouncementConfig _boardAnnouncementConfig;
+
         [Tooltip("Полоска ходов: максимум ходов, правила пополнения и отображения")]
         [SerializeField] private MoveBarConfig _moveBarConfig;
 
@@ -78,6 +81,7 @@ namespace Project.Scripts.Configs
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;
         public UIConfig UIConfig => _uiConfig;
+        public BoardAnnouncementConfig BoardAnnouncementConfig => _boardAnnouncementConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
         public BattleViewConfig BattleViewConfig => _battleViewConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;

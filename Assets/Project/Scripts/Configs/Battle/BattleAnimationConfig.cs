@@ -70,35 +70,6 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Цвет свечения допустимой цели лечения")]
         [SerializeField] private Color _healTargetColor = new(0.15f, 1f, 0.25f, 1f);
 
-        [Header("Board Announcements")]
-        [Tooltip("Длительность в секундах, в течение которой текст объявления остаётся полностью видимым на экране")]
-        [SerializeField] private float _announcementDisplayDuration = 1f;
-
-        [Tooltip("Длительность в секундах анимации затухания объявления")]
-        [SerializeField] private float _announcementFadeOutDuration = 0.6f;
-
-        [Tooltip("Расстояние в пикселях, на которое объявление улетает вверх при затухании")]
-        [SerializeField] private float _announcementFlyDistance = 100f;
-
-        [Tooltip("Кривая ослабления для движения и затухания объявления")]
-        [SerializeField] private Ease _announcementFadeOutEase = Ease.InQuad;
-
-        [Header("Countdown Announcement")]
-        [Tooltip("Цвет текста цифры обратного отсчёта - должен контрастировать с фоном доски")]
-        [SerializeField] private Color _countdownTextColor = new(1f, 0.3f, 0.3f, 1f);
-
-        [Tooltip("Длительность в секундах, в течение которой цифра обратного отсчёта остаётся полностью видимой - должна быть меньше 1 во избежание наложения")]
-        [SerializeField] private float _countdownDisplayDuration = 0.5f;
-
-        [Tooltip("Длительность в секундах анимации затухания цифры обратного отсчёта")]
-        [SerializeField] private float _countdownFadeOutDuration = 0.25f;
-
-        [Tooltip("Расстояние в пикселях, на которое цифра обратного отсчёта улетает вверх при затухании")]
-        [SerializeField] private float _countdownFlyDistance = 60f;
-
-        [Tooltip("Кривая ослабления для движения и затухания цифры обратного отсчёта")]
-        [SerializeField] private Ease _countdownFadeOutEase = Ease.InQuad;
-
         [Header("Floating Numbers")]
         [Tooltip("Цвет метки числа урона")]
         [SerializeField] private Color _damageNumberColor = new(1f, 0.25f, 0.25f, 1f);
@@ -138,15 +109,6 @@ namespace Project.Scripts.Configs.Battle
         public float FloatDamageDistance => _floatDamageDistance;
         public float FloatDamageDuration => _floatDamageDuration;
         public Ease FloatDamageEase => _floatDamageEase;
-        public float AnnouncementDisplayDuration => _announcementDisplayDuration;
-        public float AnnouncementFadeOutDuration => _announcementFadeOutDuration;
-        public float AnnouncementFlyDistance => _announcementFlyDistance;
-        public Ease AnnouncementFadeOutEase => _announcementFadeOutEase;
-        public Color CountdownTextColor => _countdownTextColor;
-        public float CountdownDisplayDuration => _countdownDisplayDuration;
-        public float CountdownFadeOutDuration => _countdownFadeOutDuration;
-        public float CountdownFlyDistance => _countdownFlyDistance;
-        public Ease CountdownFadeOutEase => _countdownFadeOutEase;
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;

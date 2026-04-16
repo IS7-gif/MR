@@ -27,6 +27,7 @@ namespace Project.Scripts.DI
             builder.RegisterComponentInHierarchy<GameplayEntryPoint>();
 
             builder.Register<IGameStateService, GameStateService>(Lifetime.Singleton);
+            builder.Register<IBattleActionRuntimeService, BattleActionRuntimeService>(Lifetime.Singleton);
             builder.Register<IMoveCounterService, MoveCounterService>(Lifetime.Singleton);
             builder.Register<IAvatarGroupDefenseService, AvatarGroupDefenseService>(Lifetime.Singleton);
             builder.Register<IEnemyStateService, EnemyStateService>(Lifetime.Singleton);

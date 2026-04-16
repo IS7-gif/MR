@@ -22,6 +22,7 @@ MonoBehaviour:
   _specialTileConfig: {fileID: 11400000, guid: bf43509404b084149a8b2978f4619c2d, type: 2}
   _levelDatabase: {fileID: 11400000, guid: 528394c8e2714e3489a9a33180a6de4c, type: 2}
   _uiConfig: {fileID: 11400000, guid: 63526929da5930348899f6e6bbc1be6c, type: 2}
+  _boardAnnouncementConfig: {fileID: 11400000, guid: 4f4cc5986c0342a4bb2b96d23c8d67a1, type: 2}
   _moveBarConfig: {fileID: 11400000, guid: 1d120bb07ff23a948a01c2604afe52b3, type: 2}
   _battleViewConfig: {fileID: 11400000, guid: 0d769511b02f54e4a8d7f8b556769b48, type: 2}
   _tileKindPaletteConfig: {fileID: 11400000, guid: d100b8948d0a59f4cbe9d90dd813cb63, type: 2}
