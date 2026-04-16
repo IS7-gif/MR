@@ -18,7 +18,6 @@ MonoBehaviour:
   _knockbackDistance: 0.2
   _knockbackDuration: 0.3
   _knockbackEase: 6
-  _resultScreenDelay: 1
   _hpBarLagDelay: 0.2
   _hpBarLagDuration: 1
   _hpBarLagEase: 9

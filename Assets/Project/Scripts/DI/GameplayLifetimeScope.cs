@@ -2,6 +2,7 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Gameplay;
 using Project.Scripts.Gameplay.Battle.HUD;
 using Project.Scripts.Gameplay.Battle.Targeting;
+using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Board;
@@ -46,6 +47,7 @@ namespace Project.Scripts.DI
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);
             builder.Register<BattleHUDViewModel>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Singleton);
+            builder.Register<GameResultSequenceController>(Lifetime.Singleton);
             builder.Register<IReadyPulseCoordinator, ReadyPulseCoordinator>(Lifetime.Singleton);
 
             builder.Register<IBoardRuntimeService, BoardRuntimeService>(Lifetime.Singleton);

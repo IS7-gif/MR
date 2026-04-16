@@ -1,6 +1,8 @@
 using DG.Tweening;
+using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
+using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Combat;
@@ -50,8 +52,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private CompositeDisposable _disposables;
         private Color _originalPortraitColor;
         private Vector3 _originalLocalPos;
+        private Vector3 _originalLocalScale;
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
+        private Tween _resultPulseTween;
         private MaterialPropertyBlock _portraitPropertyBlock;
 
 
@@ -59,6 +63,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             _hitFlashTween?.Kill();
             _knockbackTween?.Kill();
+            _resultPulseTween?.Kill();
             _disposables?.Dispose();
         }
 
@@ -72,6 +77,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _disposables?.Dispose();
             _disposables = new CompositeDisposable();
             _originalLocalPos = transform.localPosition;
+            _originalLocalScale = transform.localScale;
             ResetPortraitDeathFill();
 
             BindPortrait(viewModel);
@@ -79,6 +85,39 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindEnergyBar(viewModel, pulseCoordinator);
             BindHitReaction(viewModel);
             BindDeathState(viewModel);
+        }
+
+        public async UniTask PlayResultPulse(AvatarPulseStepConfig config)
+        {
+            if (null == config)
+                return;
+
+            if (config.Duration <= 0f || config.ScaleMultiplier <= 0f)
+                return;
+
+            _resultPulseTween?.Kill();
+            transform.localScale = _originalLocalScale;
+
+            var halfDuration = config.Duration * 0.5f;
+            var targetScale = _originalLocalScale * config.ScaleMultiplier;
+
+            _resultPulseTween = DOTween.Sequence()
+                .Append(transform.DOScale(targetScale, halfDuration).SetEase(config.Ease))
+                .Append(transform.DOScale(_originalLocalScale, halfDuration).SetEase(config.Ease))
+                .OnKill(() =>
+                {
+                    if (this)
+                        transform.localScale = _originalLocalScale;
+
+                    _resultPulseTween = null;
+                })
+                .OnComplete(() =>
+                {
+                    transform.localScale = _originalLocalScale;
+                    _resultPulseTween = null;
+                });
+
+            await _resultPulseTween.ToUniTask();
         }
 
         public bool IsValidTarget(UnitDescriptor source)
@@ -269,7 +308,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _hitFlashTween = null;
             _knockbackTween?.Kill();
             _knockbackTween = null;
+            _resultPulseTween?.Kill();
+            _resultPulseTween = null;
             transform.localPosition = _originalLocalPos;
+            transform.localScale = _originalLocalScale;
 
             if (_portrait)
                 _portrait.color = _originalPortraitColor;

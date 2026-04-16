@@ -1,4 +1,5 @@
 using Project.Scripts.Configs;
+using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
@@ -15,9 +16,14 @@ namespace Project.Scripts.DI
 
         protected override void Configure(IContainerBuilder builder)
         {
+            var gameResultSequenceConfig = _mainConfig.GameResultSequenceConfig
+                ? _mainConfig.GameResultSequenceConfig
+                : ScriptableObject.CreateInstance<GameResultSequenceConfig>();
+
             builder.RegisterInstance(_mainConfig.BoardConfig);
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
             builder.RegisterInstance(_mainConfig.BattleAnimationConfig);
+            builder.RegisterInstance(gameResultSequenceConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
             builder.RegisterInstance(_mainConfig.CascadeEnergyConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);

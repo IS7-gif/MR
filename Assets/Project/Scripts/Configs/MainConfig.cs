@@ -28,6 +28,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Анимации боя: длительности ударов, хилов и эффектов на юнитах")]
         [SerializeField] private BattleAnimationConfig _battleAnimationConfig;
 
+        [Tooltip("Последовательности post-result презентации: шаги победы и поражения с настраиваемыми паузами")]
+        [SerializeField] private GameResultSequenceConfig _gameResultSequenceConfig;
+
         [Tooltip("Формула энергии от матчей: множители за каскады, L/T-образные совпадения и мультиматчи")]
         [SerializeField] private CascadeEnergyConfig _cascadeEnergyConfig;
 
@@ -77,6 +80,7 @@ namespace Project.Scripts.Configs
         public BoardConfig BoardConfig => _boardConfig;
         public BoardAnimationConfig BoardAnimationConfig => _boardAnimationConfig;
         public BattleAnimationConfig BattleAnimationConfig => _battleAnimationConfig;
+        public GameResultSequenceConfig GameResultSequenceConfig => _gameResultSequenceConfig;
         public CascadeEnergyConfig CascadeEnergyConfig => _cascadeEnergyConfig;
         public SpecialTileConfig SpecialTileConfig => _specialTileConfig;
         public LevelDatabase LevelDatabase => _levelDatabase;

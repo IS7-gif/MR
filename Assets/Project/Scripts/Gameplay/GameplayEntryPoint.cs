@@ -6,6 +6,7 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Board;
 using Project.Scripts.Gameplay.Battle.HUD;
+using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Audio;
 using Project.Scripts.Services.Board;
@@ -35,7 +36,6 @@ namespace Project.Scripts.Gameplay
         [Tooltip("Компонент View, задающий размер рамки доски и маски спавна во время выполнения")]
         [SerializeField] private BoardView _boardView;
 
-        
         private EventBus _eventBus;
         private AudioService _audioService;
         private BoardConfig _boardConfig;
@@ -52,6 +52,7 @@ namespace Project.Scripts.Gameplay
         private IBoardRuntimeService _boardRuntimeService;
         private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
+        private GameResultSequenceController _gameResultSequenceController;
         private BattleHUDViewModel _battleHUDViewModel;
         private IBoardBoundsProvider _boardBoundsProvider;
         private BattleHUDView _battleHUDView;
@@ -71,7 +72,6 @@ namespace Project.Scripts.Gameplay
         private int _lastWidth;
         private int _lastHeight;
 #endif
-
 
         private void Start()
         {
@@ -109,23 +109,22 @@ namespace Project.Scripts.Gameplay
         {
             if (_moveBarService?.IsEnabled == true)
                 _uiService?.Close<MoveBarView>();
-            
+
             _uiService?.Close<TopBarView>();
-            
+
             if (_battleHUDView)
                 _battleHUDView.Close();
-            
+
             _orchestrator?.Dispose();
             _overtimeBoardAnimator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
-            
+
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
             BattleViewConfig.LayoutChanged -= OnBattleLayoutChanged;
 #endif
         }
-
 
         [Inject]
         public void Construct(
@@ -145,6 +144,7 @@ namespace Project.Scripts.Gameplay
             IBoardRuntimeService boardRuntimeService,
             IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter,
+            GameResultSequenceController gameResultSequenceController,
             BattleHUDViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
@@ -167,13 +167,13 @@ namespace Project.Scripts.Gameplay
             _boardRuntimeService = boardRuntimeService;
             _moveBarService = moveBarService;
             _gameResultPresenter = gameResultPresenter;
+            _gameResultSequenceController = gameResultSequenceController;
             _battleHUDViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
             _overtimeService = overtimeService;
             _debugConfig = debugConfig;
         }
-
 
         private async UniTaskVoid InitAsync()
         {
@@ -206,6 +206,7 @@ namespace Project.Scripts.Gameplay
             _battleHUDView.SetDependencies(_inputService, _battleViewConfig, _boardBoundsProvider);
             await _battleHUDView.InitializeAsync(_battleHUDViewModel);
             await _battleHUDView.ShowAsync();
+            _gameResultSequenceController.BindVisuals(_battleHUDView);
 
             var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
@@ -254,6 +255,7 @@ namespace Project.Scripts.Gameplay
             _gameAudioController.StartMusic();
 
             _gameResultPresenter.Initialize();
+            _gameResultSequenceController.Initialize();
             _battleTimerService.Initialize();
 
 #if UNITY_EDITOR

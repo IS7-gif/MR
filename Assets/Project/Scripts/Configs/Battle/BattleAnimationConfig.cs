@@ -24,9 +24,6 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Кривая ослабления для обеих фаз отбрасывания")]
         [SerializeField] private Ease _knockbackEase = Ease.OutQuad;
 
-        [Tooltip("Пауза в секундах перед появлением окна победы/поражения - даёт игроку момент осознать исход боя")]
-        [SerializeField] private float _resultScreenDelay = 1f;
-
         [Header("HP Bar Animation")]
         [Tooltip("Задержка в секундах перед началом опустошения лаг-полосы после получения урона")]
         [SerializeField] private float _hpBarLagDelay = 0.2f;
@@ -93,7 +90,6 @@ namespace Project.Scripts.Configs.Battle
         public float KnockbackDistance => _knockbackDistance;
         public float KnockbackDuration => _knockbackDuration;
         public Ease KnockbackEase => _knockbackEase;
-        public float ResultScreenDelay => _resultScreenDelay;
         public float HPBarLagDelay => _hpBarLagDelay;
         public float HPBarLagDuration => _hpBarLagDuration;
         public Ease HPBarLagEase => _hpBarLagEase;

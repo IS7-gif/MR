@@ -1,18 +1,21 @@
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs.UI;
 using Project.Scripts.Configs.Battle;
+using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.Heroes;
 using R3;
 using UnityEngine;
 using UnityEngine.Pool;
 
 namespace Project.Scripts.Gameplay.Battle.HUD
 {
-    public class BattleHUDView : BaseView<BattleHUDViewModel>
+    public class BattleHUDView : BaseView<BattleHUDViewModel>, IGameResultVisuals
     {
         private const int FloatingNumberDefaultPoolCapacity = 4;
         private const int FloatingNumberMaxPoolSize = 16;
@@ -69,6 +72,18 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _inputService = inputService;
             _battleViewConfig = battleViewConfig;
             _boardBounds = boardBounds;
+        }
+
+        public async UniTask PlayAvatarPulse(BattleSide side, AvatarPulseStepConfig config)
+        {
+            var targetView = side == BattleSide.Player
+                ? _playerAvatarSlot
+                : _enemyAvatarSlot;
+
+            if (false == targetView)
+                return;
+
+            await targetView.PlayResultPulse(config);
         }
 
 

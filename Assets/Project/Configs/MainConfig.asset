@@ -18,6 +18,7 @@ MonoBehaviour:
   _boardConfig: {fileID: 11400000, guid: be905cc36eebaa048b09269c08009310, type: 2}
   _boardAnimationConfig: {fileID: 11400000, guid: cbd98e1f82be3af488e15870bc436ae1, type: 2}
   _battleAnimationConfig: {fileID: 11400000, guid: 78800f9186b816a479bc920c3b746561, type: 2}
+  _gameResultSequenceConfig: {fileID: 11400000, guid: a46c0d4d77a24f14bb61c31f9c9b4a01, type: 2}
   _cascadeEnergyConfig: {fileID: 11400000, guid: 367bc2c4bb5f8c5498d44f1f92e0f2b3, type: 2}
   _specialTileConfig: {fileID: 11400000, guid: bf43509404b084149a8b2978f4619c2d, type: 2}
   _levelDatabase: {fileID: 11400000, guid: 528394c8e2714e3489a9a33180a6de4c, type: 2}
