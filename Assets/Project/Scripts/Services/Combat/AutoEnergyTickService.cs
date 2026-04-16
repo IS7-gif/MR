@@ -1,6 +1,7 @@
 using System;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Timer;
 using R3;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Project.Scripts.Services.Combat
         private readonly EventBus _eventBus;
         private readonly AutoEnergyConfig _autoEnergyConfig;
         private readonly EscalationConfig _escalationConfig;
+        private readonly IGameStateService _gameStateService;
         private readonly CompositeDisposable _subscriptions = new();
 
         private float _elapsed;
@@ -21,21 +23,30 @@ namespace Project.Scripts.Services.Combat
         private float _amountMultiplier = 1f;
 
 
-        public AutoEnergyTickService(EventBus eventBus, AutoEnergyConfig autoEnergyConfig, EscalationConfig escalationConfig)
+        public AutoEnergyTickService(
+            EventBus eventBus,
+            AutoEnergyConfig autoEnergyConfig,
+            EscalationConfig escalationConfig,
+            IGameStateService gameStateService)
         {
             _eventBus = eventBus;
             _autoEnergyConfig = autoEnergyConfig;
             _escalationConfig = escalationConfig;
+            _gameStateService = gameStateService;
         }
 
         public void Start()
         {
             _subscriptions.Add(_eventBus.Subscribe<OvertimeStartedEvent>(_ => _isActive = false));
+            _subscriptions.Add(_gameStateService.State.Subscribe(OnGameStateChanged));
         }
 
         public void Tick()
         {
             if (!_isActive)
+                return;
+
+            if (false == _gameStateService.IsPlaying)
                 return;
 
             _elapsed += Time.deltaTime;
@@ -69,6 +80,12 @@ namespace Project.Scripts.Services.Combat
         public void SetAmountMultiplier(float multiplier)
         {
             _amountMultiplier = Mathf.Max(0f, multiplier);
+        }
+
+        private void OnGameStateChanged(GameState state)
+        {
+            if (state != GameState.Playing)
+                _isActive = false;
         }
     }
 }

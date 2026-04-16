@@ -12,6 +12,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
+        private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly EventBus _eventBus;
 
@@ -22,6 +23,7 @@ namespace Project.Scripts.Services.Combat
             IPlayerStateService playerState,
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
+            IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService,
             EventBus eventBus)
         {
@@ -30,6 +32,7 @@ namespace Project.Scripts.Services.Combat
             _playerState = playerState;
             _enemyState = enemyState;
             _groupDefense = groupDefense;
+            _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _eventBus = eventBus;
         }
@@ -37,6 +40,9 @@ namespace Project.Scripts.Services.Combat
 
         public void Execute(UnitDescriptor source, UnitDescriptor target)
         {
+            if (false == _gameStateService.IsPlaying)
+                return;
+
             if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilityCommit).IsAllowed)
                 return;
 

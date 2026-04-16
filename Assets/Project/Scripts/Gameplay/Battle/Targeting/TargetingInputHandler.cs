@@ -17,6 +17,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         private IInputService _input;
         private TargetingRegistry _registry;
         private IAbilityExecutionService _abilityExecution;
+        private IGameStateService _gameStateService;
         private IBattleActionRuntimeService _battleActionRuntimeService;
         private Camera _cam;
         private ITargetable _source;
@@ -24,6 +25,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         private Vector2 _currentScreenPos;
         private int _actionSessionVersion = -1;
         private IDisposable _runtimeStateSubscription;
+        private IDisposable _gameStateSubscription;
 
 
         private void OnDestroy()
@@ -37,6 +39,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             IInputService input,
             TargetingRegistry registry,
             IAbilityExecutionService abilityExecution,
+            IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService,
             Camera cam)
         {
@@ -44,6 +47,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             _input = input;
             _registry = registry;
             _abilityExecution = abilityExecution;
+            _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _cam = cam;
 
@@ -51,6 +55,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             _input.OnDragDelta += HandleDragDelta;
             _input.OnDragCanceled += HandleDragCanceled;
             _runtimeStateSubscription = _battleActionRuntimeService.State.Subscribe(_ => OnRuntimeStateChanged());
+            _gameStateSubscription = _gameStateService.State.Subscribe(OnGameStateChanged);
         }
 
 
@@ -114,6 +119,8 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         {
             _runtimeStateSubscription?.Dispose();
             _runtimeStateSubscription = null;
+            _gameStateSubscription?.Dispose();
+            _gameStateSubscription = null;
 
             if (null == _input)
                 return;
@@ -125,7 +132,10 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
 
         private bool CanStartSelection()
         {
-            if (null == _battleActionRuntimeService)
+            if (null == _battleActionRuntimeService || null == _gameStateService)
+                return false;
+
+            if (false == _gameStateService.IsPlaying)
                 return false;
 
             return _battleActionRuntimeService.Evaluate(BattleActionKind.AbilitySourceSelect).IsAllowed;
@@ -133,7 +143,10 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
 
         private bool CanContinueSelection()
         {
-            if (null == _battleActionRuntimeService)
+            if (null == _battleActionRuntimeService || null == _gameStateService)
+                return false;
+
+            if (false == _gameStateService.IsPlaying)
                 return false;
 
             if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilitySourceSelect).IsAllowed)
@@ -144,7 +157,10 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
 
         private bool CanCommitSelection()
         {
-            if (null == _battleActionRuntimeService)
+            if (null == _battleActionRuntimeService || null == _gameStateService)
+                return false;
+
+            if (false == _gameStateService.IsPlaying)
                 return false;
 
             if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AbilityCommit).IsAllowed)
@@ -159,6 +175,12 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
                 return;
 
             if (false == _battleActionRuntimeService.CanAcceptNormalActions)
+                ClearSelection();
+        }
+
+        private void OnGameStateChanged(GameState state)
+        {
+            if (state != GameState.Playing)
                 ClearSelection();
         }
 

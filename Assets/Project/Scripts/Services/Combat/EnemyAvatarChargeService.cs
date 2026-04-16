@@ -24,6 +24,7 @@ namespace Project.Scripts.Services.Combat
 
         private readonly EventBus _eventBus;
         private readonly IEscalationModifierService _escalationModifier;
+        private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
         private readonly AvatarEnergyFormula _formula;
@@ -33,10 +34,12 @@ namespace Project.Scripts.Services.Combat
 
 
         public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
-            IEscalationModifierService escalationModifier, IBattleActionRuntimeService battleActionRuntimeService)
+            IEscalationModifierService escalationModifier, IGameStateService gameStateService,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _escalationModifier = escalationModifier;
+            _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             var config = levelConfig.EnemyAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
@@ -115,6 +118,9 @@ namespace Project.Scripts.Services.Combat
 
         private void OnAutoEnergyTick(AutoEnergyTickEvent e)
         {
+            if (false == _gameStateService.IsPlaying)
+                return;
+
             var added = _engine.TryAddEnergy(e.EnergyAmount);
             if (added > 0f)
                 PublishEnergyChanged();

@@ -143,7 +143,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                     if (_enemyHeroSlots[i])
                         registry.Register(_enemyHeroSlots[i]);
 
-            _targetingInputHandler.Init(_inputService, registry, ViewModel.AbilityExecution, ViewModel.BattleActionRuntime, Camera.main);
+            _targetingInputHandler.Init(
+                _inputService,
+                registry,
+                ViewModel.AbilityExecution,
+                ViewModel.GameState,
+                ViewModel.BattleActionRuntime,
+                Camera.main);
         }
 
         private void SetupFloatingNumbers()

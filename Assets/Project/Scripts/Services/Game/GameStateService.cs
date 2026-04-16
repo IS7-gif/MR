@@ -14,15 +14,20 @@ namespace Project.Scripts.Services.Game
 
         private readonly EventBus _eventBus;
         private readonly IPlayerStateService _playerState;
+        private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly ReactiveProperty<GameState> _state = new(GameState.Playing);
         private IDisposable _winSub;
         private IDisposable _loseSub;
 
 
-        public GameStateService(EventBus eventBus, IPlayerStateService playerState)
+        public GameStateService(
+            EventBus eventBus,
+            IPlayerStateService playerState,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
+            _battleActionRuntimeService = battleActionRuntimeService;
             _winSub = _eventBus.Subscribe<EnemyDefeatedEvent>(OnEnemyDefeated);
             _loseSub = _eventBus.Subscribe<PlayerDefeatedEvent>(OnPlayerDefeated);
         }
@@ -46,6 +51,7 @@ namespace Project.Scripts.Services.Game
             if (false == IsPlaying && _state.Value != GameState.Overtime)
                 return;
 
+            _battleActionRuntimeService.MarkBlocked();
             var isFlawless = _playerState.CurrentHP >= _playerState.MaxHP;
             _eventBus.Publish(new GameResultEvent(BattleSide.Player, isFlawless));
             SetState(GameState.Win);
@@ -56,6 +62,7 @@ namespace Project.Scripts.Services.Game
             if (false == IsPlaying && _state.Value != GameState.Overtime)
                 return;
 
+            _battleActionRuntimeService.MarkBlocked();
             _eventBus.Publish(new GameResultEvent(BattleSide.Enemy, isFlawless: false));
             SetState(GameState.Lose);
         }

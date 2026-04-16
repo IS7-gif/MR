@@ -22,6 +22,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public AvatarSlotViewModel EnemyAvatar { get; private set; }
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
+        public IGameStateService GameState => _gameStateService;
         public IBattleActionRuntimeService BattleActionRuntime => _battleActionRuntimeService;
         public IReadyPulseCoordinator PulseCoordinator { get; }
         public IAbilityExecutionService AbilityExecution { get; }
@@ -45,6 +46,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly LevelConfig _levelConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly IBoardBoundsProvider _boardBounds;
+        private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly BattleTimerConfig _battleTimerConfig;
         private readonly UnitDeathConfig _unitDeathConfig;
@@ -64,6 +66,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             LevelConfig levelConfig,
             SlotLayoutConfig slotLayoutConfig,
             IBoardBoundsProvider boardBounds,
+            IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
@@ -81,6 +84,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _levelConfig = levelConfig;
             _slotLayoutConfig = slotLayoutConfig;
             _boardBounds = boardBounds;
+            _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;

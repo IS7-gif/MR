@@ -20,6 +20,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
         private readonly IEscalationModifierService _escalationModifier;
+        private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
@@ -28,12 +29,13 @@ namespace Project.Scripts.Services.Combat
 
         public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
             IPlayerStateService playerState, IEnemyStateService enemyState, IEscalationModifierService escalationModifier,
-            IBattleActionRuntimeService battleActionRuntimeService)
+            IGameStateService gameStateService, IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
             _enemyState = enemyState;
             _escalationModifier = escalationModifier;
+            _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes, slotLayoutConfig.HeroSlotKinds);
@@ -186,6 +188,9 @@ namespace Project.Scripts.Services.Combat
 
         private void OnAutoEnergyTick(AutoEnergyTickEvent e)
         {
+            if (false == _gameStateService.IsPlaying)
+                return;
+
             DistributeAutoTickToSlots(_playerSlots, BattleSide.Player, e.EnergyAmount);
             DistributeAutoTickToSlots(_enemySlots, BattleSide.Enemy, e.EnergyAmount);
         }
