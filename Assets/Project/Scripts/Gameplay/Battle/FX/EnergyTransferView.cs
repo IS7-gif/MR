@@ -8,13 +8,18 @@ namespace Project.Scripts.Gameplay.Battle.FX
     public class EnergyTransferView : MonoBehaviour
     {
         private const float FullWaveRotation = Mathf.PI * 2f;
+        
+
+        [Tooltip("Рендереры, которые окрашиваются при воспроизведении эффекта")]
+        [SerializeField] private Renderer[] _renderers;
+
+        [Tooltip("Если включено, альфа TrailRenderer берётся из его градиента; если выключено - используется альфа пришедшего цвета")]
+        [SerializeField] private bool _trailPreserveGradientAlpha = true;
 
 
-        [Tooltip("Sprite renderer used to tint the energy transfer visual")]
-        [SerializeField] private SpriteRenderer _sprite;
-
-
+        private static readonly int ColorShaderId = Shader.PropertyToID("_Color");
         private Tween _flightTween;
+        private MaterialPropertyBlock _mpb;
 
 
         private void OnDestroy()
@@ -28,8 +33,7 @@ namespace Project.Scripts.Gameplay.Battle.FX
             Kill();
 
             transform.position = from;
-            if (_sprite)
-                _sprite.color = color;
+            ApplyColor(color);
 
             var delta = to - from;
             var direction = delta.sqrMagnitude > 0.0001f ? delta.normalized : Vector3.up;
@@ -60,6 +64,42 @@ namespace Project.Scripts.Gameplay.Battle.FX
                     transform.position = to;
                     onComplete?.Invoke();
                 });
+        }
+
+        private void ApplyColor(Color color)
+        {
+            if (_renderers == null || _renderers.Length == 0)
+                return;
+
+            _mpb ??= new MaterialPropertyBlock();
+            _mpb.SetColor(ColorShaderId, color);
+
+            for (var i = 0; i < _renderers.Length; i++)
+            {
+                var r = _renderers[i];
+                if (!r)
+                    continue;
+
+                if (r is TrailRenderer trail)
+                {
+                    float startAlpha, endAlpha;
+                    if (_trailPreserveGradientAlpha)
+                    {
+                        var gradient = trail.colorGradient;
+                        startAlpha = gradient.Evaluate(0f).a;
+                        endAlpha = gradient.Evaluate(1f).a;
+                    }
+                    else
+                    {
+                        startAlpha = color.a;
+                        endAlpha = color.a;
+                    }
+                    trail.startColor = new Color(color.r, color.g, color.b, startAlpha);
+                    trail.endColor = new Color(color.r, color.g, color.b, endAlpha);
+                }
+                else
+                    r.SetPropertyBlock(_mpb);
+            }
         }
 
         public void Kill()
