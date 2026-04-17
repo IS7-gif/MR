@@ -6,9 +6,9 @@ namespace Project.Scripts.Services.Board
         float BoardHalfWidth { get; }
         float BoardCenterX { get; }
         float CellSize { get; }
-        float BattleAreaCenterWorldY { get; }
+        float AnnouncementAnchorWorldY { get; }
 
         void SetBounds(float centerX, float topWorldY, float halfWidth, float cellSize);
-        void SetBattleAreaCenter(float centerWorldY);
+        void SetAnnouncementAnchorY(float worldY);
     }
 }

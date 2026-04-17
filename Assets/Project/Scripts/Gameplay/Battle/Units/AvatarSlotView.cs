@@ -8,6 +8,7 @@ using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Shared.Heroes;
 using R3;
+using TMPro;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.Units
@@ -17,8 +18,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
 
-        [Tooltip("Фоновый SpriteRenderer - определяет границы слота и масштабируется через SetSize")]
-        [SerializeField] private SpriteRenderer _background;
+        [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
+        [SerializeField] private SpriteRenderer _boundsSource;
+
+        [Tooltip("SpriteRenderers, которые красятся цветом аватара; при смерти красятся в цвет смерти из UnitDeathConfig")]
+        [SerializeField] private SpriteRenderer[] _coloredRenderers;
 
         [Tooltip("SpriteRenderer портрета - отображает изображение аватара")]
         [SerializeField] private SpriteRenderer _portrait;
@@ -35,13 +39,16 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Полоса энергии/заряда - заполняется по мере накопления энергии аватаром")]
         [SerializeField] private BarRenderer _energyBar;
 
+        [Tooltip("Текст HP в формате 'Current / Max' - скрывается при MaxHP = 0 (бессмертный юнит)")]
+        [SerializeField] private TMP_Text _hpText;
+
         [Tooltip("Transform, используемый как якорь для всплывающих чисел урона/лечения")]
         [SerializeField] private Transform _hitAnchor;
 
 
         public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side, _viewModel.AbilityType);
         public bool IsReadySource => _viewModel != null && _viewModel.Side == BattleSide.Player && _viewModel.EnergyBar.IsReady.CurrentValue;
-        public Bounds WorldBounds => _background ? _background.bounds : new Bounds(transform.position, Vector3.one);
+        public Bounds WorldBounds => _boundsSource ? _boundsSource.bounds : new Bounds(transform.position, Vector3.one);
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
 
 
@@ -171,8 +178,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void BindPortrait(AvatarSlotViewModel viewModel)
         {
-            if (_background)
-                _background.color = viewModel.SlotColor;
+            ApplySlotColor(viewModel.SlotColor);
 
             if (false == _portrait)
                 return;
@@ -189,6 +195,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             if (_hpLagBar)
                 _hpLagBar.SnapFill(viewModel.HPFill.CurrentValue);
+
+            if (_hpText)
+                _hpText.gameObject.SetActive(true);
+
+            SetHPText(viewModel.CurrentHP, viewModel.MaxHP);
 
             viewModel.HealthBarUpdated
                 .Subscribe(ApplyHealthBarUpdate)
@@ -252,8 +263,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     if (defeated)
                         FinalizeDeathState(viewModel.HPFill.CurrentValue);
 
-                    if (_background && visuals.ChangeBackgroundColor)
-                        _background.color = defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor;
+                    if (visuals.ChangeBackgroundColor)
+                        ApplySlotColor(defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor);
 
                     if (visuals.ApplyDeathFill)
                         SetPortraitDeathFill(defeated);
@@ -270,6 +281,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
                             _hpLagBar.gameObject.SetActive(false == defeated);
                     }
 
+                    if (_hpText)
+                        _hpText.gameObject.SetActive(false == defeated);
+
                     if (_energyBar && visuals.DisableEnergyBar)
                         _energyBar.gameObject.SetActive(false == defeated);
                 })
@@ -278,6 +292,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void ApplyHealthBarUpdate(HealthBarUpdate update)
         {
+            SetHPText(update.CurrentHP, update.MaxHP);
+
             if (update.Mode == HealthBarUpdateMode.Snap)
             {
                 _hpBar?.SnapFill(update.Fill);
@@ -300,6 +316,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
             var healDuration = _config ? _config.HPBarHealDuration : 0.4f;
             _hpBar?.SetFillAnimated(update.Fill, healDuration);
             _hpLagBar?.SetFillAnimated(update.Fill, healDuration);
+        }
+
+        private void SetHPText(int currentHP, int maxHP)
+        {
+            if (false == _hpText)
+                return;
+
+            _hpText.text = maxHP > 0 ? $"{currentHP} / {maxHP}" : string.Empty;
         }
 
         private void FinalizeDeathState(float hpFill)
@@ -346,6 +370,16 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private void ResetPortraitDeathFill()
         {
             SetPortraitDeathFill(false);
+        }
+
+        private void ApplySlotColor(Color color)
+        {
+            if (_coloredRenderers == null)
+                return;
+
+            for (var i = 0; i < _coloredRenderers.Length; i++)
+                if (_coloredRenderers[i])
+                    _coloredRenderers[i].color = color;
         }
 
 

@@ -18,6 +18,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public HeroActionType AbilityType { get; }
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool> IsDefeated { get; } = new(false);
+        public int CurrentHP { get; private set; }
+        public int MaxHP { get; private set; }
         public Observable<HealthBarUpdate> HealthBarUpdated => _healthBarUpdated;
         public Observable<int> Hit => _hit;
         public Observable<int> Heal => _heal;
@@ -42,6 +44,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             EventBus = eventBus;
             AbilityType = abilityType;
             _prevHP = initialHP;
+            CurrentHP = initialHP;
+            MaxHP = maxHP;
             HPFill = new ReactiveProperty<float>(maxHP > 0 ? (float)initialHP / maxHP : 1f);
             IsDefeated.Value = initialHP <= 0;
             EnergyBar = new AvatarChargeBarViewModel(eventBus, side, battleActionRuntimeService);
@@ -86,11 +90,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
             var previousHP = _prevHP;
 
             _prevHP = current;
+            CurrentHP = current;
+            MaxHP = max;
             HPFill.Value = fill;
 
             if (silent)
             {
-                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap, current, max));
 
                 if (current <= 0)
                     IsDefeated.Value = true;
@@ -101,16 +107,16 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (current < previousHP)
             {
                 _hit.OnNext(previousHP - current);
-                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Damage));
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Damage, current, max));
             }
             else if (current > previousHP)
             {
                 _heal.OnNext(current - previousHP);
-                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal));
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal, current, max));
             }
             else
             {
-                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap));
+                _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap, current, max));
             }
 
             if (current <= 0)

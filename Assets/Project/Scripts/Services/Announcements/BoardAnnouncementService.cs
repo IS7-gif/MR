@@ -85,7 +85,7 @@ namespace Project.Scripts.Services.Announcements
                 fadeOutDuration,
                 flyDistance,
                 fadeOutEase,
-                _boardBounds.BattleAreaCenterWorldY + _config.VerticalWorldOffset);
+                _boardBounds.AnnouncementAnchorWorldY + _config.VerticalWorldOffset);
         }
 
         private BoardAnnouncementView GetOrCreate()

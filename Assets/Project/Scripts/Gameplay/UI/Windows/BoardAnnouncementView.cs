@@ -47,7 +47,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
             if (_canvasGroup)
                 _canvasGroup.alpha = 1f;
 
-            var startPos = WorldYToAnchored(ViewModel.BattleAreaCenterWorldY);
+            var startPos = WorldYToAnchored(ViewModel.WorldY);
 
             if (_textRect)
                 _textRect.anchoredPosition = startPos;

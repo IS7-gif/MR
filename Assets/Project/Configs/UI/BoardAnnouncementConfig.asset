@@ -18,7 +18,7 @@ MonoBehaviour:
   _fadeOutDuration: 0.6
   _flyDistance: 100
   _fadeOutEase: 5
-  _verticalWorldOffset: 0.23
+  _verticalWorldOffset: 0
   _countdownTextColor: {r: 1, g: 0, b: 0, a: 1}
   _countdownDisplayDuration: 0.5
   _countdownFadeOutDuration: 0.25

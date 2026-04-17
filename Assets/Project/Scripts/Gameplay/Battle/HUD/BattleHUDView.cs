@@ -39,8 +39,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Префаб с компонентом FloatingDamageNumber")]
         [SerializeField] private FloatingDamageNumber _floatingDamagePrefab;
 
+        [Space(10)]
         [Tooltip("Пустой дочерний объект, размещённый на нижней границе визуала HUD; используется для позиционирования от верхнего края доски")]
         [SerializeField] private Transform _bottomAnchor;
+
+        [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
+        [SerializeField] private Transform _announcementAnchor;
 
 
         private IInputService _inputService;
@@ -53,7 +57,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         {
             PositionHUD();
             BindSlots();
-            PublishBattleAreaCenter();
+            PublishAnnouncementAnchor();
             SetupTargeting();
             SetupFloatingNumbers();
 
@@ -100,17 +104,16 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public void RefreshPosition()
         {
             PositionHUD();
-            PublishBattleAreaCenter();
+            PublishAnnouncementAnchor();
         }
 #endif
 
-        private void PublishBattleAreaCenter()
+        private void PublishAnnouncementAnchor()
         {
-            if (_boardBounds == null || false == _playerAvatarSlot || false == _enemyAvatarSlot)
+            if (_boardBounds == null || false == _announcementAnchor)
                 return;
 
-            var centerY = (_playerAvatarSlot.transform.position.y + _enemyAvatarSlot.transform.position.y) * 0.5f;
-            _boardBounds.SetBattleAreaCenter(centerY);
+            _boardBounds.SetAnnouncementAnchorY(_announcementAnchor.position.y);
         }
 
         private void BindSlots()

@@ -13,7 +13,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
         public float FadeOutDuration { get; }
         public float FlyDistance { get; }
         public Ease FadeOutEase { get; }
-        public float BattleAreaCenterWorldY { get; }
+        public float WorldY { get; }
 
 
         private readonly UniTaskCompletionSource _animationDone = new();
@@ -26,7 +26,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
             float fadeOutDuration,
             float flyDistance,
             Ease fadeOutEase,
-            float battleAreaCenterWorldY)
+            float worldY)
         {
             Text = text;
             TextColor = textColor;
@@ -34,7 +34,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
             FadeOutDuration = fadeOutDuration;
             FlyDistance = flyDistance;
             FadeOutEase = fadeOutEase;
-            BattleAreaCenterWorldY = battleAreaCenterWorldY;
+            WorldY = worldY;
         }
 
 
