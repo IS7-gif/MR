@@ -57,6 +57,16 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Кривая ослабления для анимации заполнения энергии")]
         [SerializeField] private Ease _energyFillEase = Ease.OutCubic;
 
+        [Header("Energy Transfer FX")]
+        [Tooltip("Длительность полета эффекта передачи энергии в секундах")]
+        [SerializeField] private float _energyTransferDuration = 0.45f;
+
+        [Tooltip("Амплитуда боковых колебаний S-кривой эффекта передачи энергии в мировых единицах")]
+        [SerializeField] private float _energyTransferWaveAmplitude = 0.22f;
+
+        [Tooltip("Кривая скорости для полета эффекта передачи энергии")]
+        [SerializeField] private Ease _energyTransferFlightEase = Ease.InOutSine;
+
         [Header("Targeting Highlights")]
         [Tooltip("Цвет свечения юнита, от которого начато перетаскивание (источник)")]
         [SerializeField] private Color _sourceHighlightColor = Color.white;
@@ -97,6 +107,9 @@ namespace Project.Scripts.Configs.Battle
         public Ease HPBarHealEase => _hpBarHealEase;
         public float EnergyFillDuration => _energyFillDuration;
         public Ease EnergyFillEase => _energyFillEase;
+        public float EnergyTransferDuration => _energyTransferDuration;
+        public float EnergyTransferWaveAmplitude => _energyTransferWaveAmplitude;
+        public Ease EnergyTransferFlightEase => _energyTransferFlightEase;
         public Color SourceHighlightColor => _sourceHighlightColor;
         public Color AttackTargetColor => _attackTargetColor;
         public Color HealTargetColor => _healTargetColor;

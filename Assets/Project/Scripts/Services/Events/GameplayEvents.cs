@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Scripts.Shared.GroupDefense;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
+using UnityEngine;
 
 namespace Project.Scripts.Services.Events
 {
@@ -60,11 +61,15 @@ namespace Project.Scripts.Services.Events
     public readonly struct EnergyGeneratedEvent
     {
         public IReadOnlyDictionary<TileKind, float> EnergyByKind { get; }
+        public IReadOnlyDictionary<TileKind, Vector3> WorldSourceByKind { get; }
 
 
-        public EnergyGeneratedEvent(IReadOnlyDictionary<TileKind, float> energyByKind)
+        public EnergyGeneratedEvent(
+            IReadOnlyDictionary<TileKind, float> energyByKind,
+            IReadOnlyDictionary<TileKind, Vector3> worldSourceByKind)
         {
             EnergyByKind = energyByKind;
+            WorldSourceByKind = worldSourceByKind;
         }
     }
 

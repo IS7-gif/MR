@@ -18,6 +18,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
 
+        
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
         [SerializeField] private SpriteRenderer _boundsSource;
 
@@ -45,11 +46,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Transform, используемый как якорь для всплывающих чисел урона/лечения")]
         [SerializeField] private Transform _hitAnchor;
 
+        [Tooltip("Якорь для прилёта орбов передачи энергии - по умолчанию HitAnchor, если не назначен")]
+        [SerializeField] private Transform _energyAnchor;
+
 
         public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side, _viewModel.AbilityType);
         public bool IsReadySource => _viewModel != null && _viewModel.Side == BattleSide.Player && _viewModel.EnergyBar.IsReady.CurrentValue;
         public Bounds WorldBounds => _boundsSource ? _boundsSource.bounds : new Bounds(transform.position, Vector3.one);
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
+        public Transform EnergyAnchor => _energyAnchor ? _energyAnchor : HitAnchor;
 
 
         private AvatarSlotViewModel _viewModel;
@@ -381,7 +386,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 if (_coloredRenderers[i])
                     _coloredRenderers[i].color = color;
         }
-
 
         private void PlayHitFlash()
         {

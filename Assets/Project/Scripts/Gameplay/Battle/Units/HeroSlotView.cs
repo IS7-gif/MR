@@ -1,5 +1,4 @@
 using DG.Tweening;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Shared.Heroes;
@@ -14,6 +13,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
 
+        
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
         [SerializeField] private SpriteRenderer _boundsSource;
 
@@ -44,11 +44,17 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
         [SerializeField] private Transform _hitAnchor;
 
+        [Tooltip("Якорь для прилёта орбов передачи энергии - по умолчанию HitAnchor, если не назначен")]
+        [SerializeField] private Transform _energyAnchor;
+
+        
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
+        public Transform EnergyAnchor => _energyAnchor ? _energyAnchor : HitAnchor;
         public UnitDescriptor Descriptor => UnitDescriptor.Hero(_viewModel.Side, _viewModel.SlotIndex, _viewModel.ActionType);
         public bool IsReadySource => _viewModel != null && _viewModel.IsAssigned && _viewModel.IsActivatable.CurrentValue;
         public Bounds WorldBounds => _boundsSource ? _boundsSource.bounds : new Bounds(transform.position, Vector3.one);
 
+        
         private HeroSlotViewModel _viewModel;
         private BattleAnimationConfig _config;
         private UnitDeathConfig _deathConfig;
@@ -59,12 +65,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private Tween _knockbackTween;
         private MaterialPropertyBlock _portraitPropertyBlock;
 
+        
         private void OnDestroy()
         {
             _hitFlashTween?.Kill();
             _knockbackTween?.Kill();
             _disposables?.Dispose();
         }
+        
 
         public void Bind(HeroSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, BattleAnimationConfig config, UnitDeathConfig deathConfig)
         {
@@ -127,6 +135,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             _glow.gameObject.SetActive(active);
         }
+        
 
         private void BindPortrait(HeroSlotViewModel viewModel)
         {

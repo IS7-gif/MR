@@ -47,6 +47,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.BarRenderer
   _fill: {fileID: 8919502189715921145}
   _vertical: 0
+--- !u!1 &1560069644232012115
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973214678908926257}
+  m_Layer: 0
+  m_Name: EnergyFXTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &973214678908926257
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560069644232012115}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.374, y: -0.405, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5079601235995019718}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1618246297600553473
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,6 +939,7 @@ Transform:
   - {fileID: 2509511058789889567}
   - {fileID: 9039142347772881041}
   - {fileID: 8721752855712036830}
+  - {fileID: 973214678908926257}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &370416894395110427
@@ -926,7 +958,6 @@ MonoBehaviour:
   _coloredRenderers:
   - {fileID: 2114889309585241080}
   - {fileID: 939483844217200381}
-  - {fileID: 1274146383776473485}
   _portrait: {fileID: 830134576443962202}
   _glow: {fileID: 7829801574302690671}
   _hpBarContainer: {fileID: 3913464817945936822}
@@ -935,6 +966,7 @@ MonoBehaviour:
   _energyBar: {fileID: 6709319566379441593}
   _hpText: {fileID: 8736065246179166520}
   _hitAnchor: {fileID: 8598192539019804028}
+  _energyAnchor: {fileID: 973214678908926257}
 --- !u!1 &7320874684612399690
 GameObject:
   m_ObjectHideFlags: 0

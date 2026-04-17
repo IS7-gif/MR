@@ -123,6 +123,7 @@ namespace Project.Scripts.Services.Board
                 var toKind = toTile.Config.Kind;
                 var fromIsSpecial = fromKind.IsSpecial();
                 var toIsSpecial = toKind.IsSpecial();
+                var energySourcePositions = new EnergySourcePositionCollector();
 
                 await _gridOps.SwapTiles(request.From, request.To);
 
@@ -152,6 +153,7 @@ namespace Project.Scripts.Services.Board
                     var comboMultiplier = _cascadeEnergyConfig.GetSpecialTileMultiplier(fromKind)
                                          * _cascadeEnergyConfig.GetSpecialTileMultiplier(toKind);
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind, comboMultiplier);
+                    energySourcePositions.CollectFromGridDiff(stateBefore, stateAfter, _view);
 
                     await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
 
@@ -194,6 +196,7 @@ namespace Project.Scripts.Services.Board
                     _eventBus.Publish(new BombActivatedEvent());
                     var specialMultiplier = _cascadeEnergyConfig.GetSpecialTileMultiplier(specialTile.Config.Kind);
                     AccumulateGridDiffEnergy(stateBefore, stateAfter, energyByKind, specialMultiplier);
+                    energySourcePositions.CollectFromGridDiff(stateBefore, stateAfter, _view);
 
                     await RunPostActivationFlow(waves, request.PivotPosition, runtimeVersion);
 
@@ -230,10 +233,11 @@ namespace Project.Scripts.Services.Board
                 }
 
                 AccumulateMatchEnergy(waves, _cascadeEnergyConfig, energyByKind);
+                energySourcePositions.CollectFromMatches(waves, _view);
 
                 if (energyByKind.Count > 0 && CanContinueFlow(runtimeVersion))
                 {
-                    _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
+                    _eventBus.Publish(new EnergyGeneratedEvent(energyByKind, energySourcePositions.Build()));
                     if (_debugConfig.LogCascades)
                         Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
                 }

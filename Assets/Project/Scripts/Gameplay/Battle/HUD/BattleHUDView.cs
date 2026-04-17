@@ -39,6 +39,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Префаб с компонентом FloatingDamageNumber")]
         [SerializeField] private FloatingDamageNumber _floatingDamagePrefab;
 
+        [Tooltip("Optional HUD-side energy orb FX view")]
+        [SerializeField] private BattleEnergyFXView _energyFXView;
+
         [Space(10)]
         [Tooltip("Пустой дочерний объект, размещённый на нижней границе визуала HUD; используется для позиционирования от верхнего края доски")]
         [SerializeField] private Transform _bottomAnchor;
@@ -59,6 +62,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             BindSlots();
             PublishAnnouncementAnchor();
             SetupTargeting();
+            SetupEnergyFX();
             SetupFloatingNumbers();
 
             return UniTask.CompletedTask;
@@ -66,6 +70,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         protected override void OnClose()
         {
+            _energyFXView?.Cleanup();
             _floatingPool?.Dispose();
             _floatingPool = null;
         }
@@ -168,6 +173,21 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 ViewModel.GameState,
                 ViewModel.BattleActionRuntime,
                 Camera.main);
+        }
+
+        private void SetupEnergyFX()
+        {
+            if (false == _energyFXView)
+                return;
+
+            _energyFXView.Initialize(
+                ViewModel.EventBus,
+                _playerHeroSlots,
+                ViewModel.PlayerHeroSlots,
+                ViewModel.PlayerHeroKinds,
+                _playerAvatarSlot,
+                ViewModel.PlayerAvatar.SlotColor,
+                ViewModel.BattleAnimConfig);
         }
 
         private void SetupFloatingNumbers()

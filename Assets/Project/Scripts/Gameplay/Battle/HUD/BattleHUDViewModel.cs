@@ -11,6 +11,7 @@ using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Tiles;
 using R3;
 using UnityEngine;
 
@@ -22,11 +23,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public AvatarSlotViewModel EnemyAvatar { get; private set; }
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
+        public EventBus EventBus => _eventBus;
         public IGameStateService GameState => _gameStateService;
         public IBattleActionRuntimeService BattleActionRuntime => _battleActionRuntimeService;
         public IReadyPulseCoordinator PulseCoordinator { get; }
         public IAbilityExecutionService AbilityExecution { get; }
         public IAvatarGroupDefenseService GroupDefense { get; }
+        public TileKind[] PlayerHeroKinds => _slotLayoutConfig.HeroSlotKinds;
         public string EnemyName => _levelConfig.BotConfig ? _levelConfig.BotConfig.OpponentName : string.Empty;
         public BattleAnimationConfig BattleAnimConfig => _battleAnimationConfig;
         public UnitDeathConfig DeathConfig { get; private set; }
