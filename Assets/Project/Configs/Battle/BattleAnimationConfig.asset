@@ -28,8 +28,8 @@ MonoBehaviour:
   _readyPulseEase: 4
   _energyFillDuration: 0.35
   _energyFillEase: 9
-  _energyTransferDuration: 0.65
-  _energyTransferWaveAmplitude: 0.22
+  _energyTransferDuration: 0.5
+  _energyTransferWaveAmplitude: 0
   _energyTransferFlightEase: 4
   _sourceHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _attackTargetColor: {r: 1, g: 0.15, b: 0.15, a: 1}

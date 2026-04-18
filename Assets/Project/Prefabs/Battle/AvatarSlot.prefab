@@ -746,9 +746,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.AvatarSlotView
   _boundsSource: {fileID: 5304306145601988827}
-  _coloredRenderers:
+  _energyColoredRenderers:
   - {fileID: 5304306145601988827}
   - {fileID: 4107591727388760241}
+  _deathColoredRenderers:
+  - {fileID: 2793549639025864200}
   _portrait: {fileID: 5862967615998522800}
   _glow: {fileID: 4106221509499051069}
   _hpBar: {fileID: 7709623914602924368}
@@ -757,6 +759,11 @@ MonoBehaviour:
   _hpText: {fileID: 782355568000881358}
   _hitAnchor: {fileID: 4580716954094339067}
   _energyAnchor: {fileID: 2835789384000631215}
+  _activateOnDeath: []
+  _deactivateOnDeath:
+  - {fileID: 7617384071603433793}
+  - {fileID: 2133473107496906719}
+  - {fileID: 8675400822373080042}
 --- !u!1 &8304990819351917047
 GameObject:
   m_ObjectHideFlags: 0

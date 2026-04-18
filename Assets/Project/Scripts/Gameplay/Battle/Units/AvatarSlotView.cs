@@ -1,10 +1,8 @@
 using DG.Tweening;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Targeting;
-using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Shared.Heroes;
 using R3;
@@ -22,9 +20,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
         [SerializeField] private SpriteRenderer _boundsSource;
 
-        [Tooltip("SpriteRenderers, которые красятся цветом аватара; при смерти красятся в цвет смерти из UnitDeathConfig")]
-        [SerializeField] private SpriteRenderer[] _coloredRenderers;
+        [Space(10)]
+        [Tooltip("SpriteRenderers, которые красятся цветом аватара")]
+        [SerializeField] private SpriteRenderer[] _energyColoredRenderers;
 
+        [Space(10)]
+        [Tooltip("SpriteRenderers, которые красятся в DeathColor из UnitDeathConfig при гибели аватара")]
+        [SerializeField] private SpriteRenderer[] _deathColoredRenderers;
+
+        [Space(10)]
         [Tooltip("SpriteRenderer портрета - отображает изображение аватара")]
         [SerializeField] private SpriteRenderer _portrait;
 
@@ -49,6 +53,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Якорь для прилёта орбов передачи энергии - по умолчанию HitAnchor, если не назначен")]
         [SerializeField] private Transform _energyAnchor;
 
+        [Space(10)]
+        [Tooltip("GameObject-ы, которые активируются при смерти аватара")]
+        [SerializeField] private GameObject[] _activateOnDeath;
+
+        [Space(10)]
+        [Tooltip("GameObject-ы, которые деактивируются при смерти аватара")]
+        [SerializeField] private GameObject[] _deactivateOnDeath;
+
 
         public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side, _viewModel.AbilityType);
         public bool IsReadySource => _viewModel != null && _viewModel.Side == BattleSide.Player && _viewModel.EnergyBar.IsReady.CurrentValue;
@@ -65,6 +77,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private Color _originalPortraitColor;
         private Vector3 _originalLocalPos;
         private Vector3 _originalLocalScale;
+        private Color[] _originalDeathColors;
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
         private Tween _resultPulseTween;
@@ -91,6 +104,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _originalLocalPos = transform.localPosition;
             _originalLocalScale = transform.localScale;
             ResetPortraitDeathFill();
+            CacheDeathColors();
 
             BindPortrait(viewModel);
             BindHPBars(viewModel);
@@ -268,29 +282,18 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     if (defeated)
                         FinalizeDeathState(viewModel.HPFill.CurrentValue);
 
-                    if (visuals.ChangeBackgroundColor)
-                        ApplySlotColor(defeated ? visuals.DeathBackgroundColor : viewModel.SlotColor);
+                    ApplyDeathColor(defeated);
 
                     if (visuals.ApplyDeathFill)
                         SetPortraitDeathFill(defeated);
 
-                    if (_portrait && visuals.DisablePortrait)
-                        _portrait.enabled = false == defeated;
+                    if (_activateOnDeath != null)
+                        foreach (var go in _activateOnDeath)
+                            if (go) go.SetActive(defeated);
 
-                    if (visuals.DisableHpBar)
-                    {
-                        if (_hpBar)
-                            _hpBar.gameObject.SetActive(false == defeated);
-
-                        if (_hpLagBar)
-                            _hpLagBar.gameObject.SetActive(false == defeated);
-                    }
-
-                    if (_hpText)
-                        _hpText.gameObject.SetActive(false == defeated);
-
-                    if (_energyBar && visuals.DisableEnergyBar)
-                        _energyBar.gameObject.SetActive(false == defeated);
+                    if (_deactivateOnDeath != null)
+                        foreach (var go in _deactivateOnDeath)
+                            if (go) go.SetActive(false == defeated);
                 })
                 .AddTo(_disposables);
         }
@@ -377,14 +380,40 @@ namespace Project.Scripts.Gameplay.Battle.Units
             SetPortraitDeathFill(false);
         }
 
-        private void ApplySlotColor(Color color)
+        private void CacheDeathColors()
         {
-            if (_coloredRenderers == null)
+            if (_deathColoredRenderers == null)
+            {
+                _originalDeathColors = null;
+                return;
+            }
+
+            _originalDeathColors = new Color[_deathColoredRenderers.Length];
+            for (var i = 0; i < _deathColoredRenderers.Length; i++)
+                if (_deathColoredRenderers[i])
+                    _originalDeathColors[i] = _deathColoredRenderers[i].color;
+        }
+
+        private void ApplyDeathColor(bool defeated)
+        {
+            if (_deathColoredRenderers == null || _originalDeathColors == null)
                 return;
 
-            for (var i = 0; i < _coloredRenderers.Length; i++)
-                if (_coloredRenderers[i])
-                    _coloredRenderers[i].color = color;
+            var deathColor = _deathConfig ? _deathConfig.AvatarDeathVisuals.DeathColor : Color.white;
+
+            for (var i = 0; i < _deathColoredRenderers.Length; i++)
+                if (_deathColoredRenderers[i])
+                    _deathColoredRenderers[i].color = defeated ? deathColor : _originalDeathColors[i];
+        }
+
+        private void ApplySlotColor(Color color)
+        {
+            if (_energyColoredRenderers == null)
+                return;
+
+            for (var i = 0; i < _energyColoredRenderers.Length; i++)
+                if (_energyColoredRenderers[i])
+                    _energyColoredRenderers[i].color = color;
         }
 
         private void PlayHitFlash()

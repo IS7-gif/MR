@@ -955,18 +955,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Units.HeroSlotView
   _boundsSource: {fileID: 2114889309585241080}
-  _coloredRenderers:
+  _energyColoredRenderers:
   - {fileID: 2114889309585241080}
   - {fileID: 939483844217200381}
+  _deathColoredRenderers:
+  - {fileID: 4557002024208468568}
   _portrait: {fileID: 830134576443962202}
   _glow: {fileID: 7829801574302690671}
-  _hpBarContainer: {fileID: 3913464817945936822}
   _hpBar: {fileID: 5399929975087249408}
   _hpLagBar: {fileID: 1968079254600887647}
   _energyBar: {fileID: 6709319566379441593}
   _hpText: {fileID: 8736065246179166520}
   _hitAnchor: {fileID: 8598192539019804028}
   _energyAnchor: {fileID: 973214678908926257}
+  _activateOnDeath: []
+  _deactivateOnDeath:
+  - {fileID: 7320874684612399690}
+  - {fileID: 9162967105012937807}
+  - {fileID: 5877986525517868558}
 --- !u!1 &7320874684612399690
 GameObject:
   m_ObjectHideFlags: 0

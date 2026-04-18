@@ -14,15 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.UnitDeathConfig
   _heroDeathVisuals:
     ApplyDeathFill: 1
-    DisablePortrait: 0
-    ChangeBackgroundColor: 1
-    DeathBackgroundColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
-    DisableHpBar: 0
-    DisableEnergyBar: 1
+    DeathColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   _avatarDeathVisuals:
     ApplyDeathFill: 1
-    DisablePortrait: 0
-    ChangeBackgroundColor: 1
-    DeathBackgroundColor: {r: 0.29803923, g: 0.29803923, b: 0.29803923, a: 1}
-    DisableHpBar: 0
-    DisableEnergyBar: 1
+    DeathColor: {r: 0.29803923, g: 0.29803923, b: 0.29803923, a: 1}
