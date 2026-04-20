@@ -70,6 +70,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Эскалация: множители параметров (скорость авто-энергии, энергия от каскадов), вступающие в силу при наступлении фазы эскалации")]
         [SerializeField] private EscalationConfig _escalationConfig;
 
+        [Tooltip("Подсказки: таймер, подсветка и пульсация при бездействии игрока")]
+        [SerializeField] private HintConfig _hintConfig;
+
         [Tooltip("Отладка: флаги логирования для разработчиков (не влияет на геймплей)")]
         [SerializeField] private DebugConfig _debugConfig;
 
@@ -94,6 +97,7 @@ namespace Project.Scripts.Configs
         public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;
         public AutoEnergyConfig AutoEnergyConfig => _autoEnergyConfig;
         public EscalationConfig EscalationConfig => _escalationConfig;
+        public HintConfig HintConfig => _hintConfig;
         public DebugConfig DebugConfig => _debugConfig;
     }
 }

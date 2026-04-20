@@ -678,6 +678,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.GameplayEntryPoint
   _tileContainer: {fileID: 1009358153}
   _boardView: {fileID: 1995056816}
+  _hintPresenter: {fileID: 0}
 --- !u!4 &1344492881
 Transform:
   m_ObjectHideFlags: 0

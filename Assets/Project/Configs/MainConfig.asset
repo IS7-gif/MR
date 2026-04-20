@@ -32,4 +32,5 @@ MonoBehaviour:
   _unitDeathConfig: {fileID: 11400000, guid: 3376c745fcd728c43bcb625f04131074, type: 2}
   _autoEnergyConfig: {fileID: 11400000, guid: fb69d75f46621ee429f17cc0a2369424, type: 2}
   _escalationConfig: {fileID: 11400000, guid: 94634fb3bbc965a4b9a9c81369bde7b5, type: 2}
+  _hintConfig: {fileID: 11400000, guid: 0930a272e1ae9d643b75bd57782355ec, type: 2}
   _debugConfig: {fileID: 11400000, guid: f3fc12f52fe53304abf0245839075646, type: 2}

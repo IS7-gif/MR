@@ -1,4 +1,3 @@
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Tiles;
@@ -10,6 +9,9 @@ namespace Project.Scripts.Tiles
     {
         [SerializeField] private SpriteRenderer _spriteRenderer;
         [SerializeField] private TileAnimator _animator;
+
+        [Tooltip("SpriteRenderer подсветки, отображаемый за тайлом во время подсказки")]
+        [SerializeField] private SpriteRenderer _glowRenderer;
 
 
         public TileKind Kind { get; private set; }
@@ -31,6 +33,14 @@ namespace Project.Scripts.Tiles
         public void SetPayloadKind(TileKind kind)
         {
             PayloadKind = kind;
+        }
+
+        public void SetGlowActive(bool active, Color color)
+        {
+            if (!_glowRenderer)
+                return;
+            _glowRenderer.color = color;
+            _glowRenderer.gameObject.SetActive(active);
         }
     }
 }

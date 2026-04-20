@@ -63,6 +63,9 @@ namespace Project.Scripts.Gameplay
         private IBattleTimerService _battleTimerService;
         private IOvertimeService _overtimeService;
         private OvertimeBoardAnimator _overtimeBoardAnimator;
+        private HintConfig _hintConfig;
+        private TileKindPaletteConfig _palette;
+        private HintService _hintService;
         private DebugConfig _debugConfig;
 
 #if UNITY_EDITOR
@@ -115,6 +118,7 @@ namespace Project.Scripts.Gameplay
             if (_battleHUDView)
                 _battleHUDView.Close();
 
+            _hintService?.Dispose();
             _orchestrator?.Dispose();
             _overtimeBoardAnimator?.Dispose();
             _swapHandler?.Dispose();
@@ -149,6 +153,8 @@ namespace Project.Scripts.Gameplay
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
             IOvertimeService overtimeService,
+            HintConfig hintConfig,
+            TileKindPaletteConfig palette,
             DebugConfig debugConfig)
         {
             _eventBus = eventBus;
@@ -172,6 +178,8 @@ namespace Project.Scripts.Gameplay
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
             _overtimeService = overtimeService;
+            _hintConfig = hintConfig;
+            _palette = palette;
             _debugConfig = debugConfig;
         }
 
@@ -249,6 +257,9 @@ namespace Project.Scripts.Gameplay
                 specialTileResolver,
                 swapComboResolver,
                 _debugConfig);
+
+            _hintService = new HintService(_hintConfig, gridManager.State, gridManager, matchFinder,
+                _levelConfig, _gameStateService, _boardRuntimeService, _eventBus, _palette);
 
             _overtimeBoardAnimator = new OvertimeBoardAnimator(_eventBus, gridManager);
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);

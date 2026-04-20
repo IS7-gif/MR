@@ -11,11 +11,13 @@ namespace Project.Scripts.Tiles
         private Vector3 _targetScale = Vector3.one;
         private Tween _moveTween;
         private Tween _scaleTween;
+        private Sequence _hintSequence;
         
 
         private void OnDestroy()
         {
             StopActiveAnimations();
+            StopHintPulse();
         }
         
 
@@ -76,9 +78,34 @@ namespace Project.Scripts.Tiles
 
             _scaleTween?.Kill();
             _scaleTween = transform.DOScale(_targetScale, _config.SpawnDuration);
-            
+
             return AwaitTween(_scaleTween, isMoveTween: false);
         }
+
+        public void AnimateHintPulse(HintConfig config)
+        {
+            StopHintPulse();
+
+            var pulseScale = _targetScale * config.PulseScaleMax;
+            var halfDuration = config.PulseDuration * 0.5f;
+
+            _hintSequence = DOTween.Sequence();
+            _hintSequence.Append(transform.DOScale(pulseScale, halfDuration).SetEase(Ease.InOutSine));
+            _hintSequence.Append(transform.DOScale(_targetScale, halfDuration).SetEase(Ease.InOutSine));
+            _hintSequence.AppendInterval(config.PauseBetweenPulses);
+            _hintSequence.SetLoops(-1);
+        }
+
+        public void StopHintPulse()
+        {
+            if (null == _hintSequence)
+                return;
+
+            _hintSequence.Kill();
+            _hintSequence = null;
+            transform.localScale = _targetScale;
+        }
+
 
         private UniTask AwaitTween(Tween tween, bool isMoveTween)
         {

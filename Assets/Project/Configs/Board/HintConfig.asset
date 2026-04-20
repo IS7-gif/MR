@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c646d012a38c945ade007e2977b632, type: 3}
+  m_Name: HintConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Board.HintConfig
+  _idleTimeThreshold: 5
+  _showGlow: 1
+  _animatePulse: 1
+  _pulseScaleMax: 1.15
+  _pulseDuration: 0.3
+  _pauseBetweenPulses: 0.8
