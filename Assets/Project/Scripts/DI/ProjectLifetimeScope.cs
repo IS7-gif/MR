@@ -1,4 +1,5 @@
 using Project.Scripts.Configs;
+using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Events;
@@ -19,6 +20,9 @@ namespace Project.Scripts.DI
             var gameResultSequenceConfig = _mainConfig.GameResultSequenceConfig
                 ? _mainConfig.GameResultSequenceConfig
                 : ScriptableObject.CreateInstance<GameResultSequenceConfig>();
+            var overtimeConfig = _mainConfig.OvertimeConfig
+                ? _mainConfig.OvertimeConfig
+                : ScriptableObject.CreateInstance<OvertimeConfig>();
 
             builder.RegisterInstance(_mainConfig.BoardConfig);
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
@@ -37,6 +41,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
             builder.RegisterInstance(_mainConfig.BattleTimerConfig);
+            builder.RegisterInstance(overtimeConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);
             builder.RegisterInstance(_mainConfig.AutoEnergyConfig);
             builder.RegisterInstance(_mainConfig.EscalationConfig);

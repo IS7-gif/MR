@@ -62,7 +62,6 @@ namespace Project.Scripts.Gameplay
         private GameAudioController _gameAudioController;
         private IBattleTimerService _battleTimerService;
         private IOvertimeService _overtimeService;
-        private OvertimeBoardAnimator _overtimeBoardAnimator;
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
         private HintService _hintService;
@@ -120,7 +119,6 @@ namespace Project.Scripts.Gameplay
 
             _hintService?.Dispose();
             _orchestrator?.Dispose();
-            _overtimeBoardAnimator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
 
@@ -261,7 +259,6 @@ namespace Project.Scripts.Gameplay
             _hintService = new HintService(_hintConfig, gridManager.State, gridManager, matchFinder,
                 _levelConfig, _gameStateService, _boardRuntimeService, _eventBus, _palette);
 
-            _overtimeBoardAnimator = new OvertimeBoardAnimator(_eventBus, gridManager);
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 

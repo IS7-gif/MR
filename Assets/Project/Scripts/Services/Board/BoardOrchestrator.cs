@@ -237,7 +237,8 @@ namespace Project.Scripts.Services.Board
 
                 if (energyByKind.Count > 0 && CanContinueFlow(runtimeVersion))
                 {
-                    _eventBus.Publish(new EnergyGeneratedEvent(energyByKind, energySourcePositions.Build()));
+                    _eventBus.Publish(new EnergyGeneratedEvent(energyByKind));
+                    _eventBus.Publish(new EnergyGeneratedVisualEvent(energySourcePositions.Build()));
                     if (_debugConfig.LogCascades)
                         Debug.Log(BuildDetailedCascadeLog(waves, _cascadeEnergyConfig, energyByKind));
                 }

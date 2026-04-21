@@ -11,7 +11,7 @@ namespace Project.Scripts.Services.Timer
 {
     public class OvertimeService : IOvertimeService
     {
-        private readonly BattleTimerConfig _config;
+        private readonly OvertimeConfig _config;
         private readonly IHeroService _heroService;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
@@ -30,7 +30,7 @@ namespace Project.Scripts.Services.Timer
 
 
         public OvertimeService(
-            BattleTimerConfig config,
+            OvertimeConfig config,
             IHeroService heroService,
             IPlayerStateService playerState,
             IEnemyStateService enemyState,

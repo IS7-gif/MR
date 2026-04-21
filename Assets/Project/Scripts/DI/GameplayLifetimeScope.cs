@@ -11,7 +11,6 @@ using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Timer;
-using Project.Scripts.Shared.Timer;
 using VContainer;
 using VContainer.Unity;
 
@@ -21,6 +20,10 @@ namespace Project.Scripts.DI
     {
         protected override void Configure(IContainerBuilder builder)
         {
+            const bool EnableEscalationModule = false;
+            const bool EnableOvertimeModule = false;
+            
+
             var levelDatabase = Parent.Container.Resolve<LevelDatabase>();
             var levelConfig = levelDatabase.GetById(LevelProgressionService.CurrentLevelId);
             builder.RegisterInstance(levelConfig);
@@ -38,10 +41,21 @@ namespace Project.Scripts.DI
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();
             builder.RegisterEntryPoint<EnemyAvatarChargeService>().As<IEnemyAvatarChargeService>();
-            builder.RegisterEntryPoint<AutoEnergyTickService>().As<IBattleEscalationModifier>();
-            builder.Register<EscalationModifierService>(Lifetime.Singleton)
-                .As<IEscalationModifierService>()
-                .As<IBattleEscalationModifier>();
+            builder.RegisterEntryPoint<AutoEnergyTickService>();
+
+            if (EnableEscalationModule)
+            {
+                builder.Register<EscalationModifierService>(Lifetime.Singleton)
+                    .As<IEscalationModifierService>()
+                    .As<IBattleEconomyModifierService>();
+            }
+            else
+            {
+                builder.Register<DefaultBattleEconomyModifierService>(Lifetime.Singleton)
+                    .As<IEscalationModifierService>()
+                    .As<IBattleEconomyModifierService>();
+            }
+
             builder.Register<IAbilityExecutionService, AbilityExecutionService>(Lifetime.Singleton);
 
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);
@@ -52,11 +66,33 @@ namespace Project.Scripts.DI
 
             builder.Register<IBoardRuntimeService, BoardRuntimeService>(Lifetime.Singleton);
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
-            builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
-            builder.Register<IOvertimeTransitionCoordinator, OvertimeTransitionCoordinator>(Lifetime.Singleton);
+
+            if (EnableOvertimeModule)
+            {
+                builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
+                builder.Register<IOvertimeTransitionCoordinator, OvertimeTransitionCoordinator>(Lifetime.Singleton);
+            }
+            else
+            {
+                builder.Register<IOvertimeService, DefaultOvertimeService>(Lifetime.Singleton);
+                builder.Register<IOvertimeTransitionCoordinator, DefaultOvertimeTransitionCoordinator>(Lifetime.Singleton);
+            }
+
             builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<BoardAnnouncementService>().As<IBoardAnnouncementService>();
-            builder.RegisterEntryPoint<BattleEscalationService>();
+            builder.RegisterEntryPoint<BattleTimerAnnouncementService>();
+
+            if (EnableOvertimeModule)
+            {
+                builder.RegisterEntryPoint<OvertimeAnnouncementService>();
+                builder.RegisterEntryPoint<OvertimeBoardAnimator>();
+            }
+
+            if (EnableEscalationModule)
+            {
+                builder.RegisterEntryPoint<BattleEscalationController>();
+                builder.RegisterEntryPoint<BattleEscalationAnnouncementService>();
+            }
 
             if (levelConfig.BotConfig)
             {

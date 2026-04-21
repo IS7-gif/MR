@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e48eefc9e6ede43b6fa5a9fb420793, type: 3}
   m_Name: BattleViewConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleViewConfig
-  _battleHUDBottomOffset: 0.1
+  _battleHUDBottomOffset: 0.7
   _battleHUDViewPrefab: {fileID: 8010516392992138223, guid: a5c1a4861b5595a49a0a892fc037b33b, type: 3}

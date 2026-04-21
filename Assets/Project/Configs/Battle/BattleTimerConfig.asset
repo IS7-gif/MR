@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d9fe9f2666f1c489e7a699ab741418, type: 3}
   m_Name: BattleTimerConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.BattleTimerConfig
-  _battleDuration: 180
-  _escalationThreshold: 60
-  _heroDrainPerSecond: 150
-  _avatarDrainPerSecond: 250
-  _drainTickInterval: 0.1
+  _battleDuration: 30
   _countdownThreshold: 5

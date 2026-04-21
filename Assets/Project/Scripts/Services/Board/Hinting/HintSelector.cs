@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Grid;
+using Project.Scripts.Shared;
+using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Tiles;
+using UnityEngine;
 
-namespace Project.Scripts.Shared.Grid
+namespace Project.Scripts.Services.Board.Hinting
 {
     public static class HintSelector
     {
@@ -30,13 +33,13 @@ namespace Project.Scripts.Shared.Grid
             }
 
             if (tier1.Count > 0)
-                return tier1[UnityEngine.Random.Range(0, tier1.Count)];
+                return tier1[Random.Range(0, tier1.Count)];
 
             if (tier2.Count > 0)
-                return tier2[UnityEngine.Random.Range(0, tier2.Count)];
+                return tier2[Random.Range(0, tier2.Count)];
 
             if (tier3.Count > 0)
-                return tier3[UnityEngine.Random.Range(0, tier3.Count)];
+                return tier3[Random.Range(0, tier3.Count)];
 
             return HintCandidate.None;
         }
@@ -97,7 +100,7 @@ namespace Project.Scripts.Shared.Grid
                 if (m.Positions.Count != 3)
                     return false;
             }
-            
+
             return true;
         }
     }

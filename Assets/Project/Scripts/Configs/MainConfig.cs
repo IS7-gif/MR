@@ -58,8 +58,11 @@ namespace Project.Scripts.Configs
         [Tooltip("Раскладка слотов: порядок цветов ячеек героев и аватара на поле")]
         [SerializeField] private SlotLayoutConfig _slotLayoutConfig;
 
-        [Tooltip("Таймер боя: продолжительность фаз, правила эскалации и овертайма")]
+        [Tooltip("Таймер боя: длительность основной фазы и настройки обратного отсчёта")]
         [SerializeField] private BattleTimerConfig _battleTimerConfig;
+
+        [Tooltip("Овертайм: урон истощения и спец-анимации этого модуля")]
+        [SerializeField] private OvertimeConfig _overtimeConfig;
 
         [Tooltip("Смерть юнитов: длительности анимаций и задержки при гибели героев и аватаров")]
         [SerializeField] private UnitDeathConfig _unitDeathConfig;
@@ -94,6 +97,7 @@ namespace Project.Scripts.Configs
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
         public BattleTimerConfig BattleTimerConfig => _battleTimerConfig;
+        public OvertimeConfig OvertimeConfig => _overtimeConfig;
         public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;
         public AutoEnergyConfig AutoEnergyConfig => _autoEnergyConfig;
         public EscalationConfig EscalationConfig => _escalationConfig;

@@ -19,5 +19,3 @@ MonoBehaviour:
   _destroyEase: 26
   _spawnDuration: 0.15
   _chainReactionWaveDelay: 0.1
-  _collapseAllDuration: 0.6
-  _collapseAllEase: 26

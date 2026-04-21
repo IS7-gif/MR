@@ -1,9 +1,8 @@
 namespace Project.Scripts.Services.Combat
 {
-    public interface IEscalationModifierService
+    public interface IEscalationModifierService : IBattleEconomyModifierService
     {
         bool IsEscalationActive { get; }
-        float CascadeEnergyMultiplier { get; }
-        float AutoEnergyIntervalMultiplier { get; }
+        void ActivateEscalation();
     }
 }

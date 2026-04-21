@@ -4,7 +4,9 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.FX;
 using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared;
 using Project.Scripts.Shared.Tiles;
+using Project.Scripts.Utils;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -73,7 +75,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 defaultCapacity: DefaultPoolCapacity,
                 maxSize: MaxPoolSize);
 
-            _subscription = eventBus.Subscribe<EnergyGeneratedEvent>(OnEnergyGenerated);
+            _subscription = eventBus.Subscribe<EnergyGeneratedVisualEvent>(OnEnergyGenerated);
         }
 
         public void Cleanup()
@@ -88,12 +90,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         }
 
 
-        private void OnEnergyGenerated(EnergyGeneratedEvent e)
+        private void OnEnergyGenerated(EnergyGeneratedVisualEvent e)
         {
             if (null == _transferPool)
                 return;
 
-            foreach (var pair in e.WorldSourceByKind)
+            foreach (var pair in e.SourceByKind)
             {
                 if (false == _targetsByKind.TryGetValue(pair.Key, out var target))
                     continue;
@@ -103,16 +105,16 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
                 var transfer = _transferPool.Get();
                 transfer.Play(
-                    pair.Value,
+                    pair.Value.ToUnityVector3(),
                     target.View.EnergyAnchor.position,
                     target.ViewModel.SlotColor,
                     _animationConfig,
                     () => _transferPool.Release(transfer));
             }
 
-            if (_playerAvatarSlot && e.WorldSourceByKind.Count > 0)
+            if (_playerAvatarSlot && e.SourceByKind.Count > 0)
             {
-                var centroid = ComputeCentroid(e.WorldSourceByKind);
+                var centroid = ComputeCentroid(e.SourceByKind);
                 var avatarTransfer = _transferPool.Get();
                 avatarTransfer.Play(
                     centroid,
@@ -123,11 +125,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             }
         }
 
-        private static Vector3 ComputeCentroid(IReadOnlyDictionary<TileKind, Vector3> positions)
+        private static Vector3 ComputeCentroid(IReadOnlyDictionary<TileKind, SharedVector3> positions)
         {
             var sum = Vector3.zero;
             foreach (var pair in positions)
-                sum += pair.Value;
+                sum += pair.Value.ToUnityVector3();
+            
             return sum / positions.Count;
         }
 

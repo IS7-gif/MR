@@ -301,7 +301,7 @@ namespace Project.Scripts.Services.Grid
             await UniTask.WhenAll(tasks);
         }
 
-        public async UniTask CollapseAll()
+        public async UniTask CollapseAll(float duration, DG.Tweening.Ease ease)
         {
             ClearPendingScheduledRemovals();
 
@@ -320,7 +320,7 @@ namespace Project.Scripts.Services.Grid
                     var tile = _tiles[x, y];
 
                     if (tile)
-                        tasks.Add(tile.Animator.AnimateCollapse());
+                        tasks.Add(tile.Animator.AnimateCollapse(duration, ease));
                 }
 
             if (tasks.Count > 0)

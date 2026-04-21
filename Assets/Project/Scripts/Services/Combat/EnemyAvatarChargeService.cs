@@ -23,7 +23,7 @@ namespace Project.Scripts.Services.Combat
 
 
         private readonly EventBus _eventBus;
-        private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
@@ -34,11 +34,11 @@ namespace Project.Scripts.Services.Combat
 
 
         public EnemyAvatarChargeService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
-            IEscalationModifierService escalationModifier, IGameStateService gameStateService,
+            IBattleEconomyModifierService battleEconomyModifier, IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
-            _escalationModifier = escalationModifier;
+            _battleEconomyModifier = battleEconomyModifier;
             _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             var config = levelConfig.EnemyAvatarConfig;
@@ -78,7 +78,7 @@ namespace Project.Scripts.Services.Combat
                 ? _formula.Calculate(energyByKind, _bonusKinds, _deadHeroTileMultiplier)
                 : _formula.Calculate(energyByKind);
 
-            gain *= _escalationModifier.CascadeEnergyMultiplier;
+            gain *= _battleEconomyModifier.CascadeEnergyMultiplier;
 
             var added = _engine.TryAddEnergy(gain);
             if (added <= 0f)

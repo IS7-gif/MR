@@ -23,10 +23,9 @@ namespace Project.Scripts.Services.Combat
         public HeroActionType AbilityType { get; }
         public int AbilityPower { get; }
 
-
         private readonly EventBus _eventBus;
         private readonly DebugConfig _debugConfig;
-        private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly AvatarEnergyEngine _engine = new AvatarEnergyEngine();
@@ -35,18 +34,18 @@ namespace Project.Scripts.Services.Combat
         private readonly HashSet<TileKind> _bonusKinds = new();
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
-
         public PlayerAvatarChargeService(EventBus eventBus, DebugConfig debugConfig, LevelConfig levelConfig,
-            SlotLayoutConfig slotLayoutConfig, IEscalationModifierService escalationModifier,
+            SlotLayoutConfig slotLayoutConfig, IBattleEconomyModifierService battleEconomyModifier,
             IGameStateService gameStateService, IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _debugConfig = debugConfig;
-            _escalationModifier = escalationModifier;
+            _battleEconomyModifier = battleEconomyModifier;
             _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             var config = levelConfig.PlayerAvatarConfig;
             _engine.Initialize(config.MaxEnergy);
+
             AbilityType = config.AbilityType;
             AbilityPower = config.AbilityPower;
             _deadHeroTileMultiplier = config.DeadHeroTileMultiplier;
@@ -69,7 +68,6 @@ namespace Project.Scripts.Services.Combat
             _subscriptions.Dispose();
         }
 
-
         public bool TryRelease()
         {
             if (false == _battleActionRuntimeService.Evaluate(BattleActionKind.AvatarActivation).IsAllowed)
@@ -83,7 +81,6 @@ namespace Project.Scripts.Services.Combat
             
             return true;
         }
-
 
         private void OnAutoEnergyTick(AutoEnergyTickEvent e)
         {
@@ -110,7 +107,7 @@ namespace Project.Scripts.Services.Combat
                 ? _formula.Calculate(e.EnergyByKind, _bonusKinds, _deadHeroTileMultiplier)
                 : _formula.Calculate(e.EnergyByKind);
 
-            var cascadeMultiplier = _escalationModifier.CascadeEnergyMultiplier;
+            var cascadeMultiplier = _battleEconomyModifier.CascadeEnergyMultiplier;
             gain *= cascadeMultiplier;
 
             var added = _engine.TryAddEnergy(gain);
@@ -147,8 +144,8 @@ namespace Project.Scripts.Services.Combat
                 sb.AppendLine($"  {pair.Key}: {pair.Value:F2} × {mult:F2} ({label}) = {pair.Value * mult:F2}");
             }
 
-            if (_escalationModifier.IsEscalationActive)
-                sb.AppendLine($"  Cascade multiplier: ×{cascadeMultiplier:F2} (escalation)");
+            if (cascadeMultiplier != 1f)
+                sb.AppendLine($"  Cascade multiplier: ×{cascadeMultiplier:F2}");
 
             sb.Append($"  Formula={gain:F2}  Really added={added:F2}  Bar={current}/{max}{(isReady ? " - READY" : string.Empty)}");
             return sb.ToString();

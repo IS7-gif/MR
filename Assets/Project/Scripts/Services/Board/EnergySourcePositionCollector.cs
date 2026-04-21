@@ -3,6 +3,7 @@ using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Tiles;
+using Project.Scripts.Utils;
 using UnityEngine;
 
 namespace Project.Scripts.Services.Board
@@ -58,11 +59,11 @@ namespace Project.Scripts.Services.Board
             }
         }
 
-        public Dictionary<TileKind, Vector3> Build()
+        public Dictionary<TileKind, SharedVector3> Build()
         {
-            var result = new Dictionary<TileKind, Vector3>(_positionsByKind.Count);
+            var result = new Dictionary<TileKind, SharedVector3>(_positionsByKind.Count);
             foreach (var pair in _positionsByKind)
-                result[pair.Key] = pair.Value.Sum / pair.Value.Count;
+                result[pair.Key] = (pair.Value.Sum / pair.Value.Count).ToSharedVector3();
 
             return result;
         }

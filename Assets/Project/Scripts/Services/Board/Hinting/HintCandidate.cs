@@ -1,4 +1,6 @@
-namespace Project.Scripts.Shared.Grid
+using Project.Scripts.Shared;
+
+namespace Project.Scripts.Services.Board.Hinting
 {
     public readonly struct HintCandidate
     {

@@ -46,9 +46,9 @@ namespace Project.Scripts.Services.Timer
             if (false == IsRunning || false == _gameStateService.IsPlaying)
                 return;
 
-            var overtimeBegan = _engine.Tick(deltaTime);
+            var timerElapsed = _engine.Tick(deltaTime);
 
-            if (overtimeBegan)
+            if (timerElapsed)
             {
                 IsRunning = false;
                 PublishTimerChanged();
@@ -70,7 +70,7 @@ namespace Project.Scripts.Services.Timer
         private void PublishTimerChanged()
         {
             var timeRemaining = _engine.Snapshot.TimeRemaining;
-            _eventBus.Publish(new BattleTimerChangedEvent(timeRemaining, timeRemaining <= _config.EscalationThreshold));
+            _eventBus.Publish(new BattleTimerChangedEvent(timeRemaining));
         }
     }
 }

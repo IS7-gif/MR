@@ -1,10 +1,10 @@
-using UnityEngine;
+using System;
 
 namespace Project.Scripts.Shared.Avatar
 {
     public sealed class AvatarEnergyEngine
     {
-        public AvatarEnergyState Snapshot => new AvatarEnergyState(Mathf.RoundToInt(_currentEnergy), _maxEnergy);
+        public AvatarEnergyState Snapshot => new AvatarEnergyState(RoundToInt(_currentEnergy), _maxEnergy);
 
 
         private int _maxEnergy;
@@ -14,10 +14,7 @@ namespace Project.Scripts.Shared.Avatar
         public void Initialize(int maxEnergy)
         {
             if (maxEnergy <= 0)
-            {
-                Debug.LogError($"[AvatarEnergyEngine] maxEnergy must be > 0, got {maxEnergy}. Clamping to 1.");
                 maxEnergy = 1;
-            }
 
             _maxEnergy = maxEnergy;
             _currentEnergy = 0f;
@@ -29,7 +26,7 @@ namespace Project.Scripts.Shared.Avatar
                 return 0f;
 
             var before = _currentEnergy;
-            _currentEnergy = Mathf.Min(_maxEnergy, _currentEnergy + amount);
+            _currentEnergy = MathF.Min(_maxEnergy, _currentEnergy + amount);
 
             return _currentEnergy - before;
         }
@@ -48,6 +45,12 @@ namespace Project.Scripts.Shared.Avatar
         public void Reset()
         {
             _currentEnergy = 0f;
+        }
+
+
+        private static int RoundToInt(float value)
+        {
+            return (int)MathF.Round(value, MidpointRounding.AwayFromZero);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleViewConfig", menuName = "Configs/Battle/Battle View Config")]
     public class BattleViewConfig : ScriptableObject
     {
-        [Tooltip("Отступ в мировых координатах между верхним краем доски и нижним краем BattleHUDView. 0 — вплотную.")]
+        [Tooltip("Отступ в мировых координатах между верхним краем доски и нижним краем BattleHUDView. 0 - вплотную.")]
         [Range(0f, 2f)]
         [SerializeField] private float _battleHUDBottomOffset = 0.4f;
         

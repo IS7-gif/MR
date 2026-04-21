@@ -6,6 +6,7 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Grid;
+using Project.Scripts.Services.Board.Hinting;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Tiles;
@@ -78,12 +79,12 @@ namespace Project.Scripts.Services.Board
 
         private void OnGameStateChanged(GameState state)
         {
-            if (state != GameState.Playing && state != GameState.Overtime)
+            if (state != GameState.Playing)
             {
                 HideHint();
                 CancelTimer();
             }
-            else if (!_firstHintedTile && !_secondHintedTile) 
+            else if (!_firstHintedTile && !_secondHintedTile)
                 RestartTimer();
         }
 
@@ -103,9 +104,7 @@ namespace Project.Scripts.Services.Board
 
         private async UniTaskVoid RunTimerAsync(CancellationToken ct)
         {
-            await UniTask.Delay(
-                TimeSpan.FromSeconds(_config.IdleTimeThreshold),
-                cancellationToken: ct);
+            await UniTask.Delay(TimeSpan.FromSeconds(_config.IdleTimeThreshold), cancellationToken: ct);
 
             if (ct.IsCancellationRequested)
                 return;

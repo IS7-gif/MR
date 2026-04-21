@@ -64,10 +64,10 @@ namespace Project.Scripts.Tiles
             return AwaitTween(_scaleTween, isMoveTween: false);
         }
 
-        public UniTask AnimateCollapse()
+        public UniTask AnimateCollapse(float duration, Ease ease)
         {
             _scaleTween?.Kill();
-            _scaleTween = transform.DOScale(Vector3.zero, _config.CollapseAllDuration).SetEase(_config.CollapseAllEase);
+            _scaleTween = transform.DOScale(Vector3.zero, duration).SetEase(ease);
             
             return AwaitTween(_scaleTween, isMoveTween: false);
         }

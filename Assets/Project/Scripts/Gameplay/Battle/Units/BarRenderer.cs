@@ -68,9 +68,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 _fillTween = seq;
             }
             else
-            {
                 _fillTween = DOTween.To(() => _currentNormalized, SetFill, normalized, duration);
-            }
         }
 
         public void SetFillColor(Color color)

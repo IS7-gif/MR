@@ -15,7 +15,7 @@ namespace Project.Scripts.Services.Grid
         UniTask ActivateTiles(List<GridPoint> positions);
         UniTask ConsumeTile(GridPoint pos);
         UniTask ShuffleGrid();
-        UniTask CollapseAll();
+        UniTask CollapseAll(float duration, DG.Tweening.Ease ease);
         void ForceInjectMove();
     }
 }

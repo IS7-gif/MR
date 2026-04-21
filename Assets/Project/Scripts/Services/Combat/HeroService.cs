@@ -19,7 +19,7 @@ namespace Project.Scripts.Services.Combat
         private readonly EventBus _eventBus;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
-        private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
@@ -28,13 +28,13 @@ namespace Project.Scripts.Services.Combat
 
 
         public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
-            IPlayerStateService playerState, IEnemyStateService enemyState, IEscalationModifierService escalationModifier,
+            IPlayerStateService playerState, IEnemyStateService enemyState, IBattleEconomyModifierService battleEconomyModifier,
             IGameStateService gameStateService, IBattleActionRuntimeService battleActionRuntimeService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
             _enemyState = enemyState;
-            _escalationModifier = escalationModifier;
+            _battleEconomyModifier = battleEconomyModifier;
             _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
 
@@ -211,7 +211,7 @@ namespace Project.Scripts.Services.Combat
 
         private void OnEnergyGenerated(EnergyGeneratedEvent e)
         {
-            var cascadeMultiplier = _escalationModifier.CascadeEnergyMultiplier;
+            var cascadeMultiplier = _battleEconomyModifier.CascadeEnergyMultiplier;
             foreach (var pair in e.EnergyByKind)
                 DistributeToSlots(_playerSlots, BattleSide.Player, pair.Key, pair.Value * cascadeMultiplier);
         }

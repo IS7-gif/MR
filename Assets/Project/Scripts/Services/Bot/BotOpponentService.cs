@@ -23,7 +23,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IEnemyAvatarChargeService _enemyChargeService;
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
-        private readonly IEscalationModifierService _escalationModifier;
+        private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly BotConfig _botConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
 
@@ -41,7 +41,7 @@ namespace Project.Scripts.Services.Bot
             IEnemyAvatarChargeService enemyChargeService,
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
-            IEscalationModifierService escalationModifier,
+            IBattleEconomyModifierService battleEconomyModifier,
             BotConfig botConfig,
             SlotLayoutConfig slotLayoutConfig)
         {
@@ -51,7 +51,7 @@ namespace Project.Scripts.Services.Bot
             _enemyChargeService = enemyChargeService;
             _enemyState = enemyState;
             _groupDefense = groupDefense;
-            _escalationModifier = escalationModifier;
+            _battleEconomyModifier = battleEconomyModifier;
             _botConfig = botConfig;
             _slotLayoutConfig = slotLayoutConfig;
         }
@@ -87,7 +87,7 @@ namespace Project.Scripts.Services.Bot
         {
             while (false == ct.IsCancellationRequested)
             {
-                var interval = _botConfig.EnemyChargeTickInterval / _escalationModifier.AutoEnergyIntervalMultiplier;
+                var interval = _botConfig.EnemyChargeTickInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
                 var cancelled = await UniTask
                     .Delay(TimeSpan.FromSeconds(interval), cancellationToken: ct)
                     .SuppressCancellationThrow();
@@ -268,7 +268,7 @@ namespace Project.Scripts.Services.Bot
         {
             while (false == ct.IsCancellationRequested)
             {
-                var interval = _botConfig.HeroEnergyTickInterval / _escalationModifier.AutoEnergyIntervalMultiplier;
+                var interval = _botConfig.HeroEnergyTickInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
                 var cancelled = await UniTask
                     .Delay(TimeSpan.FromSeconds(interval), cancellationToken: ct)
                     .SuppressCancellationThrow();
@@ -282,7 +282,7 @@ namespace Project.Scripts.Services.Bot
                 if (pickedIndex < 0)
                     continue;
 
-                var energyAmount = Mathf.RoundToInt(_botConfig.HeroEnergyPerTick * RollCascadeMultiplier() * _escalationModifier.CascadeEnergyMultiplier);
+                var energyAmount = Mathf.RoundToInt(_botConfig.HeroEnergyPerTick * RollCascadeMultiplier() * _battleEconomyModifier.CascadeEnergyMultiplier);
                 _heroService.AddEnemyHeroEnergy(pickedIndex, energyAmount);
 
                 var currentEnemySlots = _heroService.GetSlots(BattleSide.Enemy);

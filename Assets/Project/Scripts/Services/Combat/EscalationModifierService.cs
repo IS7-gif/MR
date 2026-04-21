@@ -1,10 +1,9 @@
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
-using Project.Scripts.Shared.Timer;
 
 namespace Project.Scripts.Services.Combat
 {
-    public class EscalationModifierService : IEscalationModifierService, IBattleEscalationModifier
+    public class EscalationModifierService : IEscalationModifierService, IBattleEconomyModifierService
     {
         public bool IsEscalationActive { get; private set; }
         public float CascadeEnergyMultiplier { get; private set; } = 1f;
@@ -21,8 +20,11 @@ namespace Project.Scripts.Services.Combat
             _eventBus = eventBus;
         }
 
-        public void OnEscalationReached()
+        public void ActivateEscalation()
         {
+            if (IsEscalationActive)
+                return;
+
             IsEscalationActive = true;
             CascadeEnergyMultiplier = _config.CascadeEnergyMultiplier;
             AutoEnergyIntervalMultiplier = _config.AutoEnergyIntervalMultiplier;
