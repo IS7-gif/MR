@@ -1,7 +1,6 @@
 using DG.Tweening;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
-using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using TMPro;
@@ -234,10 +233,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void BindAvailabilityState(HeroSlotViewModel viewModel)
         {
-            viewModel.ActivationBlockReason
-                .Subscribe(reason =>
+            viewModel.IsAvailabilityDimmed
+                .Subscribe(dimmed =>
                 {
-                    _isAvailabilityDimmed = reason != UnitActivationBlockReason.None;
+                    _isAvailabilityDimmed = dimmed;
                     ApplyAvailabilityPortraitState();
                 })
                 .AddTo(_disposables);

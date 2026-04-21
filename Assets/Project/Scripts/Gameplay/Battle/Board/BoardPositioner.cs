@@ -1,5 +1,7 @@
+using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
+using Project.Scripts.Gameplay.Battle.Layout;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.Board
@@ -8,6 +10,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
     public class BoardPositioner : MonoBehaviour
     {
         [SerializeField] private BoardConfig _boardConfig;
+        [SerializeField] private BattleViewConfig _battleViewConfig;
         [SerializeField] private LevelConfig _levelConfig;
 
 
@@ -22,7 +25,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
         public void Apply(float tileCellSize = -1f)
         {
             var cam = Camera.main;
-            if (!cam || !_boardConfig || !_levelConfig)
+            if (!cam || !_boardConfig || !_battleViewConfig || !_levelConfig)
                 return;
 
             var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions(cam);
@@ -30,18 +33,26 @@ namespace Project.Scripts.Gameplay.Battle.Board
             if (tileCellSize < 0f)
                 tileCellSize = ComputeTileCellSize(cam);
 
-            transform.position = ComputeBoardCenter(cam, frameHeight, frameCellSize);
-
             var boardView = GetComponent<BoardView>();
             if (boardView)
                 boardView.Setup(frameWidth, frameHeight, tileCellSize, _boardConfig.MaskTopPadding);
+
+            var boardCenter = ComputeBoardCenter(cam, frameHeight, frameCellSize);
+            var layout = GetComponentInParent<BattleWorldLayout>();
+            if (layout)
+            {
+                layout.SetBoardWorldCenter(boardCenter);
+                return;
+            }
+
+            transform.position = boardCenter;
         }
 
 
         private Vector3 ComputeBoardCenter(Camera cam, float frameHeight, float frameCellSize)
         {
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var bottomPadding = _boardConfig.BoardBottomPadding * frameCellSize;
+            var bottomPadding = _battleViewConfig.BattleWorldBottomPadding * frameCellSize;
 
             return new Vector3(cam.transform.position.x, camBottomY + bottomPadding + frameHeight * 0.5f, 0f);
         }

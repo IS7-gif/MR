@@ -39,10 +39,6 @@ namespace Project.Scripts.Configs.Board
         [Range(-2f, 3f)]
         [SerializeField] private float _maskTopPadding = -0.3f;
 
-        [Tooltip("Отступ между нижним краем экрана и нижним краем доски, в единицах frame-ячейки (1 = высота одного тайла при framePaddingPercent). Одинаков для всех разрешений.")]
-        [Range(0f, 5f)]
-        [SerializeField] private float _boardBottomPadding = 0.15f;
-
         [Tooltip("Минимальное количество тайлов в ряду/столбце для засчитывания совпадения")]
         [Range(2, 6)]
         [SerializeField] private int _minMatchLength = 3;
@@ -72,7 +68,6 @@ namespace Project.Scripts.Configs.Board
         public float FramePaddingPercent => _framePaddingPercent;
         public float FrameExtraHeight => _frameExtraHeight;
         public float MaskTopPadding => _maskTopPadding;
-        public float BoardBottomPadding => _boardBottomPadding;
         public int MinMatchLength => _minMatchLength;
         public float MaxAspectRatio => _maxAspectRatio;
         public Tile TilePrefab => _tilePrefab;

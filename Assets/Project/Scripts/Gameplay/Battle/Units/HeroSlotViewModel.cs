@@ -2,6 +2,7 @@ using System;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Game;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Rules;
@@ -22,6 +23,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public bool IsPlayerSlot => Side == BattleSide.Player;
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
+        public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new(false);
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
         public int CurrentHP { get; private set; }
@@ -39,6 +41,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private int _prevHP;
         private bool _hasSufficientEnergy;
         private bool _isOnCooldown;
+        private BattlePhaseKind _currentBattlePhase = BattlePhaseKind.Match;
 
 
         public HeroSlotViewModel(
@@ -72,6 +75,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _subscriptions.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshActivatable()));
             _subscriptions.Add(eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
             _subscriptions.Add(eventBus.Subscribe<HeroCooldownChangedEvent>(OnHeroCooldownChanged));
+            _subscriptions.Add(eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged));
         }
 
         public void UpdateHP(int current, int max, bool silent = false)
@@ -117,6 +121,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             IsActivatable.Dispose();
             ActivationBlockReason.Dispose();
+            IsAvailabilityDimmed.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();
             _healthBarUpdated.Dispose();
@@ -132,6 +137,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             {
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.None;
+                RefreshAvailabilityVisualState();
                 return;
             }
 
@@ -140,6 +146,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             {
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.BlockedByPhase;
+                RefreshAvailabilityVisualState();
                 return;
             }
 
@@ -147,6 +154,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             {
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.InsufficientEnergy;
+                RefreshAvailabilityVisualState();
                 return;
             }
 
@@ -154,11 +162,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
             {
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.Cooldown;
+                RefreshAvailabilityVisualState();
                 return;
             }
 
             IsActivatable.Value = true;
             ActivationBlockReason.Value = UnitActivationBlockReason.None;
+            RefreshAvailabilityVisualState();
         }
 
         private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)
@@ -177,6 +187,19 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             _isOnCooldown = e.RemainingSeconds > 0f;
             RefreshActivatable();
+        }
+
+        private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
+        {
+            _currentBattlePhase = e.Phase;
+            RefreshAvailabilityVisualState();
+        }
+
+        private void RefreshAvailabilityVisualState()
+        {
+            IsAvailabilityDimmed.Value = IsAssigned
+                && _currentBattlePhase == BattlePhaseKind.Hero
+                && ActivationBlockReason.Value != UnitActivationBlockReason.None;
         }
     }
 }

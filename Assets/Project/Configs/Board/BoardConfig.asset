@@ -18,7 +18,6 @@ MonoBehaviour:
   _framePaddingPercent: 0
   _frameExtraHeight: 0.08
   _maskTopPadding: -0.3
-  _boardBottomPadding: 0.15
   _minMatchLength: 3
   _maxAspectRatio: 0.5
   _tilePrefab: {fileID: 1773954573927491530, guid: a5207b55f0bde394299f025baad22fc0, type: 3}

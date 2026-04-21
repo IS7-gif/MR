@@ -425,7 +425,6 @@ MonoBehaviour:
   _floatingDamagePrefab: {fileID: 8456231779810160761, guid: 79104c41107d65d49b13b1875346fcfd, type: 3}
   _energyFXView: {fileID: 2622925152121854030}
   _phaseOverlay: {fileID: 1422261451581182373}
-  _bottomAnchor: {fileID: 2222222222222222222}
   _announcementAnchor: {fileID: 3141839574175101637}
 --- !u!114 &2622925152121854030
 MonoBehaviour:

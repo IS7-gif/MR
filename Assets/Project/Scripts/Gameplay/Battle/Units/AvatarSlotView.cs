@@ -4,7 +4,6 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Services.Combat;
-using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using TMPro;
@@ -268,10 +267,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void BindAvailabilityState(AvatarSlotViewModel viewModel)
         {
-            viewModel.EnergyBar.ActivationBlockReason
-                .Subscribe(reason =>
+            viewModel.EnergyBar.IsAvailabilityDimmed
+                .Subscribe(dimmed =>
                 {
-                    _isAvailabilityDimmed = reason != UnitActivationBlockReason.None;
+                    _isAvailabilityDimmed = dimmed;
                     ApplyAvailabilityPortraitState();
                 })
                 .AddTo(_disposables);

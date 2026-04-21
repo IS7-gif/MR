@@ -5,8 +5,8 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
-using Project.Scripts.Gameplay.Battle.Board;
 using Project.Scripts.Gameplay.Battle.HUD;
+using Project.Scripts.Gameplay.Battle.Layout;
 using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Audio;
@@ -21,6 +21,7 @@ using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.Timer;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Grid;
 using UnityEngine;
 using VContainer;
@@ -34,10 +35,7 @@ namespace Project.Scripts.Gameplay
     public class GameplayEntryPoint : MonoBehaviour
     {
         [Tooltip("Родительский Transform для всех инстанцируемых объектов тайлов")]
-        [SerializeField] private Transform _tileContainer;
-
-        [Tooltip("Компонент View, задающий размер рамки доски и маски спавна во время выполнения")]
-        [SerializeField] private BoardView _boardView;
+        [SerializeField] private BattleWorldLayout _battleWorldLayout;
 
         private EventBus _eventBus;
         private AudioService _audioService;
@@ -66,12 +64,16 @@ namespace Project.Scripts.Gameplay
         private IBattleTimerService _battleTimerService;
         private IBattleFlowService _battleFlowService;
         private IOvertimeService _overtimeService;
+        private OvertimeConfig _overtimeConfig;
         private IUnitActivationCooldownService _unitActivationCooldownService;
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
         private HintService _hintService;
         private DebugConfig _debugConfig;
-        private IDisposable _boardRuntimeStateSubscription;
+        private IDisposable _battleFlowPhaseSubscription;
+        private IDisposable _gameStateSubscription;
+        private IDisposable _overtimeStartedSubscription;
+        private BattlePhaseKind _currentBattlePhase = BattlePhaseKind.Match;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -118,20 +120,24 @@ namespace Project.Scripts.Gameplay
 
         private void OnDestroy()
         {
+            _battleHUDView?.ReleaseSceneInstance();
+            _battleWorldLayout?.EnergyView?.Cleanup();
+
             if (_moveBarService?.IsEnabled == true)
                 _uiService?.Close<MoveBarView>();
 
             _uiService?.Close<TopBarView>();
 
-            if (_battleHUDView)
-                _battleHUDView.Close();
-
             _hintService?.Dispose();
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
-            _boardRuntimeStateSubscription?.Dispose();
-            _boardRuntimeStateSubscription = null;
+            _battleFlowPhaseSubscription?.Dispose();
+            _battleFlowPhaseSubscription = null;
+            _gameStateSubscription?.Dispose();
+            _gameStateSubscription = null;
+            _overtimeStartedSubscription?.Dispose();
+            _overtimeStartedSubscription = null;
 
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
@@ -163,6 +169,7 @@ namespace Project.Scripts.Gameplay
             IBattleTimerService battleTimerService,
             IBattleFlowService battleFlowService,
             IOvertimeService overtimeService,
+            OvertimeConfig overtimeConfig,
             IUnitActivationCooldownService unitActivationCooldownService,
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
@@ -190,6 +197,7 @@ namespace Project.Scripts.Gameplay
             _battleTimerService = battleTimerService;
             _battleFlowService = battleFlowService;
             _overtimeService = overtimeService;
+            _overtimeConfig = overtimeConfig;
             _unitActivationCooldownService = unitActivationCooldownService;
             _hintConfig = hintConfig;
             _palette = palette;
@@ -209,9 +217,9 @@ namespace Project.Scripts.Gameplay
                 await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
             var cellSize = ComputeTileCellSize();
-            var (frameWidth, frameHeight, _) = ComputeFrameDimensions();
-            var boardCenter = ComputeBoardCenter();
-            _boardView.transform.position = boardCenter;
+            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions();
+            var boardCenter = ComputeBoardCenter(frameHeight, frameCellSize);
+            _battleWorldLayout.SetBoardWorldCenter(boardCenter);
 
             var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
             var boardHalfWidth = frameWidth * 0.5f;
@@ -221,15 +229,14 @@ namespace Project.Scripts.Gameplay
 
             _inputService = new InputService(_inputConfig);
 
-            var hudGo = Instantiate(_battleViewConfig.BattleHUDViewPrefab);
-            hudGo.name = _battleViewConfig.BattleHUDViewPrefab.name;
-            _battleHUDView = hudGo.GetComponent<BattleHUDView>();
-            _battleHUDView.SetDependencies(_inputService, _battleViewConfig, _boardBoundsProvider);
+            _battleHUDView = _battleWorldLayout.BattleHUDView;
+            _battleHUDView.SetDependencies(_inputService, _boardBoundsProvider);
             await _battleHUDView.InitializeAsync(_battleHUDViewModel);
             await _battleHUDView.ShowAsync();
+            _battleWorldLayout.EnergyView?.Bind(_battleHUDViewModel);
             _gameResultSequenceController.BindVisuals(_battleHUDView);
 
-            var pool = new TilePool(_boardConfig.TilePrefab, _tileContainer, _animConfig, cellSize, _boardConfig.TileScale);
+            var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
             var gridManager = new GridManager(_levelConfig, _animConfig, pool, cellSize, _boardRuntimeService);
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
@@ -244,7 +251,7 @@ namespace Project.Scripts.Gameplay
             BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
 #endif
 
-            _boardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
+            _battleWorldLayout.BoardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig, _boardRuntimeService);
 
@@ -277,9 +284,21 @@ namespace Project.Scripts.Gameplay
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 
-            _boardRuntimeStateSubscription?.Dispose();
-            _boardRuntimeStateSubscription = _boardRuntimeService.State.Subscribe(_ => RefreshPhaseOverlays());
+            _battleFlowPhaseSubscription?.Dispose();
+            _battleFlowPhaseSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(e =>
+            {
+                _currentBattlePhase = e.Phase;
+                RefreshPhaseOverlays();
+            });
+            _gameStateSubscription?.Dispose();
+            _gameStateSubscription = _gameStateService.State.Subscribe(_ => RefreshPhaseOverlays());
             RefreshPhaseOverlays();
+
+            _overtimeStartedSubscription?.Dispose();
+            _overtimeStartedSubscription = _eventBus.Subscribe<OvertimeStartedEvent>(_ =>
+            {
+                gridManager.CollapseAll(_overtimeConfig.CollapseAllDuration, _overtimeConfig.CollapseAllEase).Forget();
+            });
 
             _gameResultPresenter.Initialize();
             _gameResultSequenceController.Initialize();
@@ -299,16 +318,16 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
         private void OnLayoutChanged()  => ApplyLiveLayout();
-        private void OnBattleLayoutChanged() => _battleHUDView?.RefreshPosition();
+        private void OnBattleLayoutChanged() => ApplyLiveLayout();
 
         private void ApplyLiveResize() => ApplyLiveLayout();
 
         private void ApplyLiveLayout()
         {
             _cellSize = ComputeTileCellSize();
-            var (frameWidth, frameHeight, _) = ComputeFrameDimensions();
-            var boardCenter = ComputeBoardCenter();
-            _boardView.transform.position = boardCenter;
+            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions();
+            var boardCenter = ComputeBoardCenter(frameHeight, frameCellSize);
+            _battleWorldLayout.SetBoardWorldCenter(boardCenter);
 
             _gridManager.SetCellSize(_cellSize);
 
@@ -316,14 +335,14 @@ namespace Project.Scripts.Gameplay
             _gridManager.SetOrigin(newOrigin);
             _gridManager.RepositionAllTiles();
 
-            _boardView.Setup(frameWidth, frameHeight, _cellSize, _boardConfig.MaskTopPadding);
+            _battleWorldLayout.BoardView.Setup(frameWidth, frameHeight, _cellSize, _boardConfig.MaskTopPadding);
             _pool.UpdateScale(_cellSize, _boardConfig.TileScale);
 
             var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
             var boardHalfWidth = frameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
 
-            _battleHUDView?.RefreshPosition();
+            _battleWorldLayout?.RefreshBindings();
         }
 #endif
 
@@ -356,12 +375,11 @@ namespace Project.Scripts.Gameplay
             return Mathf.Min(byWidth, byHeight);
         }
 
-        private Vector3 ComputeBoardCenter()
+        private Vector3 ComputeBoardCenter(float frameHeight, float frameCellSize)
         {
             var cam = Camera.main;
-            var (_, frameHeight, frameCellSize) = ComputeFrameDimensions();
             var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var bottomPadding = _boardConfig.BoardBottomPadding * frameCellSize;
+            var bottomPadding = _battleViewConfig.BattleWorldBottomPadding * frameCellSize;
 
             return new Vector3(
                 cam.transform.position.x,
@@ -381,7 +399,9 @@ namespace Project.Scripts.Gameplay
 
         private void RefreshPhaseOverlays()
         {
-            _boardView?.SetInteractionOverlayActive(!_boardRuntimeService.CanAcceptInput);
+            var showOverlay = _gameStateService.State.CurrentValue == GameState.Playing
+                && _currentBattlePhase == BattlePhaseKind.Hero;
+            _battleWorldLayout?.BoardView?.SetInteractionOverlayActive(showOverlay);
         }
     }
 }

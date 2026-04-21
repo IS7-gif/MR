@@ -10,6 +10,7 @@ using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 using R3;
@@ -24,7 +25,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public HeroSlotViewModel[] PlayerHeroSlots => _playerHeroSlots;
         public HeroSlotViewModel[] EnemyHeroSlots => _enemyHeroSlots;
         public EventBus EventBus => _eventBus;
-        public IGameStateService GameState => _gameStateService;
+        public IGameStateService GameStateService => _gameStateService;
         public IBattleActionRuntimeService BattleActionRuntime => _battleActionRuntimeService;
         public IReadyPulseCoordinator PulseCoordinator { get; }
         public IAbilityExecutionService AbilityExecution { get; }
@@ -45,7 +46,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly EventBus _eventBus;
         private readonly IEnemyStateService _enemyState;
         private readonly IPlayerStateService _playerState;
-        private readonly BattleViewConfig _battleViewConfig;
         private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
         private readonly IBattleSideEnergyService _battleSideEnergyService;
@@ -64,13 +64,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly ReactiveProperty<bool> _isInteractionOverlayVisible;
         private readonly ReactiveProperty<int> _playerEnergy;
         private readonly ReactiveProperty<int> _enemyEnergy;
+        private BattlePhaseKind _currentBattlePhase = BattlePhaseKind.Match;
 
 
         public BattleHUDViewModel(
             EventBus eventBus,
             IEnemyStateService enemyState,
             IPlayerStateService playerState,
-            BattleViewConfig battleViewConfig,
             BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
             IBattleSideEnergyService battleSideEnergyService,
@@ -90,7 +90,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _eventBus = eventBus;
             _enemyState = enemyState;
             _playerState = playerState;
-            _battleViewConfig = battleViewConfig;
             _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
             _battleSideEnergyService = battleSideEnergyService;
@@ -108,7 +107,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _unitDeathConfig = unitDeathConfig;
 
             _timerSeconds = new ReactiveProperty<int>((int)battleFlowConfig.MatchPhaseDuration);
-            _isInteractionOverlayVisible = new ReactiveProperty<bool>(!battleActionRuntimeService.CanAcceptNormalActions);
+            _isInteractionOverlayVisible = new ReactiveProperty<bool>(gameStateService.State.CurrentValue == GameState.Playing
+                                                                      && _currentBattlePhase == BattlePhaseKind.Match);
             _playerEnergy = new ReactiveProperty<int>(battleSideEnergyService.GetDisplayEnergy(BattleSide.Player));
             _enemyEnergy = new ReactiveProperty<int>(battleSideEnergyService.GetDisplayEnergy(BattleSide.Enemy));
         }
@@ -158,9 +158,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             Disposables.Add(_eventBus.Subscribe<HeroHPChangedEvent>(OnHeroHPChanged));
             Disposables.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            Disposables.Add(_eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged));
             Disposables.Add(_eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnBattleFlowTimerChanged));
             Disposables.Add(_eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
-            Disposables.Add(_battleActionRuntimeService.State.Subscribe(_ => OnBattleActionRuntimeChanged()));
+            Disposables.Add(_gameStateService.State.Subscribe(_ => RefreshInteractionOverlay()));
+            RefreshInteractionOverlay();
 
             return UniTask.CompletedTask;
         }
@@ -203,9 +205,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _timerSeconds.Value = (int)e.TimeRemaining;
         }
 
-        private void OnBattleActionRuntimeChanged()
+        private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
         {
-            _isInteractionOverlayVisible.Value = !_battleActionRuntimeService.CanAcceptNormalActions;
+            _currentBattlePhase = e.Phase;
+            RefreshInteractionOverlay();
         }
 
         private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)
@@ -214,6 +217,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _playerEnergy.Value = e.Current;
             else
                 _enemyEnergy.Value = e.Current;
+        }
+
+        private void RefreshInteractionOverlay()
+        {
+            _isInteractionOverlayVisible.Value = _gameStateService.State.CurrentValue == GameState.Playing
+                && _currentBattlePhase == BattlePhaseKind.Match;
         }
 
         private HeroSlotViewModel[] CreateHeroSlotViewModels(

@@ -8,13 +8,9 @@ namespace Project.Scripts.Configs.Battle
     [CreateAssetMenu(fileName = "BattleViewConfig", menuName = "Configs/Battle/Battle View Config")]
     public class BattleViewConfig : ScriptableObject
     {
-        [Tooltip("Отступ в мировых координатах между верхним краем доски и нижним краем BattleHUDView. 0 - вплотную.")]
-        [Range(0f, 2f)]
-        [SerializeField] private float _battleHUDBottomOffset = 0.4f;
-        
-        [Tooltip("Префаб компонента BattleHUDView - корень отображения боя в мировом пространстве")]
-        [Space(10)]
-        [SerializeField] private GameObject _battleHUDViewPrefab;
+        [Tooltip("Отступ между нижним краем экрана и нижним краем battle-world layout, в единицах frame-ячейки")]
+        [Range(0f, 5f)]
+        [SerializeField] private float _battleWorldBottomPadding = 0.15f;
 
 
 #if UNITY_EDITOR
@@ -23,7 +19,6 @@ namespace Project.Scripts.Configs.Battle
         private void OnValidate() => LayoutChanged?.Invoke();
 #endif
 
-        public GameObject BattleHUDViewPrefab => _battleHUDViewPrefab;
-        public float BattleHUDBottomOffset => _battleHUDBottomOffset;
+        public float BattleWorldBottomPadding => _battleWorldBottomPadding;
     }
 }

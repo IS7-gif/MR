@@ -9,7 +9,6 @@ namespace Project.Scripts.Services.Timer
     {
         private readonly BattleTimerConfig _config;
         private readonly EventBus _eventBus;
-        private readonly IOvertimeTransitionCoordinator _overtimeTransitionCoordinator;
         private readonly IGameStateService _gameStateService;
         private readonly BattleTimerEngine _engine = new();
 
@@ -22,12 +21,10 @@ namespace Project.Scripts.Services.Timer
         public BattleTimerService(
             BattleTimerConfig config,
             EventBus eventBus,
-            IOvertimeTransitionCoordinator overtimeTransitionCoordinator,
             IGameStateService gameStateService)
         {
             _config = config;
             _eventBus = eventBus;
-            _overtimeTransitionCoordinator = overtimeTransitionCoordinator;
             _gameStateService = gameStateService;
         }
 
@@ -52,7 +49,6 @@ namespace Project.Scripts.Services.Timer
             {
                 IsRunning = false;
                 PublishTimerChanged();
-                _overtimeTransitionCoordinator.RequestStart();
                 return;
             }
 

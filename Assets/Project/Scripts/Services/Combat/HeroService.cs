@@ -58,7 +58,7 @@ namespace Project.Scripts.Services.Combat
             if (false == slot.IsAssigned || false == slot.IsAlive)
                 return false;
 
-            if (slot.ActionType == HeroActionType.HealAlly && IsHpFull(side))
+            if (slot.ActionType == HeroActionType.HealAlly && false == HasHealTarget(side, slotIndex))
                 return false;
 
             if (_unitActivationCooldownService.IsHeroOnCooldown(side, slotIndex))
@@ -135,12 +135,29 @@ namespace Project.Scripts.Services.Combat
         }
 
 
-        private bool IsHpFull(BattleSide side)
+        private bool HasHealTarget(BattleSide side, int sourceSlotIndex)
         {
-            if (side == BattleSide.Player)
-                return _playerState.CurrentHP >= _playerState.MaxHP;
+            if (side == BattleSide.Player && _playerState.CurrentHP < _playerState.MaxHP)
+                return true;
 
-            return _enemyState.CurrentHP >= _enemyState.MaxHP;
+            if (side == BattleSide.Enemy && _enemyState.CurrentHP < _enemyState.MaxHP)
+                return true;
+
+            var slots = side == BattleSide.Player ? _playerSlots : _enemySlots;
+            for (var i = 0; i < slots.Length; i++)
+            {
+                if (i == sourceSlotIndex)
+                    continue;
+
+                var slot = slots[i];
+                if (false == slot.IsAssigned || false == slot.IsAlive || slot.MaxHP <= 0)
+                    continue;
+
+                if (slot.CurrentHP < slot.MaxHP)
+                    return true;
+            }
+
+            return false;
         }
 
         private void TryActivateSlot(ref HeroSlotState slot, BattleSide side, int slotIndex)

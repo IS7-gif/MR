@@ -22,7 +22,7 @@ namespace Project.Scripts.DI
         protected override void Configure(IContainerBuilder builder)
         {
             const bool EnableEscalationModule = false;
-            const bool EnableOvertimeModule = false;
+            const bool EnableOvertimeModule = true;
             
 
             var levelDatabase = Parent.Container.Resolve<LevelDatabase>();
@@ -90,7 +90,6 @@ namespace Project.Scripts.DI
             if (EnableOvertimeModule)
             {
                 builder.RegisterEntryPoint<OvertimeAnnouncementService>();
-                builder.RegisterEntryPoint<OvertimeBoardAnimator>();
             }
 
             if (EnableEscalationModule)

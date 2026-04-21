@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.UI;
-using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
@@ -45,23 +44,17 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Опциональный SpriteRenderer затемнения боевого поля; включается, когда боевые действия недоступны")]
         [SerializeField] private SpriteRenderer _phaseOverlay;
 
-        [Space(10)]
-        [Tooltip("Пустой дочерний объект, размещённый на нижней границе визуала HUD; используется для позиционирования от верхнего края доски")]
-        [SerializeField] private Transform _bottomAnchor;
-
         [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
         [SerializeField] private Transform _announcementAnchor;
 
 
         private IInputService _inputService;
-        private BattleViewConfig _battleViewConfig;
         private IBoardBoundsProvider _boardBounds;
         private ObjectPool<FloatingDamageNumber> _floatingPool;
 
 
         protected override UniTask OnBindViewModel()
         {
-            PositionHUD();
             BindSlots();
             PublishAnnouncementAnchor();
             SetupTargeting();
@@ -74,16 +67,18 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         protected override void OnClose()
         {
-            _energyFXView?.Cleanup();
-            _floatingPool?.Dispose();
-            _floatingPool = null;
+            CleanupRuntimeResources();
+        }
+
+        public void ReleaseSceneInstance()
+        {
+            CleanupRuntimeResources();
         }
 
 
-        public void SetDependencies(IInputService inputService, BattleViewConfig battleViewConfig, IBoardBoundsProvider boardBounds)
+        public void SetDependencies(IInputService inputService, IBoardBoundsProvider boardBounds)
         {
             _inputService = inputService;
-            _battleViewConfig = battleViewConfig;
             _boardBounds = boardBounds;
         }
 
@@ -99,20 +94,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             await targetView.PlayResultPulse(config);
         }
 
-
-        private void PositionHUD()
-        {
-            var bottomTargetY = ViewModel.BoardTopWorldY + _battleViewConfig.BattleHUDBottomOffset;
-            var pivotY = _bottomAnchor
-                ? bottomTargetY - _bottomAnchor.localPosition.y
-                : bottomTargetY;
-            transform.position = new Vector3(ViewModel.BoardCenterX, pivotY, 0f);
-        }
-
 #if UNITY_EDITOR
         public void RefreshPosition()
         {
-            PositionHUD();
             PublishAnnouncementAnchor();
         }
 #endif
@@ -174,7 +158,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _inputService,
                 registry,
                 ViewModel.AbilityExecution,
-                ViewModel.GameState,
+                ViewModel.GameStateService,
                 ViewModel.BattleActionRuntime,
                 Camera.main);
         }
@@ -270,6 +254,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             var item = _floatingPool.Get();
             item.Play(value, type, anchor, ViewModel.BattleAnimConfig,
                 () => _floatingPool.Release(item));
+        }
+
+        private void CleanupRuntimeResources()
+        {
+            _energyFXView?.Cleanup();
+            _floatingPool?.Dispose();
+            _floatingPool = null;
         }
     }
 }
