@@ -61,6 +61,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Таймер боя: длительность основной фазы и настройки обратного отсчёта")]
         [SerializeField] private BattleTimerConfig _battleTimerConfig;
 
+        [Tooltip("Фазы боя: число раундов, длительности Match/Hero Phase и правило переноса энергии между раундами")]
+        [SerializeField] private BattleFlowConfig _battleFlowConfig;
+
         [Tooltip("Овертайм: урон истощения и спец-анимации этого модуля")]
         [SerializeField] private OvertimeConfig _overtimeConfig;
 
@@ -97,6 +100,7 @@ namespace Project.Scripts.Configs
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
         public BattleTimerConfig BattleTimerConfig => _battleTimerConfig;
+        public BattleFlowConfig BattleFlowConfig => _battleFlowConfig;
         public OvertimeConfig OvertimeConfig => _overtimeConfig;
         public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;
         public AutoEnergyConfig AutoEnergyConfig => _autoEnergyConfig;

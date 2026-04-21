@@ -50,13 +50,6 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Кривая ослабления для анимации пульсации")]
         [SerializeField] private Ease _readyPulseEase = Ease.InOutSine;
 
-        [Header("Energy Bar Animation")]
-        [Tooltip("Длительность анимации заполнения энергии в секундах")]
-        [SerializeField] private float _energyFillDuration = 0.35f;
-
-        [Tooltip("Кривая ослабления для анимации заполнения энергии")]
-        [SerializeField] private Ease _energyFillEase = Ease.OutCubic;
-
         [Header("Energy Transfer FX")]
         [Tooltip("Длительность полета эффекта передачи энергии в секундах")]
         [SerializeField] private float _energyTransferDuration = 0.45f;
@@ -105,8 +98,6 @@ namespace Project.Scripts.Configs.Battle
         public Ease HPBarLagEase => _hpBarLagEase;
         public float HPBarHealDuration => _hpBarHealDuration;
         public Ease HPBarHealEase => _hpBarHealEase;
-        public float EnergyFillDuration => _energyFillDuration;
-        public Ease EnergyFillEase => _energyFillEase;
         public float EnergyTransferDuration => _energyTransferDuration;
         public float EnergyTransferWaveAmplitude => _energyTransferWaveAmplitude;
         public Ease EnergyTransferFlightEase => _energyTransferFlightEase;

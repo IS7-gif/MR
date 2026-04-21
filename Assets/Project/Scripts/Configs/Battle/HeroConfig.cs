@@ -15,8 +15,11 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Количество урона (DealDamage) или восстановленного HP (HealAlly) при активации")]
         [SerializeField] private int _abilityPower = 20;
 
-        [Tooltip("Энергия, необходимая для активации способности этого героя")]
-        [SerializeField] private int _maxEnergy = 10;
+        [Tooltip("Стоимость активации героя из общего пула энергии стороны")]
+        [SerializeField] private int _activationEnergyCost = 10;
+
+        [Tooltip("Кулдаун повторной активации героя в секундах")]
+        [SerializeField] private float _activationCooldownSeconds = 3;
         
         [Tooltip("Спрайт портрета в слоте героя (null = пустая рамка)")]
         [SerializeField] private Sprite _portrait;
@@ -25,11 +28,12 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private string _displayName;
 
 
-        public int MaxEnergy => _maxEnergy;
         public HeroActionType AbilityType => _abilityType;
         public int AbilityPower => _abilityPower;
         public int MaxHP => _maxHP;
         public Sprite Portrait => _portrait;
         public string DisplayName => _displayName;
+        public int ActivationEnergyCost => _activationEnergyCost;
+        public float ActivationCooldownSeconds => _activationCooldownSeconds;
     }
 }

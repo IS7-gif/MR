@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
@@ -10,6 +11,7 @@ using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Audio;
 using Project.Scripts.Services.Board;
+using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
@@ -22,6 +24,7 @@ using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Grid;
 using UnityEngine;
 using VContainer;
+using R3;
 #if UNITY_EDITOR
 using Project.Scripts.Services.BoardEdit;
 #endif
@@ -61,11 +64,14 @@ namespace Project.Scripts.Gameplay
         private BoardOrchestrator _orchestrator;
         private GameAudioController _gameAudioController;
         private IBattleTimerService _battleTimerService;
+        private IBattleFlowService _battleFlowService;
         private IOvertimeService _overtimeService;
+        private IUnitActivationCooldownService _unitActivationCooldownService;
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
         private HintService _hintService;
         private DebugConfig _debugConfig;
+        private IDisposable _boardRuntimeStateSubscription;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -91,7 +97,10 @@ namespace Project.Scripts.Gameplay
             if (false == _gameStateService.IsPlaying)
                 return;
 
-            if (_moveBarService.IsEnabled)
+            _battleFlowService?.Tick(Time.deltaTime);
+            _unitActivationCooldownService?.Tick(Time.deltaTime);
+
+            if (_moveBarService.IsEnabled && _boardRuntimeService.CanAcceptInput)
                 _moveBarService.Tick(Time.deltaTime);
 
 #if UNITY_EDITOR
@@ -121,6 +130,8 @@ namespace Project.Scripts.Gameplay
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
+            _boardRuntimeStateSubscription?.Dispose();
+            _boardRuntimeStateSubscription = null;
 
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
@@ -150,7 +161,9 @@ namespace Project.Scripts.Gameplay
             BattleHUDViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
+            IBattleFlowService battleFlowService,
             IOvertimeService overtimeService,
+            IUnitActivationCooldownService unitActivationCooldownService,
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
             DebugConfig debugConfig)
@@ -175,7 +188,9 @@ namespace Project.Scripts.Gameplay
             _battleHUDViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
+            _battleFlowService = battleFlowService;
             _overtimeService = overtimeService;
+            _unitActivationCooldownService = unitActivationCooldownService;
             _hintConfig = hintConfig;
             _palette = palette;
             _debugConfig = debugConfig;
@@ -262,9 +277,14 @@ namespace Project.Scripts.Gameplay
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 
+            _boardRuntimeStateSubscription?.Dispose();
+            _boardRuntimeStateSubscription = _boardRuntimeService.State.Subscribe(_ => RefreshPhaseOverlays());
+            RefreshPhaseOverlays();
+
             _gameResultPresenter.Initialize();
             _gameResultSequenceController.Initialize();
             _battleTimerService.Initialize();
+            _battleFlowService.Initialize();
 
 #if UNITY_EDITOR
             var editHandler = gameObject.AddComponent<BoardEditClickHandler>();
@@ -357,6 +377,11 @@ namespace Project.Scripts.Gameplay
                 -(_levelConfig.Height - 1) * cellSize * 0.5f,
                 0f
             );
+        }
+
+        private void RefreshPhaseOverlays()
+        {
+            _boardView?.SetInteractionOverlayActive(!_boardRuntimeService.CanAcceptInput);
         }
     }
 }

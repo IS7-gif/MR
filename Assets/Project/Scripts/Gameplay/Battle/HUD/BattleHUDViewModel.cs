@@ -37,6 +37,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
         public ReadOnlyReactiveProperty<int> TimerSeconds => _timerSeconds;
+        public ReadOnlyReactiveProperty<bool> IsInteractionOverlayVisible => _isInteractionOverlayVisible;
+        public ReadOnlyReactiveProperty<int> PlayerEnergy => _playerEnergy;
+        public ReadOnlyReactiveProperty<int> EnemyEnergy => _enemyEnergy;
 
 
         private readonly EventBus _eventBus;
@@ -45,17 +48,22 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly BattleViewConfig _battleViewConfig;
         private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
+        private readonly IBattleSideEnergyService _battleSideEnergyService;
+        private readonly IUnitActivationCooldownService _unitActivationCooldownService;
         private readonly TileKindPaletteConfig _palette;
         private readonly LevelConfig _levelConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly IBoardBoundsProvider _boardBounds;
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
-        private readonly BattleTimerConfig _battleTimerConfig;
+        private readonly BattleFlowConfig _battleFlowConfig;
         private readonly UnitDeathConfig _unitDeathConfig;
         private HeroSlotViewModel[] _playerHeroSlots;
         private HeroSlotViewModel[] _enemyHeroSlots;
         private readonly ReactiveProperty<int> _timerSeconds;
+        private readonly ReactiveProperty<bool> _isInteractionOverlayVisible;
+        private readonly ReactiveProperty<int> _playerEnergy;
+        private readonly ReactiveProperty<int> _enemyEnergy;
 
 
         public BattleHUDViewModel(
@@ -65,6 +73,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             BattleViewConfig battleViewConfig,
             BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
+            IBattleSideEnergyService battleSideEnergyService,
+            IUnitActivationCooldownService unitActivationCooldownService,
             TileKindPaletteConfig palette,
             LevelConfig levelConfig,
             SlotLayoutConfig slotLayoutConfig,
@@ -74,7 +84,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
             IAvatarGroupDefenseService groupDefense,
-            BattleTimerConfig battleTimerConfig,
+            BattleFlowConfig battleFlowConfig,
             UnitDeathConfig unitDeathConfig)
         {
             _eventBus = eventBus;
@@ -83,6 +93,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _battleViewConfig = battleViewConfig;
             _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
+            _battleSideEnergyService = battleSideEnergyService;
+            _unitActivationCooldownService = unitActivationCooldownService;
             _palette = palette;
             _levelConfig = levelConfig;
             _slotLayoutConfig = slotLayoutConfig;
@@ -92,10 +104,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
             GroupDefense = groupDefense;
-            _battleTimerConfig = battleTimerConfig;
+            _battleFlowConfig = battleFlowConfig;
             _unitDeathConfig = unitDeathConfig;
 
-            _timerSeconds = new ReactiveProperty<int>((int)battleTimerConfig.BattleDuration);
+            _timerSeconds = new ReactiveProperty<int>((int)battleFlowConfig.MatchPhaseDuration);
+            _isInteractionOverlayVisible = new ReactiveProperty<bool>(!battleActionRuntimeService.CanAcceptNormalActions);
+            _playerEnergy = new ReactiveProperty<int>(battleSideEnergyService.GetDisplayEnergy(BattleSide.Player));
+            _enemyEnergy = new ReactiveProperty<int>(battleSideEnergyService.GetDisplayEnergy(BattleSide.Enemy));
         }
 
 
@@ -113,6 +128,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _playerState.MaxHP,
                 _battleAnimationConfig,
                 _levelConfig.PlayerAvatarConfig.AbilityType,
+                _levelConfig.PlayerAvatarConfig.ActivationEnergyCost,
+                _unitActivationCooldownService,
                 _battleActionRuntimeService);
 
             EnemyAvatar = new AvatarSlotViewModel(
@@ -124,6 +141,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _enemyState.MaxHP,
                 _battleAnimationConfig,
                 _levelConfig.EnemyAvatarConfig.AbilityType,
+                _levelConfig.EnemyAvatarConfig.ActivationEnergyCost,
+                _unitActivationCooldownService,
                 _battleActionRuntimeService);
 
 
@@ -137,10 +156,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _heroService.GetSlots(BattleSide.Enemy),
                 _levelConfig.EnemyHeroes);
 
-            Disposables.Add(_eventBus.Subscribe<HeroEnergyChangedEvent>(OnHeroEnergyChanged));
             Disposables.Add(_eventBus.Subscribe<HeroHPChangedEvent>(OnHeroHPChanged));
             Disposables.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
-            Disposables.Add(_eventBus.Subscribe<BattleTimerChangedEvent>(OnBattleTimerChanged));
+            Disposables.Add(_eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnBattleFlowTimerChanged));
+            Disposables.Add(_eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
+            Disposables.Add(_battleActionRuntimeService.State.Subscribe(_ => OnBattleActionRuntimeChanged()));
 
             return UniTask.CompletedTask;
         }
@@ -148,6 +168,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         protected override void OnCleanup()
         {
             _timerSeconds.Dispose();
+            _isInteractionOverlayVisible.Dispose();
+            _playerEnergy.Dispose();
+            _enemyEnergy.Dispose();
             PlayerAvatar?.Dispose();
             EnemyAvatar?.Dispose();
 
@@ -160,15 +183,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                     _enemyHeroSlots[i]?.Dispose();
         }
 
-
-        private void OnHeroEnergyChanged(HeroEnergyChangedEvent e)
-        {
-            var slots = e.Side == BattleSide.Player ? _playerHeroSlots : _enemyHeroSlots;
-            if (null == slots || e.SlotIndex < 0 || e.SlotIndex >= slots.Length)
-                return;
-
-            slots[e.SlotIndex]?.UpdateEnergy(e.Current, e.Max);
-        }
 
         private void OnHeroHPChanged(HeroHPChangedEvent e)
         {
@@ -184,9 +198,22 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             // Reserved for future side effects (sound, particles, etc.).
         }
 
-        private void OnBattleTimerChanged(BattleTimerChangedEvent e)
+        private void OnBattleFlowTimerChanged(BattleFlowTimerChangedEvent e)
         {
             _timerSeconds.Value = (int)e.TimeRemaining;
+        }
+
+        private void OnBattleActionRuntimeChanged()
+        {
+            _isInteractionOverlayVisible.Value = !_battleActionRuntimeService.CanAcceptNormalActions;
+        }
+
+        private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)
+        {
+            if (e.Side == BattleSide.Player)
+                _playerEnergy.Value = e.Current;
+            else
+                _enemyEnergy.Value = e.Current;
         }
 
         private HeroSlotViewModel[] CreateHeroSlotViewModels(
@@ -205,7 +232,15 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                     : Color.gray;
                 var portrait = config ? config.Portrait : null;
 
-                slots[i] = new HeroSlotViewModel(i, side, state, color, portrait, _battleActionRuntimeService);
+                slots[i] = new HeroSlotViewModel(
+                    i,
+                    side,
+                    state,
+                    color,
+                    portrait,
+                    _eventBus,
+                    _unitActivationCooldownService,
+                    _battleActionRuntimeService);
             }
 
             return slots;

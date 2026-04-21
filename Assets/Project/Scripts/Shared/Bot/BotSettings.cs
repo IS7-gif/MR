@@ -2,14 +2,14 @@ namespace Project.Scripts.Shared.Bot
 {
     public readonly struct BotSettings
     {
-        public readonly float MinDischargeDelay;
-        public readonly float MaxDischargeDelay;
+        public readonly float MinAvatarActivationDelay;
+        public readonly float MaxAvatarActivationDelay;
 
 
-        public BotSettings(float minDischargeDelay, float maxDischargeDelay)
+        public BotSettings(float minAvatarActivationDelay, float maxAvatarActivationDelay)
         {
-            MinDischargeDelay = minDischargeDelay;
-            MaxDischargeDelay = maxDischargeDelay;
+            MinAvatarActivationDelay = minAvatarActivationDelay;
+            MaxAvatarActivationDelay = maxAvatarActivationDelay;
         }
     }
 }

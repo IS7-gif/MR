@@ -1,0 +1,32 @@
+namespace Project.Scripts.Shared.BattleFlow
+{
+    public readonly struct BattleFlowSnapshot
+    {
+        public int CurrentRound { get; }
+        public int TotalRounds { get; }
+        public BattlePhaseKind Phase { get; }
+        public float TimeRemaining { get; }
+        public EnergyCarryoverMode EnergyCarryoverMode { get; }
+        public bool IsTerminal => Phase == BattlePhaseKind.PendingOvertime || Phase == BattlePhaseKind.Finished;
+
+
+        public BattleFlowSnapshot(
+            int currentRound,
+            int totalRounds,
+            BattlePhaseKind phase,
+            float timeRemaining,
+            EnergyCarryoverMode energyCarryoverMode)
+        {
+            CurrentRound = currentRound;
+            TotalRounds = totalRounds;
+            Phase = phase;
+            TimeRemaining = timeRemaining < 0f ? 0f : timeRemaining;
+            EnergyCarryoverMode = energyCarryoverMode;
+        }
+
+        public BattleFlowSnapshot WithTimeRemaining(float timeRemaining)
+        {
+            return new BattleFlowSnapshot(CurrentRound, TotalRounds, Phase, timeRemaining, EnergyCarryoverMode);
+        }
+    }
+}

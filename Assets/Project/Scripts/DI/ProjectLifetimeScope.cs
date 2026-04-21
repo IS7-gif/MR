@@ -23,6 +23,9 @@ namespace Project.Scripts.DI
             var overtimeConfig = _mainConfig.OvertimeConfig
                 ? _mainConfig.OvertimeConfig
                 : ScriptableObject.CreateInstance<OvertimeConfig>();
+            var battleFlowConfig = _mainConfig.BattleFlowConfig
+                ? _mainConfig.BattleFlowConfig
+                : ScriptableObject.CreateInstance<BattleFlowConfig>();
 
             builder.RegisterInstance(_mainConfig.BoardConfig);
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
@@ -41,6 +44,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
             builder.RegisterInstance(_mainConfig.BattleTimerConfig);
+            builder.RegisterInstance(battleFlowConfig);
             builder.RegisterInstance(overtimeConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);
             builder.RegisterInstance(_mainConfig.AutoEnergyConfig);

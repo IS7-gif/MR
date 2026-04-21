@@ -4,6 +4,7 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Services.Combat;
+using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using TMPro;
@@ -15,6 +16,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
     {
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
+        private const float DisabledPortraitBrightness = 0.45f;
 
         
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
@@ -41,9 +43,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Лаг-полоса HP позади основной полосы - опустошается с задержкой после получения урона")]
         [SerializeField] private BarRenderer _hpLagBar;
 
-        [Tooltip("Полоса энергии/заряда - заполняется по мере накопления энергии аватаром")]
-        [SerializeField] private BarRenderer _energyBar;
-
         [Tooltip("Текст HP в формате 'Current / Max' - скрывается при MaxHP = 0 (бессмертный юнит)")]
         [SerializeField] private TMP_Text _hpText;
 
@@ -63,7 +62,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
 
         public UnitDescriptor Descriptor => UnitDescriptor.Avatar(_viewModel.Side, _viewModel.AbilityType);
-        public bool IsReadySource => _viewModel != null && _viewModel.Side == BattleSide.Player && _viewModel.EnergyBar.IsReady.CurrentValue;
+        public bool IsReadySource => _viewModel is { Side: BattleSide.Player } && _viewModel.EnergyBar.IsReady.CurrentValue;
         public Bounds WorldBounds => _boundsSource ? _boundsSource.bounds : new Bounds(transform.position, Vector3.one);
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
         public Transform EnergyAnchor => _energyAnchor ? _energyAnchor : HitAnchor;
@@ -82,6 +81,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private Tween _knockbackTween;
         private Tween _resultPulseTween;
         private MaterialPropertyBlock _portraitPropertyBlock;
+        private bool _isAvailabilityDimmed;
 
 
         private void OnDestroy()
@@ -93,7 +93,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         }
 
 
-        public void Bind(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator, IAvatarGroupDefenseService groupDefense, UnitDeathConfig deathConfig)
+        public void Bind(AvatarSlotViewModel viewModel, IAvatarGroupDefenseService groupDefense, UnitDeathConfig deathConfig)
         {
             _viewModel = viewModel;
             _groupDefense = groupDefense;
@@ -108,9 +108,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             BindPortrait(viewModel);
             BindHPBars(viewModel);
-            BindEnergyBar(viewModel, pulseCoordinator);
             BindHitReaction(viewModel);
             BindDeathState(viewModel);
+            BindAvailabilityState(viewModel);
         }
 
         public async UniTask PlayResultPulse(AvatarPulseStepConfig config)
@@ -205,6 +205,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             ResetPortraitDeathFill();
             _portrait.sprite = viewModel.Portrait;
             _originalPortraitColor = _portrait.color;
+            ApplyAvailabilityPortraitState();
         }
 
         private void BindHPBars(AvatarSlotViewModel viewModel)
@@ -222,39 +223,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
             viewModel.HealthBarUpdated
                 .Subscribe(ApplyHealthBarUpdate)
-                .AddTo(_disposables);
-        }
-
-        private void BindEnergyBar(AvatarSlotViewModel viewModel, IReadyPulseCoordinator pulseCoordinator)
-        {
-            if (false == _energyBar)
-                return;
-
-            _energyBar.SnapFill(viewModel.EnergyBar.FillFraction.CurrentValue);
-
-            viewModel.EnergyBar.FillFraction
-                .Skip(1)
-                .Subscribe(v =>
-                {
-                    var duration = _config ? _config.EnergyFillDuration : 0.35f;
-                    _energyBar.SetFillAnimated(v, duration);
-                })
-                .AddTo(_disposables);
-
-            viewModel.EnergyBar.IsReady
-                .Subscribe(ready =>
-                {
-                    if (false == ready)
-                        _energyBar.SetFillAlpha(1f);
-                })
-                .AddTo(_disposables);
-
-            pulseCoordinator.Alpha
-                .Subscribe(a =>
-                {
-                    if (viewModel.EnergyBar.IsReady.CurrentValue)
-                        _energyBar.SetFillAlpha(a);
-                })
                 .AddTo(_disposables);
         }
 
@@ -295,6 +263,21 @@ namespace Project.Scripts.Gameplay.Battle.Units
                         foreach (var go in _deactivateOnDeath)
                             if (go) go.SetActive(false == defeated);
                 })
+                .AddTo(_disposables);
+        }
+
+        private void BindAvailabilityState(AvatarSlotViewModel viewModel)
+        {
+            viewModel.EnergyBar.ActivationBlockReason
+                .Subscribe(reason =>
+                {
+                    _isAvailabilityDimmed = reason != UnitActivationBlockReason.None;
+                    ApplyAvailabilityPortraitState();
+                })
+                .AddTo(_disposables);
+
+            viewModel.IsDefeated
+                .Subscribe(_ => ApplyAvailabilityPortraitState())
                 .AddTo(_disposables);
         }
 
@@ -346,13 +329,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
             transform.localScale = _originalLocalScale;
 
             if (_portrait)
-                _portrait.color = _originalPortraitColor;
+                _portrait.color = GetPortraitBaseColor();
 
             _hpBar?.SnapFill(hpFill);
             _hpLagBar?.SnapFill(hpFill);
-
-            if (_energyBar)
-                _energyBar.SnapFill(_viewModel.EnergyBar.FillFraction.CurrentValue);
         }
 
         private void SetPortraitDeathFill(bool active)
@@ -427,9 +407,29 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 .OnComplete(() =>
                 {
                     _hitFlashTween = _portrait
-                        .DOColor(_originalPortraitColor, halfDuration)
+                        .DOColor(GetPortraitBaseColor(), halfDuration)
                         .SetEase(_config.HitFlashEase);
                 });
+        }
+
+        private void ApplyAvailabilityPortraitState()
+        {
+            if (false == _portrait)
+                return;
+
+            _portrait.color = GetPortraitBaseColor();
+        }
+
+        private Color GetPortraitBaseColor()
+        {
+            if (_viewModel == null || _viewModel.IsDefeated.CurrentValue || false == _isAvailabilityDimmed)
+                return _originalPortraitColor;
+
+            return new Color(
+                _originalPortraitColor.r * DisabledPortraitBrightness,
+                _originalPortraitColor.g * DisabledPortraitBrightness,
+                _originalPortraitColor.b * DisabledPortraitBrightness,
+                _originalPortraitColor.a);
         }
 
         private void PlayKnockback()

@@ -15,6 +15,7 @@ MonoBehaviour:
   _maxHP: 250
   _abilityType: 0
   _abilityPower: 40
-  _maxEnergy: 10
+  _activationEnergyCost: 10
+  _activationCooldownSeconds: 3
   _portrait: {fileID: 21300000, guid: 7aa2f66b0d575ae48a9d71a2cf7377d6, type: 3}
   _displayName: 

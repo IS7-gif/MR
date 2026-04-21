@@ -1,4 +1,5 @@
 using Project.Scripts.Shared.Rules;
+using Project.Scripts.Shared.BattleFlow;
 using R3;
 
 namespace Project.Scripts.Services.Game
@@ -15,6 +16,7 @@ namespace Project.Scripts.Services.Game
         int CaptureVersion();
         bool IsCurrent(int version);
         BattleActionGateResult Evaluate(BattleActionKind actionKind);
+        void ApplyBattleFlowPhase(BattlePhaseKind phase);
         void RequestOvertimeStop();
         void MarkBlocked();
     }

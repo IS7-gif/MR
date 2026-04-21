@@ -1,5 +1,8 @@
 using System;
+using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Game;
+using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Rules;
 using R3;
@@ -15,9 +18,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public int SlotIndex { get; }
         public BattleSide Side { get; }
         public HeroActionType ActionType { get; }
+        public int ActivationEnergyCost { get; }
         public bool IsPlayerSlot => Side == BattleSide.Player;
-        public ReactiveProperty<float> EnergyFill { get; } = new(0f);
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
+        public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
         public int CurrentHP { get; private set; }
@@ -33,7 +37,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private readonly CompositeDisposable _subscriptions = new();
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private int _prevHP;
-        private bool _isEnergyReady;
+        private bool _hasSufficientEnergy;
+        private bool _isOnCooldown;
 
 
         public HeroSlotViewModel(
@@ -42,12 +47,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
             HeroSlotState state,
             Color color,
             Sprite portrait,
+            EventBus eventBus,
+            IUnitActivationCooldownService cooldownService,
             IBattleActionRuntimeService battleActionRuntimeService)
         {
             SlotIndex = slotIndex;
             Side = side;
             IsAssigned = state.IsAssigned;
             ActionType = state.ActionType;
+            ActivationEnergyCost = state.ActivationEnergyCost;
             SlotColor = color;
             Portrait = portrait;
             _battleActionRuntimeService = battleActionRuntimeService;
@@ -57,17 +65,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
             CurrentHP = _prevHP;
             MaxHP = state.IsAssigned ? state.MaxHP : 0;
             IsDefeated.Value = state.IsAssigned && state.CurrentHP <= 0;
-            _isEnergyReady = state.IsAssigned && state.MaxEnergy > 0 && state.CurrentEnergy >= state.MaxEnergy;
+            _hasSufficientEnergy = ActivationEnergyCost <= 0;
+            _isOnCooldown = cooldownService.IsHeroOnCooldown(side, slotIndex);
             RefreshActivatable();
 
             _subscriptions.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshActivatable()));
-        }
-
-        public void UpdateEnergy(int current, int max)
-        {
-            EnergyFill.Value = max > 0 ? (float)current / max : 0f;
-            _isEnergyReady = max > 0 && current >= max;
-            RefreshActivatable();
+            _subscriptions.Add(eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
+            _subscriptions.Add(eventBus.Subscribe<HeroCooldownChangedEvent>(OnHeroCooldownChanged));
         }
 
         public void UpdateHP(int current, int max, bool silent = false)
@@ -111,8 +115,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         public void Dispose()
         {
-            EnergyFill.Dispose();
             IsActivatable.Dispose();
+            ActivationBlockReason.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();
             _healthBarUpdated.Dispose();
@@ -124,8 +128,55 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         private void RefreshActivatable()
         {
-            var canActivate = _battleActionRuntimeService.Evaluate(BattleActionKind.HeroActivation).IsAllowed;
-            IsActivatable.Value = IsAssigned && _isEnergyReady && canActivate;
+            if (false == IsAssigned)
+            {
+                IsActivatable.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.None;
+                return;
+            }
+
+            var gateResult = _battleActionRuntimeService.Evaluate(BattleActionKind.HeroActivation);
+            if (false == gateResult.IsAllowed)
+            {
+                IsActivatable.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.BlockedByPhase;
+                return;
+            }
+
+            if (false == _hasSufficientEnergy)
+            {
+                IsActivatable.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.InsufficientEnergy;
+                return;
+            }
+
+            if (_isOnCooldown)
+            {
+                IsActivatable.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.Cooldown;
+                return;
+            }
+
+            IsActivatable.Value = true;
+            ActivationBlockReason.Value = UnitActivationBlockReason.None;
+        }
+
+        private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)
+        {
+            if (e.Side != Side)
+                return;
+
+            _hasSufficientEnergy = ActivationEnergyCost <= 0 || e.Current >= ActivationEnergyCost;
+            RefreshActivatable();
+        }
+
+        private void OnHeroCooldownChanged(HeroCooldownChangedEvent e)
+        {
+            if (e.Side != Side || e.SlotIndex != SlotIndex)
+                return;
+
+            _isOnCooldown = e.RemainingSeconds > 0f;
+            RefreshActivatable();
         }
     }
 }

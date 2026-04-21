@@ -20,9 +20,9 @@ namespace Project.Scripts.Shared.Bot
             return (float)(_rng.NextDouble() * (max - min) + min);
         }
 
-        public float GenerateDischargeDelay()
+        public float GenerateAvatarActivationDelay()
         {
-            return GenerateDelay(_settings.MinDischargeDelay, _settings.MaxDischargeDelay);
+            return GenerateDelay(_settings.MinAvatarActivationDelay, _settings.MaxAvatarActivationDelay);
         }
 
         public int PickMostWoundedHero(IReadOnlyList<HeroSlotState> slots)

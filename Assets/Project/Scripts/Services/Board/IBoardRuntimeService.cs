@@ -1,4 +1,5 @@
 using R3;
+using Project.Scripts.Shared.BattleFlow;
 
 namespace Project.Scripts.Services.Board
 {
@@ -12,6 +13,7 @@ namespace Project.Scripts.Services.Board
         bool CanAcceptInput { get; }
         int CaptureVersion();
         bool IsCurrent(int version);
+        void ApplyBattleFlowPhase(BattlePhaseKind phase);
         void RequestOvertimeStop();
         void MarkFrozen();
     }

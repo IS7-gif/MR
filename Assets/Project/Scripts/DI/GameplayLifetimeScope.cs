@@ -6,6 +6,7 @@ using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Board;
+using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Bot;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Progression;
@@ -39,6 +40,8 @@ namespace Project.Scripts.DI
             builder.Register<ILevelProgressionService, LevelProgressionService>(Lifetime.Singleton);
             builder.Register<IMoveBarService, MoveBarService>(Lifetime.Singleton);
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<BattleSideEnergyService>().As<IBattleSideEnergyService>();
+            builder.Register<IUnitActivationCooldownService, UnitActivationCooldownService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();
             builder.RegisterEntryPoint<EnemyAvatarChargeService>().As<IEnemyAvatarChargeService>();
             builder.RegisterEntryPoint<AutoEnergyTickService>();
@@ -66,6 +69,8 @@ namespace Project.Scripts.DI
 
             builder.Register<IBoardRuntimeService, BoardRuntimeService>(Lifetime.Singleton);
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
+            builder.Register<IBattleFlowService, BattleFlowService>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<Project.Scripts.Services.BattleFlow.BattleFlowPhaseCoordinator>();
 
             if (EnableOvertimeModule)
             {

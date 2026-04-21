@@ -42,6 +42,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Optional HUD-side energy orb FX view")]
         [SerializeField] private BattleEnergyFXView _energyFXView;
 
+        [Tooltip("Опциональный SpriteRenderer затемнения боевого поля; включается, когда боевые действия недоступны")]
+        [SerializeField] private SpriteRenderer _phaseOverlay;
+
         [Space(10)]
         [Tooltip("Пустой дочерний объект, размещённый на нижней границе визуала HUD; используется для позиционирования от верхнего края доски")]
         [SerializeField] private Transform _bottomAnchor;
@@ -64,6 +67,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             SetupTargeting();
             SetupEnergyFX();
             SetupFloatingNumbers();
+            BindInteractionOverlay();
 
             return UniTask.CompletedTask;
         }
@@ -123,8 +127,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         private void BindSlots()
         {
-            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense, ViewModel.DeathConfig);
-            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.PulseCoordinator, ViewModel.GroupDefense, ViewModel.DeathConfig);
+            _playerAvatarSlot?.Bind(ViewModel.PlayerAvatar, ViewModel.GroupDefense, ViewModel.DeathConfig);
+            _enemyAvatarSlot?.Bind(ViewModel.EnemyAvatar, ViewModel.GroupDefense, ViewModel.DeathConfig);
 
             BindHeroRow(_playerHeroSlots, ViewModel.PlayerHeroSlots);
             BindHeroRow(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
@@ -139,7 +143,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             for (var i = 0; i < count; i++)
             {
                 if (views[i])
-                    views[i].Bind(viewModels[i], ViewModel.PulseCoordinator, ViewModel.BattleAnimConfig, ViewModel.DeathConfig);
+                    views[i].Bind(viewModels[i], ViewModel.BattleAnimConfig, ViewModel.DeathConfig);
             }
         }
 
@@ -188,6 +192,17 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _playerAvatarSlot,
                 ViewModel.PlayerAvatar.SlotColor,
                 ViewModel.BattleAnimConfig);
+        }
+
+        private void BindInteractionOverlay()
+        {
+            if (false == _phaseOverlay)
+                return;
+
+            _phaseOverlay.enabled = ViewModel.IsInteractionOverlayVisible.CurrentValue;
+            ViewModel.IsInteractionOverlayVisible
+                .Subscribe(active => _phaseOverlay.enabled = active)
+                .AddTo(Disposables);
         }
 
         private void SetupFloatingNumbers()

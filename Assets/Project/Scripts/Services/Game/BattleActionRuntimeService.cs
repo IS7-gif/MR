@@ -1,4 +1,5 @@
 using System;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Rules;
 using R3;
 
@@ -8,14 +9,14 @@ namespace Project.Scripts.Services.Game
     {
         public ReadOnlyReactiveProperty<BattleActionRuntimeState> State => _state;
         public int CurrentVersion => _currentVersion;
-        public bool IsRunning => _state.Value == BattleActionRuntimeState.Running;
+        public bool IsRunning => _state.Value is BattleActionRuntimeState.MatchPhaseBlocked or BattleActionRuntimeState.HeroPhase;
         public bool IsStoppingForOvertime => _state.Value == BattleActionRuntimeState.StoppingForOvertime;
         public bool IsBlocked => _state.Value == BattleActionRuntimeState.Blocked;
-        public bool CanAcceptNormalActions => _state.Value == BattleActionRuntimeState.Running;
+        public bool CanAcceptNormalActions => _state.Value == BattleActionRuntimeState.HeroPhase;
         public BattleActionPhase CurrentPhase => MapPhase(_state.Value);
 
 
-        private readonly ReactiveProperty<BattleActionRuntimeState> _state = new(BattleActionRuntimeState.Running);
+        private readonly ReactiveProperty<BattleActionRuntimeState> _state = new(BattleActionRuntimeState.MatchPhaseBlocked);
         private int _currentVersion;
 
 
@@ -34,9 +35,35 @@ namespace Project.Scripts.Services.Game
             return BattleActionGateRules.Evaluate(CurrentPhase, actionKind);
         }
 
+        public void ApplyBattleFlowPhase(BattlePhaseKind phase)
+        {
+            if (IsBlocked || IsStoppingForOvertime)
+                return;
+
+            BattleActionRuntimeState nextState;
+            switch (phase)
+            {
+                case BattlePhaseKind.Match:
+                    nextState = BattleActionRuntimeState.MatchPhaseBlocked;
+                    break;
+                case BattlePhaseKind.Hero:
+                    nextState = BattleActionRuntimeState.HeroPhase;
+                    break;
+                default:
+                    nextState = BattleActionRuntimeState.Blocked;
+                    break;
+            }
+
+            if (_state.Value == nextState)
+                return;
+
+            _currentVersion++;
+            _state.Value = nextState;
+        }
+
         public void RequestOvertimeStop()
         {
-            if (false == IsRunning)
+            if (IsBlocked || IsStoppingForOvertime)
                 return;
 
             _currentVersion++;
@@ -62,10 +89,13 @@ namespace Project.Scripts.Services.Game
 
         private static BattleActionPhase MapPhase(BattleActionRuntimeState state)
         {
-            if (state == BattleActionRuntimeState.Running)
-                return BattleActionPhase.NormalPlay;
+            if (state == BattleActionRuntimeState.MatchPhaseBlocked)
+                return BattleActionPhase.MatchPhase;
 
-            if (state == BattleActionRuntimeState.StoppingForOvertime || state == BattleActionRuntimeState.Blocked)
+            if (state == BattleActionRuntimeState.HeroPhase)
+                return BattleActionPhase.HeroPhase;
+
+            if (state == BattleActionRuntimeState.StoppingForOvertime)
                 return BattleActionPhase.Overtime;
 
             return BattleActionPhase.Finished;

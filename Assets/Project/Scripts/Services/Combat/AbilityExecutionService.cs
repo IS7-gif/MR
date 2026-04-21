@@ -134,7 +134,7 @@ namespace Project.Scripts.Services.Combat
 
             var slot = slots[source.SlotIndex];
             isAlive = slot.IsAlive;
-            if (false == slot.IsReady || false == isAlive)
+            if (false == _heroService.CanActivate(source.Side, source.SlotIndex) || false == isAlive)
                 return false;
 
             actionType = slot.ActionType;

@@ -10,6 +10,9 @@ namespace Project.Scripts.Gameplay.Battle.Board
         [Tooltip("SpriteMask для скрытия тайлов, появляющихся выше доски во время гравитации")]
         [SerializeField] private SpriteMask _spriteMask;
 
+        [Tooltip("Опциональный SpriteRenderer затемнения доски; включается, когда доска недоступна")]
+        [SerializeField] private SpriteRenderer _phaseOverlay;
+
 
         public void Setup(float frameWidth, float frameHeight, float tileCellSize, float maskTopPadding)
         {
@@ -40,6 +43,27 @@ namespace Project.Scripts.Gameplay.Battle.Board
                 );
                 _spriteMask.transform.localPosition = new Vector3(0f, maskOffsetY, 0f);
             }
+
+            if (_phaseOverlay && _phaseOverlay.sprite)
+            {
+                var spriteSize = _phaseOverlay.sprite.bounds.size;
+                var parentScale = _phaseOverlay.transform.parent
+                    ? _phaseOverlay.transform.parent.lossyScale
+                    : Vector3.one;
+
+                _phaseOverlay.transform.localScale = new Vector3(
+                    frameWidth / (spriteSize.x * parentScale.x),
+                    frameHeight / (spriteSize.y * parentScale.y),
+                    1f
+                );
+                _phaseOverlay.transform.localPosition = Vector3.zero;
+            }
+        }
+
+        public void SetInteractionOverlayActive(bool active)
+        {
+            if (_phaseOverlay)
+                _phaseOverlay.enabled = active;
         }
     }
 }

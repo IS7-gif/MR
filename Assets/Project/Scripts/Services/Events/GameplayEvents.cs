@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.GroupDefense;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
@@ -90,23 +91,6 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct HeroEnergyChangedEvent
-    {
-        public BattleSide Side { get; }
-        public int SlotIndex { get; }
-        public int Current { get; }
-        public int Max { get; }
-
-
-        public HeroEnergyChangedEvent(BattleSide side, int slotIndex, int current, int max)
-        {
-            Side = side;
-            SlotIndex = slotIndex;
-            Current = current;
-            Max = max;
-        }
-    }
-
     public readonly struct HeroActivatedEvent
     {
         public BattleSide Side { get; }
@@ -124,34 +108,38 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct HeroCooldownChangedEvent
+    {
+        public BattleSide Side { get; }
+        public int SlotIndex { get; }
+        public float RemainingSeconds { get; }
+        public float DurationSeconds { get; }
+
+
+        public HeroCooldownChangedEvent(BattleSide side, int slotIndex, float remainingSeconds, float durationSeconds)
+        {
+            Side = side;
+            SlotIndex = slotIndex;
+            RemainingSeconds = remainingSeconds;
+            DurationSeconds = durationSeconds;
+        }
+    }
+
     public readonly struct PlayerDefeatedEvent
     {
 
     }
 
-    public readonly struct PlayerAvatarEnergyChangedEvent
+    public readonly struct BattleSideEnergyChangedEvent
     {
+        public BattleSide Side { get; }
         public int Current { get; }
-        public int Max { get; }
 
 
-        public PlayerAvatarEnergyChangedEvent(int current, int max)
+        public BattleSideEnergyChangedEvent(BattleSide side, int current)
         {
+            Side = side;
             Current = current;
-            Max = max;
-        }
-    }
-
-    public readonly struct EnemyAvatarEnergyChangedEvent
-    {
-        public int Current { get; }
-        public int Max { get; }
-
-
-        public EnemyAvatarEnergyChangedEvent(int current, int max)
-        {
-            Current = current;
-            Max = max;
         }
     }
 
@@ -165,6 +153,21 @@ namespace Project.Scripts.Services.Events
         {
             ActionType = actionType;
             ActionValue = actionValue;
+        }
+    }
+
+    public readonly struct AvatarCooldownChangedEvent
+    {
+        public BattleSide Side { get; }
+        public float RemainingSeconds { get; }
+        public float DurationSeconds { get; }
+
+
+        public AvatarCooldownChangedEvent(BattleSide side, float remainingSeconds, float durationSeconds)
+        {
+            Side = side;
+            RemainingSeconds = remainingSeconds;
+            DurationSeconds = durationSeconds;
         }
     }
 
@@ -222,6 +225,66 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct BattleFlowRoundChangedEvent
+    {
+        public int CurrentRound { get; }
+        public int TotalRounds { get; }
+
+
+        public BattleFlowRoundChangedEvent(int currentRound, int totalRounds)
+        {
+            CurrentRound = currentRound;
+            TotalRounds = totalRounds;
+        }
+    }
+
+    public readonly struct BattleFlowPhaseChangedEvent
+    {
+        public BattlePhaseKind Phase { get; }
+        public int CurrentRound { get; }
+        public int TotalRounds { get; }
+        public EnergyCarryoverMode EnergyCarryoverMode { get; }
+
+
+        public BattleFlowPhaseChangedEvent(
+            BattlePhaseKind phase,
+            int currentRound,
+            int totalRounds,
+            EnergyCarryoverMode energyCarryoverMode)
+        {
+            Phase = phase;
+            CurrentRound = currentRound;
+            TotalRounds = totalRounds;
+            EnergyCarryoverMode = energyCarryoverMode;
+        }
+    }
+
+    public readonly struct BattleFlowTimerChangedEvent
+    {
+        public BattlePhaseKind Phase { get; }
+        public float TimeRemaining { get; }
+
+
+        public BattleFlowTimerChangedEvent(BattlePhaseKind phase, float timeRemaining)
+        {
+            Phase = phase;
+            TimeRemaining = timeRemaining;
+        }
+    }
+
+    public readonly struct BattleFlowCountdownTickEvent
+    {
+        public BattlePhaseKind Phase { get; }
+        public int SecondsRemaining { get; }
+
+
+        public BattleFlowCountdownTickEvent(BattlePhaseKind phase, int secondsRemaining)
+        {
+            Phase = phase;
+            SecondsRemaining = secondsRemaining;
+        }
+    }
+
     public readonly struct OvertimeStartedEvent
     {
 
@@ -248,5 +311,4 @@ namespace Project.Scripts.Services.Events
             EnergyAmount = energyAmount;
         }
     }
-
 }

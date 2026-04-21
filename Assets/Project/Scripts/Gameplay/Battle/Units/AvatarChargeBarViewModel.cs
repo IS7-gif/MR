@@ -1,9 +1,12 @@
 using System;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Game;
+using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Rules;
 using R3;
+using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.Units
 {
@@ -11,22 +14,32 @@ namespace Project.Scripts.Gameplay.Battle.Units
     {
         public ReactiveProperty<float> FillFraction { get; } = new(0f);
         public ReactiveProperty<bool> IsReady { get; } = new(false);
+        public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
 
 
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
-        private bool _isEnergyReady;
+        private readonly BattleSide _side;
+        private readonly int _activationEnergyCost;
+        private bool _hasSufficientEnergy;
+        private bool _isOnCooldown;
 
 
-        public AvatarChargeBarViewModel(EventBus eventBus, BattleSide side, IBattleActionRuntimeService battleActionRuntimeService)
+        public AvatarChargeBarViewModel(
+            EventBus eventBus,
+            BattleSide side,
+            int activationEnergyCost,
+            IUnitActivationCooldownService cooldownService,
+            IBattleActionRuntimeService battleActionRuntimeService)
         {
             _battleActionRuntimeService = battleActionRuntimeService;
+            _side = side;
+            _activationEnergyCost = activationEnergyCost;
+            _hasSufficientEnergy = activationEnergyCost <= 0;
+            _isOnCooldown = cooldownService.IsAvatarOnCooldown(side);
 
-            if (side == BattleSide.Player)
-                _subscriptions.Add(eventBus.Subscribe<PlayerAvatarEnergyChangedEvent>(OnPlayerEnergyChanged));
-            else
-                _subscriptions.Add(eventBus.Subscribe<EnemyAvatarEnergyChangedEvent>(OnEnemyEnergyChanged));
-
+            _subscriptions.Add(eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
+            _subscriptions.Add(eventBus.Subscribe<AvatarCooldownChangedEvent>(OnAvatarCooldownChanged));
             _subscriptions.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshReadyState()));
         }
 
@@ -34,31 +47,55 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             FillFraction.Dispose();
             IsReady.Dispose();
+            ActivationBlockReason.Dispose();
             _subscriptions.Dispose();
         }
 
-
-        private void OnPlayerEnergyChanged(PlayerAvatarEnergyChangedEvent e)
+        private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)
         {
-            ApplyEnergy(e.Current, e.Max);
-        }
+            if (e.Side != _side)
+                return;
 
-        private void OnEnemyEnergyChanged(EnemyAvatarEnergyChangedEvent e)
-        {
-            ApplyEnergy(e.Current, e.Max);
-        }
-
-        private void ApplyEnergy(int current, int max)
-        {
-            FillFraction.Value = max > 0 ? (float)current / max : 0f;
-            _isEnergyReady = max > 0 && current >= max;
+            FillFraction.Value = _activationEnergyCost > 0 ? Mathf.Clamp01((float)e.Current / _activationEnergyCost) : 0f;
+            _hasSufficientEnergy = _activationEnergyCost <= 0 || e.Current >= _activationEnergyCost;
             RefreshReadyState();
         }
 
         private void RefreshReadyState()
         {
-            var canActivate = _battleActionRuntimeService.Evaluate(BattleActionKind.AvatarActivation).IsAllowed;
-            IsReady.Value = _isEnergyReady && canActivate;
+            var gateResult = _battleActionRuntimeService.Evaluate(BattleActionKind.AvatarActivation);
+            if (false == gateResult.IsAllowed)
+            {
+                IsReady.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.BlockedByPhase;
+                return;
+            }
+
+            if (false == _hasSufficientEnergy)
+            {
+                IsReady.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.InsufficientEnergy;
+                return;
+            }
+
+            if (_isOnCooldown)
+            {
+                IsReady.Value = false;
+                ActivationBlockReason.Value = UnitActivationBlockReason.Cooldown;
+                return;
+            }
+
+            IsReady.Value = true;
+            ActivationBlockReason.Value = UnitActivationBlockReason.None;
+        }
+
+        private void OnAvatarCooldownChanged(AvatarCooldownChangedEvent e)
+        {
+            if (e.Side != _side)
+                return;
+
+            _isOnCooldown = e.RemainingSeconds > 0f;
+            RefreshReadyState();
         }
     }
 }

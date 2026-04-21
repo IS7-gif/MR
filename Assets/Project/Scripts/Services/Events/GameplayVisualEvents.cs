@@ -43,19 +43,6 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct AvatarTileBonusActivatedEvent
-    {
-        public BattleSide Side { get; }
-        public TileKind Kind { get; }
-
-
-        public AvatarTileBonusActivatedEvent(BattleSide side, TileKind kind)
-        {
-            Side = side;
-            Kind = kind;
-        }
-    }
-
     public readonly struct EnemyAttackEvent
     {
         public int Damage { get; }

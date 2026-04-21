@@ -10,22 +10,22 @@ namespace Project.Scripts.Services.Timer
 {
     public class BattleTimerAnnouncementService : IStartable, IDisposable
     {
-        private readonly BattleTimerConfig _timerConfig;
+        private readonly BattleFlowConfig _battleFlowConfig;
         private readonly BoardAnnouncementConfig _announcementConfig;
         private readonly IBoardAnnouncementService _announcementService;
         private readonly IDisposable _timerSub;
 
 
         public BattleTimerAnnouncementService(
-            BattleTimerConfig timerConfig,
+            BattleFlowConfig battleFlowConfig,
             BoardAnnouncementConfig announcementConfig,
             EventBus eventBus,
             IBoardAnnouncementService announcementService)
         {
-            _timerConfig = timerConfig;
+            _battleFlowConfig = battleFlowConfig;
             _announcementConfig = announcementConfig;
             _announcementService = announcementService;
-            _timerSub = eventBus.Subscribe<BattleTimerChangedEvent>(OnTimerChanged);
+            _timerSub = eventBus.Subscribe<BattleFlowCountdownTickEvent>(OnTimerChanged);
         }
 
 
@@ -39,15 +39,15 @@ namespace Project.Scripts.Services.Timer
         }
 
 
-        private void OnTimerChanged(BattleTimerChangedEvent e)
+        private void OnTimerChanged(BattleFlowCountdownTickEvent e)
         {
             TryShowCountdown(e);
         }
 
-        private void TryShowCountdown(BattleTimerChangedEvent e)
+        private void TryShowCountdown(BattleFlowCountdownTickEvent e)
         {
-            var secondsLeft = (int)e.TimeRemaining;
-            if (secondsLeft <= 0 || secondsLeft > _timerConfig.CountdownThreshold)
+            var secondsLeft = e.SecondsRemaining;
+            if (secondsLeft <= 0 || secondsLeft > _battleFlowConfig.CountdownThreshold)
                 return;
 
             var countdownParams = new BoardAnnouncementParams
@@ -61,6 +61,5 @@ namespace Project.Scripts.Services.Timer
 
             _announcementService.Show(secondsLeft.ToString(), countdownParams).Forget();
         }
-
     }
 }

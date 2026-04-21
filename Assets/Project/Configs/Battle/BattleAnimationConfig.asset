@@ -26,8 +26,6 @@ MonoBehaviour:
   _readyPulseDuration: 0.6
   _readyPulseAlpha: 0.4
   _readyPulseEase: 4
-  _energyFillDuration: 0.35
-  _energyFillEase: 9
   _energyTransferDuration: 0.5
   _energyTransferWaveAmplitude: 0
   _energyTransferFlightEase: 4

@@ -1,4 +1,5 @@
 using System;
+using Project.Scripts.Shared.BattleFlow;
 using R3;
 
 namespace Project.Scripts.Services.Board
@@ -7,13 +8,13 @@ namespace Project.Scripts.Services.Board
     {
         public ReadOnlyReactiveProperty<BoardRuntimeState> State => _state;
         public int CurrentVersion => _currentVersion;
-        public bool IsRunning => _state.Value == BoardRuntimeState.Running;
+        public bool IsRunning => _state.Value == BoardRuntimeState.MatchPhase;
         public bool IsStoppingForOvertime => _state.Value == BoardRuntimeState.StoppingForOvertime;
         public bool IsFrozen => _state.Value == BoardRuntimeState.Frozen;
-        public bool CanAcceptInput => _state.Value == BoardRuntimeState.Running;
+        public bool CanAcceptInput => _state.Value == BoardRuntimeState.MatchPhase;
 
 
-        private readonly ReactiveProperty<BoardRuntimeState> _state = new(BoardRuntimeState.Running);
+        private readonly ReactiveProperty<BoardRuntimeState> _state = new(BoardRuntimeState.MatchPhase);
         private int _currentVersion;
 
 
@@ -27,9 +28,25 @@ namespace Project.Scripts.Services.Board
             return version == _currentVersion;
         }
 
+        public void ApplyBattleFlowPhase(BattlePhaseKind phase)
+        {
+            if (IsFrozen || IsStoppingForOvertime)
+                return;
+
+            var nextState = phase == BattlePhaseKind.Match
+                ? BoardRuntimeState.MatchPhase
+                : BoardRuntimeState.HeroPhaseSuspended;
+
+            if (_state.Value == nextState)
+                return;
+
+            _currentVersion++;
+            _state.Value = nextState;
+        }
+
         public void RequestOvertimeStop()
         {
-            if (false == IsRunning)
+            if (IsFrozen || IsStoppingForOvertime)
                 return;
 
             _currentVersion++;
@@ -41,7 +58,7 @@ namespace Project.Scripts.Services.Board
             if (IsFrozen)
                 return;
 
-            if (IsRunning)
+            if (_state.Value != BoardRuntimeState.Frozen)
                 _currentVersion++;
 
             _state.Value = BoardRuntimeState.Frozen;

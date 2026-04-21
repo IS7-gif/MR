@@ -1,5 +1,6 @@
 using System;
 using Project.Scripts.Configs.Battle;
+using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Heroes;
@@ -16,6 +17,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public BattleAnimationConfig AnimConfig { get; }
         public EventBus EventBus { get; }
         public HeroActionType AbilityType { get; }
+        public int ActivationEnergyCost { get; }
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool> IsDefeated { get; } = new(false);
         public int CurrentHP { get; private set; }
@@ -35,6 +37,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Color slotColor, Sprite portrait,
             int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType,
+            int activationEnergyCost,
+            IUnitActivationCooldownService cooldownService,
             IBattleActionRuntimeService battleActionRuntimeService)
         {
             Side = side;
@@ -43,12 +47,13 @@ namespace Project.Scripts.Gameplay.Battle.Units
             AnimConfig = animConfig;
             EventBus = eventBus;
             AbilityType = abilityType;
+            ActivationEnergyCost = activationEnergyCost;
             _prevHP = initialHP;
             CurrentHP = initialHP;
             MaxHP = maxHP;
             HPFill = new ReactiveProperty<float>(maxHP > 0 ? (float)initialHP / maxHP : 1f);
             IsDefeated.Value = initialHP <= 0;
-            EnergyBar = new AvatarChargeBarViewModel(eventBus, side, battleActionRuntimeService);
+            EnergyBar = new AvatarChargeBarViewModel(eventBus, side, activationEnergyCost, cooldownService, battleActionRuntimeService);
 
             if (side == BattleSide.Player)
             {

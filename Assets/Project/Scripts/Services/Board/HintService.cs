@@ -28,6 +28,7 @@ namespace Project.Scripts.Services.Board
         private readonly TileKindPaletteConfig _palette;
         private IDisposable _matchSub;
         private IDisposable _stateSub;
+        private IDisposable _boardRuntimeSub;
         private CancellationTokenSource _cts;
         private Tiles.Tile _firstHintedTile;
         private Tiles.Tile _secondHintedTile;
@@ -56,8 +57,10 @@ namespace Project.Scripts.Services.Board
 
             _matchSub = _eventBus.Subscribe<MatchPlayedEvent>(OnMatchPlayed);
             _stateSub = _gameStateService.State.Subscribe(OnGameStateChanged);
+            _boardRuntimeSub = _boardRuntimeService.State.Subscribe(_ => OnBoardRuntimeChanged());
 
-            RestartTimer();
+            if (_boardRuntimeService.CanAcceptInput)
+                RestartTimer();
         }
 
         public void Dispose()
@@ -67,12 +70,17 @@ namespace Project.Scripts.Services.Board
             _matchSub = null;
             _stateSub?.Dispose();
             _stateSub = null;
+            _boardRuntimeSub?.Dispose();
+            _boardRuntimeSub = null;
             CancelTimer();
         }
 
 
         private void OnMatchPlayed(MatchPlayedEvent _)
         {
+            if (false == _boardRuntimeService.CanAcceptInput)
+                return;
+
             HideHint();
             RestartTimer();
         }
@@ -84,8 +92,22 @@ namespace Project.Scripts.Services.Board
                 HideHint();
                 CancelTimer();
             }
-            else if (!_firstHintedTile && !_secondHintedTile)
+            else if (!_firstHintedTile && !_secondHintedTile && _boardRuntimeService.CanAcceptInput)
                 RestartTimer();
+        }
+
+        private void OnBoardRuntimeChanged()
+        {
+            if (_boardRuntimeService.CanAcceptInput)
+            {
+                if (_gameStateService.IsPlaying && !_firstHintedTile && !_secondHintedTile)
+                    RestartTimer();
+
+                return;
+            }
+
+            HideHint();
+            CancelTimer();
         }
 
         private void RestartTimer()

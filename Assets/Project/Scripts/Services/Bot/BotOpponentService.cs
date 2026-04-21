@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Battle;
+using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Bot;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
@@ -20,6 +22,8 @@ namespace Project.Scripts.Services.Bot
         private readonly EventBus _eventBus;
         private readonly IHeroService _heroService;
         private readonly IGameStateService _gameStateService;
+        private readonly IBattleFlowService _battleFlowService;
+        private readonly IBattleSideEnergyService _battleSideEnergyService;
         private readonly IEnemyAvatarChargeService _enemyChargeService;
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
@@ -38,6 +42,8 @@ namespace Project.Scripts.Services.Bot
             EventBus eventBus,
             IHeroService heroService,
             IGameStateService gameStateService,
+            IBattleFlowService battleFlowService,
+            IBattleSideEnergyService battleSideEnergyService,
             IEnemyAvatarChargeService enemyChargeService,
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
@@ -48,6 +54,8 @@ namespace Project.Scripts.Services.Bot
             _eventBus = eventBus;
             _heroService = heroService;
             _gameStateService = gameStateService;
+            _battleFlowService = battleFlowService;
+            _battleSideEnergyService = battleSideEnergyService;
             _enemyChargeService = enemyChargeService;
             _enemyState = enemyState;
             _groupDefense = groupDefense;
@@ -87,7 +95,7 @@ namespace Project.Scripts.Services.Bot
         {
             while (false == ct.IsCancellationRequested)
             {
-                var interval = _botConfig.EnemyChargeTickInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
+                var interval = _botConfig.MatchEnergyTickInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
                 var cancelled = await UniTask
                     .Delay(TimeSpan.FromSeconds(interval), cancellationToken: ct)
                     .SuppressCancellationThrow();
@@ -95,8 +103,11 @@ namespace Project.Scripts.Services.Bot
                 if (cancelled || false == _gameStateService.IsPlaying)
                     return;
 
-                var energyByKind = GenerateRandomCascadeEnergy();
-                _enemyChargeService.AddEnergyFromCascades(energyByKind);
+                if (_battleFlowService.Snapshot.Phase != BattlePhaseKind.Match)
+                    continue;
+
+                var generatedEnergy = GenerateSimulatedMatchEnergy();
+                _battleSideEnergyService.AddEnergy(BattleSide.Enemy, generatedEnergy);
 
                 if (_enemyChargeService.IsReady && false == _dischargeScheduled)
                 {
@@ -116,58 +127,16 @@ namespace Project.Scripts.Services.Bot
             return 1f;
         }
 
-        private Dictionary<TileKind, float> GenerateRandomCascadeEnergy()
+        private int GenerateSimulatedMatchEnergy()
         {
-            var energyByKind = new Dictionary<TileKind, float>();
-
             var variation = 1f + UnityEngine.Random.Range(-_botConfig.CascadeVariation, _botConfig.CascadeVariation);
-            var baseEnergy = _botConfig.BaseEnergyPerTick * variation * RollCascadeMultiplier();
-
-            var availableTypes = new[]
-            {
-                TileKind.Fire,
-                TileKind.Water,
-                TileKind.Nature,
-                TileKind.Light,
-                TileKind.Void
-            };
-
-            if (UnityEngine.Random.value < _botConfig.PrimaryTileProbability)
-                energyByKind[_slotLayoutConfig.AvatarSlotKind] = baseEnergy;
-
-            var otherCount = UnityEngine.Random.Range(1, 4);
-            var shuffledTypes = ShuffleArray(availableTypes);
-
-            for (var i = 0; i < shuffledTypes.Length; i++)
-            {
-                var tileType = shuffledTypes[i];
-                if (tileType == _slotLayoutConfig.AvatarSlotKind)
-                    continue;
-
-                if (energyByKind.Count >= otherCount)
-                    break;
-
-                energyByKind[tileType] = baseEnergy * UnityEngine.Random.Range(0.3f, 0.8f);
-            }
-
-            return energyByKind;
-        }
-
-        private T[] ShuffleArray<T>(T[] array)
-        {
-            var shuffled = (T[])array.Clone();
-            for (int i = 0; i < shuffled.Length; i++)
-            {
-                var randomIndex = UnityEngine.Random.Range(i, shuffled.Length);
-                (shuffled[i], shuffled[randomIndex]) = (shuffled[randomIndex], shuffled[i]);
-            }
-            
-            return shuffled;
+            var baseEnergy = _botConfig.BaseMatchEnergyPerTick * variation * RollCascadeMultiplier();
+            return Mathf.Max(1, Mathf.RoundToInt(baseEnergy));
         }
 
         private async UniTaskVoid ScheduleDischarge(CancellationToken ct)
         {
-            var delay = _engine.GenerateDischargeDelay();
+            var delay = _engine.GenerateAvatarActivationDelay();
 
             var cancelled = await UniTask
                 .Delay(TimeSpan.FromSeconds(delay), cancellationToken: ct)
@@ -176,6 +145,9 @@ namespace Project.Scripts.Services.Bot
             _dischargeScheduled = false;
 
             if (cancelled || false == _gameStateService.IsPlaying)
+                return;
+
+            if (_battleFlowService.Snapshot.Phase != BattlePhaseKind.Hero)
                 return;
 
             var abilityPower = _enemyChargeService.AbilityPower;
@@ -268,7 +240,7 @@ namespace Project.Scripts.Services.Bot
         {
             while (false == ct.IsCancellationRequested)
             {
-                var interval = _botConfig.HeroEnergyTickInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
+                var interval = _botConfig.HeroActivationCheckInterval / _battleEconomyModifier.AutoEnergyIntervalMultiplier;
                 var cancelled = await UniTask
                     .Delay(TimeSpan.FromSeconds(interval), cancellationToken: ct)
                     .SuppressCancellationThrow();
@@ -276,19 +248,19 @@ namespace Project.Scripts.Services.Bot
                 if (cancelled || false == _gameStateService.IsPlaying)
                     return;
 
+                if (_battleFlowService.Snapshot.Phase != BattlePhaseKind.Hero)
+                    continue;
+
                 var slots = _heroService.GetSlots(BattleSide.Enemy);
                 var pickedIndex = _engine.PickRandomAssignedSlot(slots);
 
                 if (pickedIndex < 0)
                     continue;
 
-                var energyAmount = Mathf.RoundToInt(_botConfig.HeroEnergyPerTick * RollCascadeMultiplier() * _battleEconomyModifier.CascadeEnergyMultiplier);
-                _heroService.AddEnemyHeroEnergy(pickedIndex, energyAmount);
-
                 var currentEnemySlots = _heroService.GetSlots(BattleSide.Enemy);
                 var updatedSlot = currentEnemySlots[pickedIndex];
 
-                if (!updatedSlot.IsReady || _heroActivationPending[pickedIndex])
+                if (false == _heroService.CanActivate(BattleSide.Enemy, pickedIndex) || _heroActivationPending[pickedIndex])
                     continue;
 
                 if (updatedSlot.ActionType == HeroActionType.HealAlly)
@@ -334,10 +306,13 @@ namespace Project.Scripts.Services.Bot
             if (cancelled || false == _gameStateService.IsPlaying)
                 return;
 
+            if (_battleFlowService.Snapshot.Phase != BattlePhaseKind.Hero)
+                return;
+
             var enemySlots = _heroService.GetSlots(BattleSide.Enemy);
             var slot = enemySlots[slotIndex];
 
-            if (!slot.IsReady)
+            if (false == _heroService.CanActivate(BattleSide.Enemy, slotIndex))
                 return;
 
             if (slot.ActionType == HeroActionType.DealDamage)
