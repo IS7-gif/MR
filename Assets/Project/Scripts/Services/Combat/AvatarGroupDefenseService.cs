@@ -4,6 +4,7 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.GroupDefense;
 using Project.Scripts.Shared.Heroes;
+using R3;
 
 namespace Project.Scripts.Services.Combat
 {
@@ -14,14 +15,15 @@ namespace Project.Scripts.Services.Combat
 
         private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly EventBus _eventBus;
-
         private readonly bool[] _playerDefending = new bool[SlotCount];
         private readonly bool[] _enemyDefending = new bool[SlotCount];
-
-        private AvatarDefenseSnapshot _playerSnapshot;
-        private AvatarDefenseSnapshot _enemySnapshot;
-
+        private readonly ReactiveProperty<AvatarDefenseSnapshot> _playerDefense;
+        private readonly ReactiveProperty<AvatarDefenseSnapshot> _enemyDefense;
         private IDisposable _subscription;
+
+
+        public ReadOnlyReactiveProperty<AvatarDefenseSnapshot> PlayerDefense => _playerDefense;
+        public ReadOnlyReactiveProperty<AvatarDefenseSnapshot> EnemyDefense => _enemyDefense;
 
 
         public AvatarGroupDefenseService(LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
@@ -33,8 +35,8 @@ namespace Project.Scripts.Services.Combat
             InitDefending(_playerDefending, levelConfig.PlayerHeroes);
             InitDefending(_enemyDefending, levelConfig.EnemyHeroes);
 
-            _playerSnapshot = ComputeSnapshot(_playerDefending);
-            _enemySnapshot = ComputeSnapshot(_enemyDefending);
+            _playerDefense = new ReactiveProperty<AvatarDefenseSnapshot>(ComputeSnapshot(_playerDefending));
+            _enemyDefense = new ReactiveProperty<AvatarDefenseSnapshot>(ComputeSnapshot(_enemyDefending));
 
             _subscription = _eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated);
         }
@@ -43,40 +45,39 @@ namespace Project.Scripts.Services.Combat
         public bool IsExposed(BattleSide side)
         {
             return side == BattleSide.Player
-                ? _playerSnapshot.IsExposed
-                : _enemySnapshot.IsExposed;
+                ? _playerDefense.Value.IsExposed
+                : _enemyDefense.Value.IsExposed;
         }
 
         public AvatarDefenseSnapshot GetSnapshot(BattleSide side)
         {
-            return side == BattleSide.Player ? _playerSnapshot : _enemySnapshot;
+            return side == BattleSide.Player ? _playerDefense.Value : _enemyDefense.Value;
         }
 
         public void Dispose()
         {
             _subscription?.Dispose();
             _subscription = null;
+            _playerDefense.Dispose();
+            _enemyDefense.Dispose();
         }
 
 
         private void OnHeroDefeated(HeroDefeatedEvent e)
         {
             var defending = e.Side == BattleSide.Player ? _playerDefending : _enemyDefending;
-            var prev = e.Side == BattleSide.Player ? _playerSnapshot : _enemySnapshot;
+            var property = e.Side == BattleSide.Player ? _playerDefense : _enemyDefense;
+            var prev = property.Value;
 
             if (e.SlotIndex >= 0 && e.SlotIndex < SlotCount)
                 defending[e.SlotIndex] = false;
 
             var next = ComputeSnapshot(defending);
+            property.Value = next;
 
-            if (e.Side == BattleSide.Player)
-                _playerSnapshot = next;
-            else
-                _enemySnapshot = next;
-
-            if (next.IsExposed && !prev.IsExposed)
+            if (next.IsExposed && false == prev.IsExposed)
             {
-                var groupId = (!prev.IsGroup1Destroyed && next.IsGroup1Destroyed)
+                var groupId = (false == prev.IsGroup1Destroyed && next.IsGroup1Destroyed)
                     ? HeroGroupId.Group1
                     : HeroGroupId.Group2;
 
@@ -88,7 +89,6 @@ namespace Project.Scripts.Services.Combat
         {
             var g1 = IsGroupDestroyed(defending, _slotLayoutConfig.Group1SlotIndices);
             var g2 = IsGroupDestroyed(defending, _slotLayoutConfig.Group2SlotIndices);
-            
             return new AvatarDefenseSnapshot(g1, g2);
         }
 

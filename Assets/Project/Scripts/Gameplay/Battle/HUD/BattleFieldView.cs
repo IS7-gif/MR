@@ -47,6 +47,20 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
         [SerializeField] private Transform _announcementAnchor;
 
+        [Space(10)]
+        
+        [Tooltip("Щит первой группы героев врага - скрывается, когда первая группа уничтожена")]
+        [SerializeField] private GroupShieldView _enemyGroup1Shield;
+
+        [Tooltip("Щит второй группы героев врага - скрывается, когда вторая группа уничтожена")]
+        [SerializeField] private GroupShieldView _enemyGroup2Shield;
+        
+        [Tooltip("Щит первой группы героев игрока - скрывается, когда первая группа уничтожена")]
+        [SerializeField] private GroupShieldView _playerGroup1Shield;
+
+        [Tooltip("Щит второй группы героев игрока - скрывается, когда вторая группа уничтожена")]
+        [SerializeField] private GroupShieldView _playerGroup2Shield;
+
 
         private IInputService _inputService;
         private IBoardBoundsProvider _boardBounds;
@@ -56,6 +70,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         protected override UniTask OnBindViewModel()
         {
             BindSlots();
+            BindGroupShields();
             PublishAnnouncementAnchor();
             SetupTargeting();
             SetupEnergyFX();
@@ -116,6 +131,17 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             BindHeroRow(_playerHeroSlots, ViewModel.PlayerHeroSlots);
             BindHeroRow(_enemyHeroSlots, ViewModel.EnemyHeroSlots);
+        }
+
+        private void BindGroupShields()
+        {
+            var playerDef = ViewModel.GroupDefense.PlayerDefense;
+            var enemyDef = ViewModel.GroupDefense.EnemyDefense;
+
+            _playerGroup1Shield?.Bind(playerDef.Select(s => false == s.IsGroup1Destroyed));
+            _playerGroup2Shield?.Bind(playerDef.Select(s => false == s.IsGroup2Destroyed));
+            _enemyGroup1Shield?.Bind(enemyDef.Select(s => false == s.IsGroup1Destroyed));
+            _enemyGroup2Shield?.Bind(enemyDef.Select(s => false == s.IsGroup2Destroyed));
         }
 
         private void BindHeroRow(HeroSlotView[] views, HeroSlotViewModel[] viewModels)
