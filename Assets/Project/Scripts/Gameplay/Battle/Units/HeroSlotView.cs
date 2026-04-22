@@ -102,6 +102,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindHitReaction(viewModel);
             BindDeathState(viewModel);
             BindAvailabilityState(viewModel);
+            GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
         }
 
         public bool IsValidTarget(UnitDescriptor source)

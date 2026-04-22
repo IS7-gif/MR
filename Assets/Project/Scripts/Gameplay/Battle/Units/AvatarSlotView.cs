@@ -110,6 +110,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindHitReaction(viewModel);
             BindDeathState(viewModel);
             BindAvailabilityState(viewModel);
+            GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
         }
 
         public async UniTask PlayResultPulse(AvatarPulseStepConfig config)
