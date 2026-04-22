@@ -17,4 +17,4 @@ MonoBehaviour:
   _abilityType: 1
   _abilityPower: 80
   _portrait: {fileID: 21300000, guid: 02e08ab308c40d14d969abb7c14e50e8, type: 3}
-  _activationCooldownSeconds: 0
+  _activationCooldownSeconds: 3

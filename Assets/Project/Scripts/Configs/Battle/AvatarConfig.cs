@@ -22,7 +22,7 @@ namespace Project.Scripts.Configs.Battle
         [SerializeField] private Sprite _portrait;
 
         [Tooltip("Кулдаун повторной активации аватара в секундах")]
-        [SerializeField] private float _activationCooldownSeconds;
+        [SerializeField] private float _activationCooldownSeconds = 3;
 
 
         public int MaxHP => _maxHP;
