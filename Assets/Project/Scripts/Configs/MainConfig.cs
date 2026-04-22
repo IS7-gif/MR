@@ -64,8 +64,8 @@ namespace Project.Scripts.Configs
         [Tooltip("Фазы боя: число раундов, длительности Match/Hero Phase и правило переноса энергии между раундами")]
         [SerializeField] private BattleFlowConfig _battleFlowConfig;
 
-        [Tooltip("Овертайм: урон истощения и спец-анимации этого модуля")]
-        [SerializeField] private OvertimeConfig _overtimeConfig;
+        [Tooltip("Фаза сжигания: урон и спец-анимации этого модуля")]
+        [SerializeField] private BurndownConfig _burndownConfig;
 
         [Tooltip("Смерть юнитов: длительности анимаций и задержки при гибели героев и аватаров")]
         [SerializeField] private UnitDeathConfig _unitDeathConfig;
@@ -101,7 +101,7 @@ namespace Project.Scripts.Configs
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
         public BattleTimerConfig BattleTimerConfig => _battleTimerConfig;
         public BattleFlowConfig BattleFlowConfig => _battleFlowConfig;
-        public OvertimeConfig OvertimeConfig => _overtimeConfig;
+        public BurndownConfig BurndownConfig => _burndownConfig;
         public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;
         public AutoEnergyConfig AutoEnergyConfig => _autoEnergyConfig;
         public EscalationConfig EscalationConfig => _escalationConfig;

@@ -1,6 +1,6 @@
 namespace Project.Scripts.Services.Timer
 {
-    public interface IOvertimeService
+    public interface IBurndownService
     {
         bool IsActive { get; }
         void Begin();

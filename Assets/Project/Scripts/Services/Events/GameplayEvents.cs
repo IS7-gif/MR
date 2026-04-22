@@ -285,7 +285,7 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct OvertimeStartedEvent
+    public readonly struct BurndownStartedEvent
     {
 
     }

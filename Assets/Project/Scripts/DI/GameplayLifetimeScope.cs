@@ -22,7 +22,7 @@ namespace Project.Scripts.DI
         protected override void Configure(IContainerBuilder builder)
         {
             const bool EnableEscalationModule = false;
-            const bool EnableOvertimeModule = true;
+            const bool EnableBurndownModule = true;
             
 
             var levelDatabase = Parent.Container.Resolve<LevelDatabase>();
@@ -72,24 +72,24 @@ namespace Project.Scripts.DI
             builder.Register<IBattleFlowService, BattleFlowService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<Project.Scripts.Services.BattleFlow.BattleFlowPhaseCoordinator>();
 
-            if (EnableOvertimeModule)
+            if (EnableBurndownModule)
             {
-                builder.Register<IOvertimeService, OvertimeService>(Lifetime.Singleton);
-                builder.Register<IOvertimeTransitionCoordinator, OvertimeTransitionCoordinator>(Lifetime.Singleton);
+                builder.Register<IBurndownService, BurndownService>(Lifetime.Singleton);
+                builder.Register<IBurndownTransitionCoordinator, BurndownTransitionCoordinator>(Lifetime.Singleton);
             }
             else
             {
-                builder.Register<IOvertimeService, DefaultOvertimeService>(Lifetime.Singleton);
-                builder.Register<IOvertimeTransitionCoordinator, DefaultOvertimeTransitionCoordinator>(Lifetime.Singleton);
+                builder.Register<IBurndownService, DefaultBurndownService>(Lifetime.Singleton);
+                builder.Register<IBurndownTransitionCoordinator, DefaultBurndownTransitionCoordinator>(Lifetime.Singleton);
             }
 
             builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<BoardAnnouncementService>().As<IBoardAnnouncementService>();
             builder.RegisterEntryPoint<BattleTimerAnnouncementService>();
 
-            if (EnableOvertimeModule)
+            if (EnableBurndownModule)
             {
-                builder.RegisterEntryPoint<OvertimeAnnouncementService>();
+                builder.RegisterEntryPoint<BurndownAnnouncementService>();
             }
 
             if (EnableEscalationModule)

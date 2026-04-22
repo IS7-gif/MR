@@ -5,7 +5,7 @@ namespace Project.Scripts.Shared.BattleFlow
         Match,
         PendingHero,
         Hero,
-        PendingOvertime,
+        PendingBurndown,
         Finished
     }
 }

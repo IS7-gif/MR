@@ -3,7 +3,7 @@ using Project.Scripts.Shared.Heroes;
 
 namespace Project.Scripts.Shared.Timer
 {
-    public struct OvertimeDrainCursor
+    public struct BurndownDrainCursor
     {
         private int _targetIndex;
 

@@ -9,9 +9,9 @@ using Random = System.Random;
 
 namespace Project.Scripts.Services.Timer
 {
-    public class OvertimeService : IOvertimeService
+    public class BurndownService : IBurndownService
     {
-        private readonly OvertimeConfig _config;
+        private readonly BurndownConfig _config;
         private readonly IHeroService _heroService;
         private readonly IPlayerStateService _playerState;
         private readonly IEnemyStateService _enemyState;
@@ -22,15 +22,15 @@ namespace Project.Scripts.Services.Timer
 
         private bool _isActive;
         private float _drainAccumulator;
-        private OvertimeDrainCursor _playerCursor;
-        private OvertimeDrainCursor _enemyCursor;
+        private BurndownDrainCursor _playerCursor;
+        private BurndownDrainCursor _enemyCursor;
 
 
         public bool IsActive => _isActive;
 
 
-        public OvertimeService(
-            OvertimeConfig config,
+        public BurndownService(
+            BurndownConfig config,
             IHeroService heroService,
             IPlayerStateService playerState,
             IEnemyStateService enemyState,
@@ -57,8 +57,8 @@ namespace Project.Scripts.Services.Timer
             _playerCursor.Initialize(_heroService.GetSlots(BattleSide.Player));
             _enemyCursor.Initialize(_heroService.GetSlots(BattleSide.Enemy));
 
-            _eventBus.Publish(new OvertimeDrainTargetChangedEvent(BattleSide.Player, _playerCursor.TargetIndex));
-            _eventBus.Publish(new OvertimeDrainTargetChangedEvent(BattleSide.Enemy, _enemyCursor.TargetIndex));
+            _eventBus.Publish(new BurndownDrainTargetChangedEvent(BattleSide.Player, _playerCursor.TargetIndex));
+            _eventBus.Publish(new BurndownDrainTargetChangedEvent(BattleSide.Enemy, _enemyCursor.TargetIndex));
         }
 
         public void Tick(float deltaTime)
@@ -113,12 +113,12 @@ namespace Project.Scripts.Services.Timer
                 _eventBus.Publish(new PlayerDefeatedEvent());
         }
 
-        private void DrainSide(BattleSide side, ref OvertimeDrainCursor cursor, int heroDamage, int avatarDamage)
+        private void DrainSide(BattleSide side, ref BurndownDrainCursor cursor, int heroDamage, int avatarDamage)
         {
             var slots = _heroService.GetSlots(side);
 
             if (cursor.AdvanceIfDead(slots))
-                _eventBus.Publish(new OvertimeDrainTargetChangedEvent(side, cursor.TargetIndex));
+                _eventBus.Publish(new BurndownDrainTargetChangedEvent(side, cursor.TargetIndex));
 
             if (cursor.IsDrainingAvatar)
             {
@@ -135,7 +135,7 @@ namespace Project.Scripts.Services.Timer
             if (false == slots[idx].IsAlive)
             {
                 cursor.AdvanceIfDead(slots);
-                _eventBus.Publish(new OvertimeDrainTargetChangedEvent(side, cursor.TargetIndex));
+                _eventBus.Publish(new BurndownDrainTargetChangedEvent(side, cursor.TargetIndex));
             }
         }
     }

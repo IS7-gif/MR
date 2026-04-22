@@ -48,7 +48,7 @@ namespace Project.Scripts.Services.Game
 
         private void OnEnemyDefeated(EnemyDefeatedEvent _)
         {
-            if (false == IsPlaying && _state.Value != GameState.Overtime)
+            if (false == IsPlaying && _state.Value != GameState.Burndown)
                 return;
 
             _battleActionRuntimeService.MarkBlocked();
@@ -59,7 +59,7 @@ namespace Project.Scripts.Services.Game
 
         private void OnPlayerDefeated(PlayerDefeatedEvent _)
         {
-            if (false == IsPlaying && _state.Value != GameState.Overtime)
+            if (false == IsPlaying && _state.Value != GameState.Burndown)
                 return;
 
             _battleActionRuntimeService.MarkBlocked();

@@ -34,7 +34,7 @@ namespace Project.Scripts.Services.Combat
 
         public void Start()
         {
-            _subscriptions.Add(_eventBus.Subscribe<OvertimeStartedEvent>(_ => _isActive = false));
+            _subscriptions.Add(_eventBus.Subscribe<BurndownStartedEvent>(_ => _isActive = false));
             _subscriptions.Add(_gameStateService.State.Subscribe(OnGameStateChanged));
         }
 

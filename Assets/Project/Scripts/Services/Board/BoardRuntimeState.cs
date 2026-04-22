@@ -5,7 +5,7 @@ namespace Project.Scripts.Services.Board
         MatchPhase,
         MatchClosing,
         HeroPhaseSuspended,
-        StoppingForOvertime,
+        StoppingForBurndown,
         Frozen
     }
 }

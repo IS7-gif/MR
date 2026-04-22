@@ -7,7 +7,7 @@ namespace Project.Scripts.Shared.BattleFlow
         public BattlePhaseKind Phase { get; }
         public float TimeRemaining { get; }
         public EnergyCarryoverMode EnergyCarryoverMode { get; }
-        public bool IsTerminal => Phase == BattlePhaseKind.PendingOvertime || Phase == BattlePhaseKind.Finished;
+        public bool IsTerminal => Phase == BattlePhaseKind.PendingBurndown || Phase == BattlePhaseKind.Finished;
 
 
         public BattleFlowSnapshot(

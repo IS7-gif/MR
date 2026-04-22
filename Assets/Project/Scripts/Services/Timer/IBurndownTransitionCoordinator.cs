@@ -1,6 +1,6 @@
 namespace Project.Scripts.Services.Timer
 {
-    public interface IOvertimeTransitionCoordinator
+    public interface IBurndownTransitionCoordinator
     {
         bool IsStarted { get; }
         void RequestStart();

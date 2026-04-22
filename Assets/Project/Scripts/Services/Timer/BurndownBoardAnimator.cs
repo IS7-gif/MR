@@ -7,18 +7,18 @@ using VContainer.Unity;
 
 namespace Project.Scripts.Services.Timer
 {
-    public class OvertimeBoardAnimator : IStartable, IDisposable
+    public class BurndownBoardAnimator : IStartable, IDisposable
     {
-        private readonly OvertimeConfig _config;
+        private readonly BurndownConfig _config;
         private readonly IGridOperations _gridOps;
         private readonly IDisposable _subscription;
 
 
-        public OvertimeBoardAnimator(EventBus eventBus, OvertimeConfig config, IGridOperations gridOps)
+        public BurndownBoardAnimator(EventBus eventBus, BurndownConfig config, IGridOperations gridOps)
         {
             _config = config;
             _gridOps = gridOps;
-            _subscription = eventBus.Subscribe<OvertimeStartedEvent>(OnOvertimeStarted);
+            _subscription = eventBus.Subscribe<BurndownStartedEvent>(OnBurndownStarted);
         }
 
 
@@ -32,7 +32,7 @@ namespace Project.Scripts.Services.Timer
         }
 
 
-        private void OnOvertimeStarted(OvertimeStartedEvent _)
+        private void OnBurndownStarted(BurndownStartedEvent _)
         {
             _gridOps.CollapseAll(_config.CollapseAllDuration, _config.CollapseAllEase).Forget();
         }

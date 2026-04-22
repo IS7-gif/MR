@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6bd3f95f8d2e49b2aa9d4d67dbe6c311, type: 3}
-  m_Name: OvertimeConfig
+  m_Name: BurndownConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.OvertimeConfig
   _heroDrainPerSecond: 150
   _avatarDrainPerSecond: 250

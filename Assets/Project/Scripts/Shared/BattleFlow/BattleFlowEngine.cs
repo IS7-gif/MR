@@ -97,7 +97,7 @@ namespace Project.Scripts.Shared.BattleFlow
             _snapshot = new BattleFlowSnapshot(
                 _snapshot.CurrentRound,
                 _snapshot.TotalRounds,
-                BattlePhaseKind.PendingOvertime,
+                BattlePhaseKind.PendingBurndown,
                 0f,
                 _snapshot.EnergyCarryoverMode);
         }

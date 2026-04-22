@@ -62,8 +62,8 @@ namespace Project.Scripts.Gameplay
         private GameAudioController _gameAudioController;
         private IBattleTimerService _battleTimerService;
         private IBattleFlowService _battleFlowService;
-        private IOvertimeService _overtimeService;
-        private OvertimeConfig _overtimeConfig;
+        private IBurndownService _burndownService;
+        private BurndownConfig _burndownConfig;
         private IUnitActivationCooldownService _unitActivationCooldownService;
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
@@ -71,7 +71,7 @@ namespace Project.Scripts.Gameplay
         private DebugConfig _debugConfig;
         private IDisposable _boardRuntimeSubscription;
         private IDisposable _gameStateSubscription;
-        private IDisposable _overtimeStartedSubscription;
+        private IDisposable _burndownStartedSubscription;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -92,7 +92,7 @@ namespace Project.Scripts.Gameplay
                 return;
 
             _battleTimerService?.Tick(Time.deltaTime);
-            _overtimeService?.Tick(Time.deltaTime);
+            _burndownService?.Tick(Time.deltaTime);
 
             if (false == _gameStateService.IsPlaying)
                 return;
@@ -134,8 +134,8 @@ namespace Project.Scripts.Gameplay
             _boardRuntimeSubscription = null;
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = null;
-            _overtimeStartedSubscription?.Dispose();
-            _overtimeStartedSubscription = null;
+            _burndownStartedSubscription?.Dispose();
+            _burndownStartedSubscription = null;
 
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
@@ -166,8 +166,8 @@ namespace Project.Scripts.Gameplay
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
             IBattleFlowService battleFlowService,
-            IOvertimeService overtimeService,
-            OvertimeConfig overtimeConfig,
+            IBurndownService burndownService,
+            BurndownConfig burndownConfig,
             IUnitActivationCooldownService unitActivationCooldownService,
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
@@ -194,8 +194,8 @@ namespace Project.Scripts.Gameplay
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
             _battleFlowService = battleFlowService;
-            _overtimeService = overtimeService;
-            _overtimeConfig = overtimeConfig;
+            _burndownService = burndownService;
+            _burndownConfig = burndownConfig;
             _unitActivationCooldownService = unitActivationCooldownService;
             _hintConfig = hintConfig;
             _palette = palette;
@@ -288,10 +288,10 @@ namespace Project.Scripts.Gameplay
             _gameStateSubscription = _gameStateService.State.Subscribe(_ => RefreshPhaseOverlays());
             RefreshPhaseOverlays();
 
-            _overtimeStartedSubscription?.Dispose();
-            _overtimeStartedSubscription = _eventBus.Subscribe<OvertimeStartedEvent>(_ =>
+            _burndownStartedSubscription?.Dispose();
+            _burndownStartedSubscription = _eventBus.Subscribe<BurndownStartedEvent>(_ =>
             {
-                gridManager.CollapseAll(_overtimeConfig.CollapseAllDuration, _overtimeConfig.CollapseAllEase).Forget();
+                gridManager.CollapseAll(_burndownConfig.CollapseAllDuration, _burndownConfig.CollapseAllEase).Forget();
             });
 
             _gameResultPresenter.Initialize();

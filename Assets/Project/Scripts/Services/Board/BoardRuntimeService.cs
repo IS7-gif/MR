@@ -10,7 +10,7 @@ namespace Project.Scripts.Services.Board
         public ReadOnlyReactiveProperty<bool> IsResolvingState => _isResolving;
         public int CurrentVersion => _currentVersion;
         public bool IsRunning => CanContinueResolution;
-        public bool IsStoppingForOvertime => _state.Value == BoardRuntimeState.StoppingForOvertime;
+        public bool IsStoppingForBurndown => _state.Value == BoardRuntimeState.StoppingForBurndown;
         public bool IsFrozen => _state.Value == BoardRuntimeState.Frozen;
         public bool CanAcceptInput => _state.Value == BoardRuntimeState.MatchPhase;
         public bool CanContinueResolution => _state.Value is BoardRuntimeState.MatchPhase or BoardRuntimeState.MatchClosing;
@@ -34,7 +34,7 @@ namespace Project.Scripts.Services.Board
 
         public void ApplyBattleFlowPhase(BattlePhaseKind phase)
         {
-            if (IsFrozen || IsStoppingForOvertime)
+            if (IsFrozen || IsStoppingForBurndown)
                 return;
 
             var nextState = phase == BattlePhaseKind.Match
@@ -50,7 +50,7 @@ namespace Project.Scripts.Services.Board
 
         public void RequestMatchPhaseClose()
         {
-            if (IsFrozen || IsStoppingForOvertime)
+            if (IsFrozen || IsStoppingForBurndown)
                 return;
 
             if (_state.Value != BoardRuntimeState.MatchPhase)
@@ -71,13 +71,13 @@ namespace Project.Scripts.Services.Board
                 _isResolving.Value = false;
         }
 
-        public void RequestOvertimeStop()
+        public void RequestBurndownStop()
         {
-            if (IsFrozen || IsStoppingForOvertime)
+            if (IsFrozen || IsStoppingForBurndown)
                 return;
 
             _currentVersion++;
-            _state.Value = BoardRuntimeState.StoppingForOvertime;
+            _state.Value = BoardRuntimeState.StoppingForBurndown;
             _isResolving.Value = false;
         }
 

@@ -18,8 +18,8 @@ namespace Project.Scripts.Shared.Rules
                     : new BattleActionGateResult(BattleActionBlockReason.None);
             }
 
-            if (phase == BattleActionPhase.Overtime)
-                return new BattleActionGateResult(BattleActionBlockReason.Overtime);
+            if (phase == BattleActionPhase.Burndown)
+                return new BattleActionGateResult(BattleActionBlockReason.Burndown);
 
             if (phase == BattleActionPhase.Finished)
                 return new BattleActionGateResult(BattleActionBlockReason.Finished);
@@ -44,7 +44,7 @@ namespace Project.Scripts.Shared.Rules
     {
         MatchPhase,
         HeroPhase,
-        Overtime,
+        Burndown,
         Finished
     }
 
@@ -62,7 +62,7 @@ namespace Project.Scripts.Shared.Rules
         None,
         MatchPhase,
         HeroPhase,
-        Overtime,
+        Burndown,
         Finished
     }
 }

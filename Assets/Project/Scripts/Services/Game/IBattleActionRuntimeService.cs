@@ -9,7 +9,7 @@ namespace Project.Scripts.Services.Game
         ReadOnlyReactiveProperty<BattleActionRuntimeState> State { get; }
         int CurrentVersion { get; }
         bool IsRunning { get; }
-        bool IsStoppingForOvertime { get; }
+        bool IsStoppingForBurndown { get; }
         bool IsBlocked { get; }
         bool CanAcceptNormalActions { get; }
         BattleActionPhase CurrentPhase { get; }
@@ -17,7 +17,7 @@ namespace Project.Scripts.Services.Game
         bool IsCurrent(int version);
         BattleActionGateResult Evaluate(BattleActionKind actionKind);
         void ApplyBattleFlowPhase(BattlePhaseKind phase);
-        void RequestOvertimeStop();
+        void RequestBurndownStop();
         void MarkBlocked();
     }
 }

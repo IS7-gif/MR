@@ -17,7 +17,7 @@ namespace Project.Scripts.Services.BattleFlow
         private readonly IBoardRuntimeService _boardRuntimeService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IGameStateService _gameStateService;
-        private readonly IOvertimeTransitionCoordinator _overtimeTransitionCoordinator;
+        private readonly IBurndownTransitionCoordinator _burndownTransitionCoordinator;
         private readonly IPlayerStateService _playerStateService;
         private readonly IEnemyStateService _enemyStateService;
         private IDisposable _phaseChangedSubscription;
@@ -32,7 +32,7 @@ namespace Project.Scripts.Services.BattleFlow
             IBoardRuntimeService boardRuntimeService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IGameStateService gameStateService,
-            IOvertimeTransitionCoordinator overtimeTransitionCoordinator,
+            IBurndownTransitionCoordinator burndownTransitionCoordinator,
             IPlayerStateService playerStateService,
             IEnemyStateService enemyStateService)
         {
@@ -41,7 +41,7 @@ namespace Project.Scripts.Services.BattleFlow
             _boardRuntimeService = boardRuntimeService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _gameStateService = gameStateService;
-            _overtimeTransitionCoordinator = overtimeTransitionCoordinator;
+            _burndownTransitionCoordinator = burndownTransitionCoordinator;
             _playerStateService = playerStateService;
             _enemyStateService = enemyStateService;
         }
@@ -105,10 +105,10 @@ namespace Project.Scripts.Services.BattleFlow
             _boardRuntimeService.ApplyBattleFlowPhase(phase);
             _battleActionRuntimeService.ApplyBattleFlowPhase(phase);
 
-            if (phase == BattlePhaseKind.PendingOvertime && _playerStateService.CurrentHP > 0
+            if (phase == BattlePhaseKind.PendingBurndown && _playerStateService.CurrentHP > 0
                                                          && _enemyStateService.CurrentHP > 0)
             {
-                _overtimeTransitionCoordinator.RequestStart();
+                _burndownTransitionCoordinator.RequestStart();
             }
         }
 

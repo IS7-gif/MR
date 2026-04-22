@@ -1,6 +1,6 @@
 namespace Project.Scripts.Services.Timer
 {
-    public class DefaultOvertimeTransitionCoordinator : IOvertimeTransitionCoordinator
+    public class DefaultBurndownTransitionCoordinator : IBurndownTransitionCoordinator
     {
         public bool IsStarted => false;
 

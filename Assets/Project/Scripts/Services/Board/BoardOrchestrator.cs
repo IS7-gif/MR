@@ -542,7 +542,7 @@ namespace Project.Scripts.Services.Board
 
         private void EnsureBoardStableAfterResolution()
         {
-            if (_boardRuntimeService.IsStoppingForOvertime || _boardRuntimeService.IsFrozen)
+            if (_boardRuntimeService.IsStoppingForBurndown || _boardRuntimeService.IsFrozen)
                 return;
 
             var issues = CollectBoardStabilityIssues();

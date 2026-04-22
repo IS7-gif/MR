@@ -4,7 +4,7 @@ using Project.Scripts.Services.Game;
 
 namespace Project.Scripts.Services.Timer
 {
-    public class OvertimeTransitionCoordinator : IOvertimeTransitionCoordinator
+    public class BurndownTransitionCoordinator : IBurndownTransitionCoordinator
     {
         public bool IsStarted { get; private set; }
 
@@ -13,21 +13,21 @@ namespace Project.Scripts.Services.Timer
         private readonly IBoardRuntimeService _boardRuntimeService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IGameStateService _gameStateService;
-        private readonly IOvertimeService _overtimeService;
+        private readonly IBurndownService _burndownService;
 
 
-        public OvertimeTransitionCoordinator(
+        public BurndownTransitionCoordinator(
             EventBus eventBus,
             IBoardRuntimeService boardRuntimeService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IGameStateService gameStateService,
-            IOvertimeService overtimeService)
+            IBurndownService burndownService)
         {
             _eventBus = eventBus;
             _boardRuntimeService = boardRuntimeService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _gameStateService = gameStateService;
-            _overtimeService = overtimeService;
+            _burndownService = burndownService;
         }
 
 
@@ -41,14 +41,14 @@ namespace Project.Scripts.Services.Timer
                 return;
 
             IsStarted = true;
-            _boardRuntimeService.RequestOvertimeStop();
-            _battleActionRuntimeService.RequestOvertimeStop();
+            _boardRuntimeService.RequestBurndownStop();
+            _battleActionRuntimeService.RequestBurndownStop();
 
-            if (state != GameState.Overtime)
-                _gameStateService.SetState(GameState.Overtime);
+            if (state != GameState.Burndown)
+                _gameStateService.SetState(GameState.Burndown);
 
-            _eventBus.Publish(new OvertimeStartedEvent());
-            _overtimeService.Begin();
+            _eventBus.Publish(new BurndownStartedEvent());
+            _burndownService.Begin();
             _battleActionRuntimeService.MarkBlocked();
         }
     }

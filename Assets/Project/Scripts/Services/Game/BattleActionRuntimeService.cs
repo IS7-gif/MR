@@ -10,7 +10,7 @@ namespace Project.Scripts.Services.Game
         public ReadOnlyReactiveProperty<BattleActionRuntimeState> State => _state;
         public int CurrentVersion => _currentVersion;
         public bool IsRunning => _state.Value is BattleActionRuntimeState.MatchPhaseBlocked or BattleActionRuntimeState.HeroPhase;
-        public bool IsStoppingForOvertime => _state.Value == BattleActionRuntimeState.StoppingForOvertime;
+        public bool IsStoppingForBurndown => _state.Value == BattleActionRuntimeState.StoppingForBurndown;
         public bool IsBlocked => _state.Value == BattleActionRuntimeState.Blocked;
         public bool CanAcceptNormalActions => _state.Value == BattleActionRuntimeState.HeroPhase;
         public BattleActionPhase CurrentPhase => MapPhase(_state.Value);
@@ -37,7 +37,7 @@ namespace Project.Scripts.Services.Game
 
         public void ApplyBattleFlowPhase(BattlePhaseKind phase)
         {
-            if (IsBlocked || IsStoppingForOvertime)
+            if (IsBlocked || IsStoppingForBurndown)
                 return;
 
             BattleActionRuntimeState nextState;
@@ -61,13 +61,13 @@ namespace Project.Scripts.Services.Game
             _state.Value = nextState;
         }
 
-        public void RequestOvertimeStop()
+        public void RequestBurndownStop()
         {
-            if (IsBlocked || IsStoppingForOvertime)
+            if (IsBlocked || IsStoppingForBurndown)
                 return;
 
             _currentVersion++;
-            _state.Value = BattleActionRuntimeState.StoppingForOvertime;
+            _state.Value = BattleActionRuntimeState.StoppingForBurndown;
         }
 
         public void MarkBlocked()
@@ -95,8 +95,8 @@ namespace Project.Scripts.Services.Game
             if (state == BattleActionRuntimeState.HeroPhase)
                 return BattleActionPhase.HeroPhase;
 
-            if (state == BattleActionRuntimeState.StoppingForOvertime)
-                return BattleActionPhase.Overtime;
+            if (state == BattleActionRuntimeState.StoppingForBurndown)
+                return BattleActionPhase.Burndown;
 
             return BattleActionPhase.Finished;
         }

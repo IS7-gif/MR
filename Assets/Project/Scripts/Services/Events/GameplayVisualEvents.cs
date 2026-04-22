@@ -85,13 +85,13 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct OvertimeDrainTargetChangedEvent
+    public readonly struct BurndownDrainTargetChangedEvent
     {
         public BattleSide Side { get; }
         public int TargetIndex { get; }
 
 
-        public OvertimeDrainTargetChangedEvent(BattleSide side, int targetIndex)
+        public BurndownDrainTargetChangedEvent(BattleSide side, int targetIndex)
         {
             Side = side;
             TargetIndex = targetIndex;

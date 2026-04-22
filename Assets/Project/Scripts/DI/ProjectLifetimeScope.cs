@@ -20,9 +20,9 @@ namespace Project.Scripts.DI
             var gameResultSequenceConfig = _mainConfig.GameResultSequenceConfig
                 ? _mainConfig.GameResultSequenceConfig
                 : ScriptableObject.CreateInstance<GameResultSequenceConfig>();
-            var overtimeConfig = _mainConfig.OvertimeConfig
-                ? _mainConfig.OvertimeConfig
-                : ScriptableObject.CreateInstance<OvertimeConfig>();
+            var burndownConfig = _mainConfig.BurndownConfig
+                ? _mainConfig.BurndownConfig
+                : ScriptableObject.CreateInstance<BurndownConfig>();
             var battleFlowConfig = _mainConfig.BattleFlowConfig
                 ? _mainConfig.BattleFlowConfig
                 : ScriptableObject.CreateInstance<BattleFlowConfig>();
@@ -45,7 +45,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
             builder.RegisterInstance(_mainConfig.BattleTimerConfig);
             builder.RegisterInstance(battleFlowConfig);
-            builder.RegisterInstance(overtimeConfig);
+            builder.RegisterInstance(burndownConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);
             builder.RegisterInstance(_mainConfig.AutoEnergyConfig);
             builder.RegisterInstance(_mainConfig.EscalationConfig);

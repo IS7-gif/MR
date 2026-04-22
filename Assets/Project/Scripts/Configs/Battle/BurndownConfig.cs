@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Project.Scripts.Configs.Battle
 {
-    [CreateAssetMenu(fileName = "OvertimeConfig", menuName = "Configs/Battle/Overtime Config")]
-    public class OvertimeConfig : ScriptableObject
+    [CreateAssetMenu(fileName = "BurndownConfig", menuName = "Configs/Battle/Burndown Config")]
+    public class BurndownConfig : ScriptableObject
     {
         [Tooltip("Фиксированный урон в секунду, применяемый к каждому герою во время овертайма")]
         [SerializeField] private int _heroDrainPerSecond = 200;

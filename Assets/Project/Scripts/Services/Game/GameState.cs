@@ -3,7 +3,7 @@ namespace Project.Scripts.Services.Game
     public enum GameState
     {
         Playing,
-        Overtime,
+        Burndown,
         Win,
         Lose,
         Paused

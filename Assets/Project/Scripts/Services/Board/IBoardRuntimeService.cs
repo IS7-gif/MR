@@ -9,7 +9,7 @@ namespace Project.Scripts.Services.Board
         ReadOnlyReactiveProperty<bool> IsResolvingState { get; }
         int CurrentVersion { get; }
         bool IsRunning { get; }
-        bool IsStoppingForOvertime { get; }
+        bool IsStoppingForBurndown { get; }
         bool IsFrozen { get; }
         bool CanAcceptInput { get; }
         bool CanContinueResolution { get; }
@@ -20,7 +20,7 @@ namespace Project.Scripts.Services.Board
         void RequestMatchPhaseClose();
         void BeginResolution();
         void EndResolution();
-        void RequestOvertimeStop();
+        void RequestBurndownStop();
         void MarkFrozen();
     }
 }

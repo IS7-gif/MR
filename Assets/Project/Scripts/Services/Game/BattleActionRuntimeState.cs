@@ -4,7 +4,7 @@ namespace Project.Scripts.Services.Game
     {
         MatchPhaseBlocked,
         HeroPhase,
-        StoppingForOvertime,
+        StoppingForBurndown,
         Blocked
     }
 }

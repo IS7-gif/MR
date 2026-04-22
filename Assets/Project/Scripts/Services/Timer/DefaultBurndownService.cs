@@ -1,6 +1,6 @@
 namespace Project.Scripts.Services.Timer
 {
-    public class DefaultOvertimeService : IOvertimeService
+    public class DefaultBurndownService : IBurndownService
     {
         public bool IsActive => false;
 
