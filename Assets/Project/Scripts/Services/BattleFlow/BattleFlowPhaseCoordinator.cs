@@ -21,7 +21,9 @@ namespace Project.Scripts.Services.BattleFlow
         private readonly IPlayerStateService _playerStateService;
         private readonly IEnemyStateService _enemyStateService;
         private IDisposable _phaseChangedSubscription;
+        private IDisposable _boardResolvingSubscription;
         private IDisposable _gameStateSubscription;
+        private bool _pendingHeroPhaseOpen;
 
 
         public BattleFlowPhaseCoordinator(
@@ -48,16 +50,20 @@ namespace Project.Scripts.Services.BattleFlow
         public void Start()
         {
             _phaseChangedSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged);
+            _boardResolvingSubscription = _boardRuntimeService.IsResolvingState.Subscribe(OnBoardResolvingChanged);
             _gameStateSubscription = _gameStateService.State.Subscribe(OnGameStateChanged);
 
             if (_battleFlowService.IsInitialized)
                 ApplyPhase(_battleFlowService.Snapshot.Phase);
         }
 
+
         public void Dispose()
         {
             _phaseChangedSubscription?.Dispose();
             _phaseChangedSubscription = null;
+            _boardResolvingSubscription?.Dispose();
+            _boardResolvingSubscription = null;
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = null;
         }
@@ -66,6 +72,14 @@ namespace Project.Scripts.Services.BattleFlow
         private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
         {
             ApplyPhase(e.Phase);
+        }
+
+        private void OnBoardResolvingChanged(bool isResolving)
+        {
+            if (isResolving)
+                return;
+
+            TryCompletePendingHeroPhase();
         }
 
         private void OnGameStateChanged(GameState state)
@@ -78,6 +92,16 @@ namespace Project.Scripts.Services.BattleFlow
 
         private void ApplyPhase(BattlePhaseKind phase)
         {
+            if (phase == BattlePhaseKind.PendingHero)
+            {
+                _pendingHeroPhaseOpen = true;
+                _boardRuntimeService.RequestMatchPhaseClose();
+                TryCompletePendingHeroPhase();
+                
+                return;
+            }
+
+            _pendingHeroPhaseOpen = false;
             _boardRuntimeService.ApplyBattleFlowPhase(phase);
             _battleActionRuntimeService.ApplyBattleFlowPhase(phase);
 
@@ -86,6 +110,17 @@ namespace Project.Scripts.Services.BattleFlow
             {
                 _overtimeTransitionCoordinator.RequestStart();
             }
+        }
+
+        private void TryCompletePendingHeroPhase()
+        {
+            if (false == _pendingHeroPhaseOpen)
+                return;
+
+            if (_boardRuntimeService.IsResolving)
+                return;
+
+            _battleFlowService.BeginHeroPhase();
         }
     }
 }

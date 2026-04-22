@@ -343,6 +343,71 @@ namespace Project.Scripts.Services.Grid
             ReInitTileAt(3, 0, configT);
         }
 
+        public bool RepairBoardState()
+        {
+            var repaired = false;
+            if (_state.ScheduledRemovals.Count > 0)
+            {
+                _state.ClearScheduledRemovals();
+                repaired = true;
+            }
+
+            var kinds = _state.GetGridState();
+            for (var x = 0; x < _levelConfig.Width; x++)
+                for (var y = 0; y < _levelConfig.Height; y++)
+                {
+                    var pos = new GridPoint(x, y);
+                    var tile = _tiles[x, y];
+                    if (false == tile)
+                    {
+                        kinds[x, y] = TileKind.None;
+                        continue;
+                    }
+
+                    var worldPos = GridToWorld(pos);
+                    if (tile.GridPosition != pos)
+                    {
+                        tile.Animator.StopActiveAnimations();
+                        tile.GridPosition = pos;
+                        repaired = true;
+                    }
+
+                    if ((tile.transform.position - worldPos).sqrMagnitude > 0.0001f)
+                    {
+                        tile.Animator.StopActiveAnimations();
+                        tile.transform.position = worldPos;
+                        repaired = true;
+                    }
+
+                    if (_state.GetKind(pos) != tile.Kind)
+                    {
+                        _state.SetKind(pos, tile.Kind);
+                        repaired = true;
+                    }
+
+                    kinds[x, y] = tile.Kind;
+                }
+
+            for (var x = 0; x < _levelConfig.Width; x++)
+                for (var y = 0; y < _levelConfig.Height; y++)
+                {
+                    if (_tiles[x, y])
+                        continue;
+
+                    var pos = new GridPoint(x, y);
+                    var tileConfig = GetRepairConfig(x, y, kinds);
+                    var tile = _pool.Get();
+                    tile.transform.position = GridToWorld(pos);
+                    tile.Init(tileConfig, pos);
+                    _tiles[x, y] = tile;
+                    _state.SetKind(pos, tileConfig.Kind);
+                    kinds[x, y] = tileConfig.Kind;
+                    repaired = true;
+                }
+
+            return repaired;
+        }
+
         private async UniTask ProcessScheduledRemovals()
         {
             while (_state.ScheduledRemovals.Count > 0)
@@ -454,7 +519,7 @@ namespace Project.Scripts.Services.Grid
 
         private bool IsBoardFlowRunning()
         {
-            return _boardRuntimeService.IsRunning;
+            return _boardRuntimeService.CanContinueResolution;
         }
 
         private void ClearPendingScheduledRemovals()
@@ -487,6 +552,39 @@ namespace Project.Scripts.Services.Grid
                 tile.Init(config, new GridPoint(x, y));
                 _state.SetKind(new GridPoint(x, y), config.Kind);
             }
+        }
+
+        private TileConfig GetRepairConfig(int x, int y, TileKind[,] kinds)
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                var config = _levelConfig.RegularTiles[UnityEngine.Random.Range(0, _levelConfig.RegularTiles.Length)];
+                if (false == WouldCreateRepairMatch(x, y, config.Kind, kinds))
+                    return config;
+            }
+
+            return _levelConfig.RegularTiles[0];
+        }
+
+        private bool WouldCreateRepairMatch(int x, int y, TileKind kind, TileKind[,] kinds)
+        {
+            if (false == kind.IsColor())
+                return false;
+
+            return IsSameKindAt(x - 2, y, kind, kinds) && IsSameKindAt(x - 1, y, kind, kinds)
+                || IsSameKindAt(x - 1, y, kind, kinds) && IsSameKindAt(x + 1, y, kind, kinds)
+                || IsSameKindAt(x + 1, y, kind, kinds) && IsSameKindAt(x + 2, y, kind, kinds)
+                || IsSameKindAt(x, y - 2, kind, kinds) && IsSameKindAt(x, y - 1, kind, kinds)
+                || IsSameKindAt(x, y - 1, kind, kinds) && IsSameKindAt(x, y + 1, kind, kinds)
+                || IsSameKindAt(x, y + 1, kind, kinds) && IsSameKindAt(x, y + 2, kind, kinds);
+        }
+
+        private bool IsSameKindAt(int x, int y, TileKind kind, TileKind[,] kinds)
+        {
+            if (x < 0 || x >= _levelConfig.Width || y < 0 || y >= _levelConfig.Height)
+                return false;
+
+            return kinds[x, y] == kind;
         }
 
         private bool WouldCreateMatch(int x, int y, TileKind kind, TileKind[,] assigned)

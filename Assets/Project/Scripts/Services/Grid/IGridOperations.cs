@@ -17,5 +17,6 @@ namespace Project.Scripts.Services.Grid
         UniTask ShuffleGrid();
         UniTask CollapseAll(float duration, DG.Tweening.Ease ease);
         void ForceInjectMove();
+        bool RepairBoardState();
     }
 }

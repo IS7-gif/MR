@@ -98,24 +98,23 @@ namespace Project.Scripts.Services.Board
                 return;
             }
 
+            _isProcessing = true;
+            _boardRuntimeService.BeginResolution();
             HandleSwapAsync(request).Forget();
         }
 
         private async UniTask HandleSwapAsync(SwapRequest request)
         {
-            var fromTile = _view.GetTile(request.From);
-            var toTile = _view.GetTile(request.To);
-
-            if (false == fromTile || false == toTile)
-            {
-                _swapHandler.NotifyBoardReady();
-                return;
-            }
-
-            var runtimeVersion = _boardRuntimeService.CaptureVersion();
-            _isProcessing = true;
             try
             {
+                var fromTile = _view.GetTile(request.From);
+                var toTile = _view.GetTile(request.To);
+
+                if (false == fromTile || false == toTile)
+                    return;
+
+                var runtimeVersion = _boardRuntimeService.CaptureVersion();
+
                 if (false == CanContinueFlow(runtimeVersion))
                     return;
 
@@ -248,6 +247,8 @@ namespace Project.Scripts.Services.Board
             }
             finally
             {
+                EnsureBoardStableAfterResolution();
+                _boardRuntimeService.EndResolution();
                 _isProcessing = false;
                 _swapHandler.NotifyBoardReady();
             }
@@ -520,7 +521,7 @@ namespace Project.Scripts.Services.Board
             if (false == _gameStateService.IsPlaying)
                 return false;
 
-            if (false == _boardRuntimeService.IsRunning)
+            if (false == _boardRuntimeService.CanContinueResolution)
                 return false;
 
             return _boardRuntimeService.IsCurrent(runtimeVersion);
@@ -537,6 +538,75 @@ namespace Project.Scripts.Services.Board
                     ?? tileB.Config.Behaviour as BombTileBehaviour;
 
             return bomb?.DoubleRadius ?? 2;
+        }
+
+        private void EnsureBoardStableAfterResolution()
+        {
+            if (_boardRuntimeService.IsStoppingForOvertime || _boardRuntimeService.IsFrozen)
+                return;
+
+            var issues = CollectBoardStabilityIssues();
+            if (issues.Count == 0)
+                return;
+
+            var repaired = _gridOps.RepairBoardState();
+            var remainingIssues = CollectBoardStabilityIssues();
+            if (remainingIssues.Count == 0)
+            {
+                Debug.LogWarning($"Board state was inconsistent after resolution and required repair. Issues: {string.Join(" | ", issues)}");
+                return;
+            }
+
+            var repairSuffix = repaired ? " Repair attempt did not fully resolve the state." : string.Empty;
+            Debug.LogError($"Board state is inconsistent after resolution.{repairSuffix} Issues: {string.Join(" | ", remainingIssues)}");
+        }
+
+        private List<string> CollectBoardStabilityIssues()
+        {
+            var issues = new List<string>();
+
+            if (_state is GridState gridState && gridState.ScheduledRemovals.Count > 0)
+                issues.Add($"Pending scheduled removals: {gridState.ScheduledRemovals.Count}");
+
+            const float positionToleranceSqr = 0.0001f;
+            for (var x = 0; x < _state.Width; x++)
+                for (var y = 0; y < _state.Height; y++)
+                {
+                    var pos = new GridPoint(x, y);
+                    var tile = _view.GetTile(pos);
+                    var kind = _state.GetKind(pos);
+
+                    if (false == tile && kind != TileKind.None)
+                    {
+                        issues.Add($"Missing tile at {pos} for kind {kind}");
+                        continue;
+                    }
+
+                    if (tile && kind == TileKind.None)
+                    {
+                        issues.Add($"State hole at {pos} while tile {tile.Kind} exists");
+                        continue;
+                    }
+
+                    if (false == tile)
+                        continue;
+
+                    if (tile.Kind != kind)
+                        issues.Add($"Kind mismatch at {pos}: state={kind}, tile={tile.Kind}");
+
+                    if (tile.GridPosition != pos)
+                        issues.Add($"GridPosition mismatch at {pos}: tile reports {tile.GridPosition}");
+
+                    var expectedWorldPos = _view.GridToWorld(pos);
+                    if ((tile.transform.position - expectedWorldPos).sqrMagnitude > positionToleranceSqr)
+                        issues.Add($"World position mismatch at {pos}");
+                }
+
+            var immediateMatches = _matchFinder.FindMatches(_state.GetGridState());
+            if (immediateMatches.Count > 0)
+                issues.Add($"Immediate matches remain after resolution: {immediateMatches.Count}");
+
+            return issues;
         }
 
         private static void AccumulateMatchEnergy(List<List<MatchResult>> waves, CascadeEnergyConfig config, Dictionary<TileKind, float> energy)

@@ -14,6 +14,7 @@ namespace Project.Scripts.Shared.Energy
                 return 0f;
 
             _currentEnergy += amount;
+            
             return amount;
         }
 
@@ -28,6 +29,7 @@ namespace Project.Scripts.Shared.Energy
                 return false;
 
             _currentEnergy -= amount;
+            
             return true;
         }
 

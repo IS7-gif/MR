@@ -8,6 +8,7 @@ namespace Project.Scripts.Services.BattleFlow
         BattleFlowSnapshot Snapshot { get; }
         void Initialize();
         void Tick(float deltaTime);
+        void BeginHeroPhase();
         void MarkFinished();
     }
 }

@@ -2,7 +2,6 @@ using System;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Game;
-using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.CombatActivation;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Rules;
@@ -25,7 +24,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private readonly int _activationEnergyCost;
         private bool _hasSufficientEnergy;
         private bool _isOnCooldown;
-        private BattlePhaseKind _currentBattlePhase = BattlePhaseKind.Match;
 
 
         public AvatarChargeBarViewModel(
@@ -44,7 +42,6 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _subscriptions.Add(eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
             _subscriptions.Add(eventBus.Subscribe<AvatarCooldownChangedEvent>(OnAvatarCooldownChanged));
             _subscriptions.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshReadyState()));
-            _subscriptions.Add(eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged));
         }
 
         public void Dispose()
@@ -107,15 +104,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
             RefreshReadyState();
         }
 
-        private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
-        {
-            _currentBattlePhase = e.Phase;
-            RefreshAvailabilityVisualState();
-        }
-
         private void RefreshAvailabilityVisualState()
         {
-            IsAvailabilityDimmed.Value = _currentBattlePhase == BattlePhaseKind.Hero
+            IsAvailabilityDimmed.Value = _battleActionRuntimeService.CanAcceptNormalActions
                 && ActivationBlockReason.Value != UnitActivationBlockReason.None;
         }
     }

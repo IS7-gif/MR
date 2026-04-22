@@ -139,6 +139,7 @@ namespace Project.Scripts.Services.Combat
 
             actionType = slot.ActionType;
             actionValue = slot.ActionValue;
+            
             return true;
         }
 
@@ -175,6 +176,7 @@ namespace Project.Scripts.Services.Combat
 
             isAlive = slot.IsAlive;
             isHpFull = slot.CurrentHP >= slot.MaxHP;
+            
             return true;
         }
 

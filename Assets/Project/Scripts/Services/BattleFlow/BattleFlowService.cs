@@ -72,6 +72,25 @@ namespace Project.Scripts.Services.BattleFlow
             }
         }
 
+        public void BeginHeroPhase()
+        {
+            if (false == IsInitialized)
+                return;
+
+            var before = _engine.Snapshot;
+            if (false == _engine.BeginHeroPhase())
+                return;
+
+            var after = _engine.Snapshot;
+            if (after.Phase == before.Phase)
+                return;
+
+            _lastPublishedSecond = (int)after.TimeRemaining;
+            PublishPhaseChanged(after);
+            PublishTimerChanged(after);
+            TryPublishCountdown(after);
+        }
+
         public void MarkFinished()
         {
             if (false == IsInitialized)

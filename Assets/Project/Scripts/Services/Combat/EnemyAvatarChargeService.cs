@@ -1,5 +1,4 @@
 using System;
-using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;

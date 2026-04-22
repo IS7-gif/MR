@@ -21,7 +21,6 @@ using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.Timer;
 using Project.Scripts.Services.UISystem;
-using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Grid;
 using UnityEngine;
 using VContainer;
@@ -70,10 +69,9 @@ namespace Project.Scripts.Gameplay
         private TileKindPaletteConfig _palette;
         private HintService _hintService;
         private DebugConfig _debugConfig;
-        private IDisposable _battleFlowPhaseSubscription;
+        private IDisposable _boardRuntimeSubscription;
         private IDisposable _gameStateSubscription;
         private IDisposable _overtimeStartedSubscription;
-        private BattlePhaseKind _currentBattlePhase = BattlePhaseKind.Match;
 
 #if UNITY_EDITOR
         private GridManager _gridManager;
@@ -132,8 +130,8 @@ namespace Project.Scripts.Gameplay
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
-            _battleFlowPhaseSubscription?.Dispose();
-            _battleFlowPhaseSubscription = null;
+            _boardRuntimeSubscription?.Dispose();
+            _boardRuntimeSubscription = null;
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = null;
             _overtimeStartedSubscription?.Dispose();
@@ -284,12 +282,8 @@ namespace Project.Scripts.Gameplay
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
 
-            _battleFlowPhaseSubscription?.Dispose();
-            _battleFlowPhaseSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(e =>
-            {
-                _currentBattlePhase = e.Phase;
-                RefreshPhaseOverlays();
-            });
+            _boardRuntimeSubscription?.Dispose();
+            _boardRuntimeSubscription = _boardRuntimeService.State.Subscribe(_ => RefreshPhaseOverlays());
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = _gameStateService.State.Subscribe(_ => RefreshPhaseOverlays());
             RefreshPhaseOverlays();
@@ -400,7 +394,7 @@ namespace Project.Scripts.Gameplay
         private void RefreshPhaseOverlays()
         {
             var showOverlay = _gameStateService.State.CurrentValue == GameState.Playing
-                && _currentBattlePhase == BattlePhaseKind.Hero;
+                && false == _boardRuntimeService.CanAcceptInput;
             _battleWorldLayout?.BoardView?.SetInteractionOverlayActive(showOverlay);
         }
     }

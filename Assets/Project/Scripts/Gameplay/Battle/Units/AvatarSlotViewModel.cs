@@ -120,9 +120,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal, current, max));
             }
             else
-            {
                 _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap, current, max));
-            }
 
             if (current <= 0)
                 IsDefeated.Value = true;

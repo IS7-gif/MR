@@ -27,6 +27,9 @@ namespace Project.Scripts.Shared.BattleFlow
             if (false == _initialized || deltaTime <= 0f || _snapshot.IsTerminal)
                 return false;
 
+            if (_snapshot.Phase == BattlePhaseKind.PendingHero)
+                return false;
+
             var nextTimeRemaining = _snapshot.TimeRemaining - deltaTime;
             if (nextTimeRemaining > 0f)
             {
@@ -35,6 +38,21 @@ namespace Project.Scripts.Shared.BattleFlow
             }
 
             AdvancePhase();
+            
+            return true;
+        }
+
+        public bool BeginHeroPhase()
+        {
+            if (false == _initialized || _snapshot.Phase != BattlePhaseKind.PendingHero)
+                return false;
+
+            _snapshot = new BattleFlowSnapshot(
+                _snapshot.CurrentRound,
+                _snapshot.TotalRounds,
+                BattlePhaseKind.Hero,
+                _settings.HeroPhaseDuration,
+                _snapshot.EnergyCarryoverMode);
             return true;
         }
 
@@ -59,8 +77,8 @@ namespace Project.Scripts.Shared.BattleFlow
                 _snapshot = new BattleFlowSnapshot(
                     _snapshot.CurrentRound,
                     _snapshot.TotalRounds,
-                    BattlePhaseKind.Hero,
-                    _settings.HeroPhaseDuration,
+                    BattlePhaseKind.PendingHero,
+                    0f,
                     _snapshot.EnergyCarryoverMode);
                 return;
             }

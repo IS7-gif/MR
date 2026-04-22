@@ -1,7 +1,5 @@
 using System;
-using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Levels;
-using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.Rules;
 using Project.Scripts.Shared.Heroes;
@@ -17,10 +15,12 @@ namespace Project.Scripts.Services.Combat
         public HeroActionType AbilityType { get; }
         public int AbilityPower { get; }
 
+        
         private readonly IBattleSideEnergyService _battleSideEnergyService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
 
+        
         public PlayerAvatarChargeService(
             LevelConfig levelConfig,
             IBattleSideEnergyService battleSideEnergyService,
@@ -57,6 +57,7 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             _unitActivationCooldownService.StartAvatarCooldown(BattleSide.Player);
+            
             return true;
         }
     }
