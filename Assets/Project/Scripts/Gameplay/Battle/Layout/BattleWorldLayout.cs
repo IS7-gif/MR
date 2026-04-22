@@ -13,7 +13,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         [SerializeField] private Transform _tileContainer;
         
         [Tooltip("View боевого поля")]
-        [SerializeField] private BattleHUDView _battleHUDView;
+        [SerializeField] private BattleFieldView _battleFieldView;
         
         [Tooltip("Вью для отображения энергии игрока и врага в мировом пространстве")]
         [SerializeField] private BattleWorldEnergyView _energyView;
@@ -21,7 +21,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 
         public BoardView BoardView => _boardView;
         public Transform TileContainer => _tileContainer;
-        public BattleHUDView BattleHUDView => _battleHUDView;
+        public BattleFieldView BattleFieldView => _battleFieldView;
         public BattleWorldEnergyView EnergyView => _energyView;
 
 
@@ -35,7 +35,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 
         public void RefreshBindings()
         {
-            _battleHUDView?.RefreshPosition();
+            _battleFieldView?.RefreshPosition();
         }
     }
 }

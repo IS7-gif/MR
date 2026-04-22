@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.HUD
 {
-    public class BattleHUDViewModel : BaseViewModel
+    public class BattleFieldViewModel : BaseViewModel
     {
         public AvatarSlotViewModel PlayerAvatar { get; private set; }
         public AvatarSlotViewModel EnemyAvatar { get; private set; }
@@ -65,7 +65,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly ReactiveProperty<int> _enemyEnergy;
 
 
-        public BattleHUDViewModel(
+        public BattleFieldViewModel(
             EventBus eventBus,
             IEnemyStateService enemyState,
             IPlayerStateService playerState,

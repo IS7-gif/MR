@@ -765,7 +765,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Layout.BattleWorldLayout
   _boardView: {fileID: 1995056816}
   _tileContainer: {fileID: 1009358153}
-  _battleHUDView: {fileID: 1683456030}
+  _battleFieldView: {fileID: 1683456030}
   _energyView: {fileID: 1683456003}
 --- !u!114 &1683456003
 MonoBehaviour:
@@ -791,7 +791,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe854326fd1767b4997384408cbac340, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.HUD.BattleHUDView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.HUD.BattleFieldView
 --- !u!1 &1900925589
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,7 +922,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8010516392992138223, guid: a5c1a4861b5595a49a0a892fc037b33b, type: 3}
       propertyPath: m_Name
-      value: BattleHUDView
+      value: BattleFieldView
       objectReference: {fileID: 0}
     - target: {fileID: 8010516392992138223, guid: a5c1a4861b5595a49a0a892fc037b33b, type: 3}
       propertyPath: m_IsActive

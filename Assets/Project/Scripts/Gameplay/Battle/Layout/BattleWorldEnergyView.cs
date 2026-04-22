@@ -23,7 +23,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         }
 
 
-        public void Bind(BattleHUDViewModel viewModel)
+        public void Bind(BattleFieldViewModel viewModel)
         {
             Cleanup();
             _disposables = new CompositeDisposable();

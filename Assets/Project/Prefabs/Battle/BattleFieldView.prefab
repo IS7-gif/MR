@@ -370,7 +370,7 @@ GameObject:
   - component: {fileID: 8754196901872767336}
   - component: {fileID: 2622925152121854030}
   m_Layer: 0
-  m_Name: BattleHUDView
+  m_Name: BattleFieldView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -408,7 +408,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe854326fd1767b4997384408cbac340, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.HUD.BattleHUDView
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.HUD.BattleFieldView
   _playerHeroSlots:
   - {fileID: 34413871785096680}
   - {fileID: 2981936325939341402}

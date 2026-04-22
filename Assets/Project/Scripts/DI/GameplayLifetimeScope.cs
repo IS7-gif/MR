@@ -62,7 +62,7 @@ namespace Project.Scripts.DI
             builder.Register<IAbilityExecutionService, AbilityExecutionService>(Lifetime.Singleton);
 
             builder.Register<MoveBarViewModel>(Lifetime.Singleton);
-            builder.Register<BattleHUDViewModel>(Lifetime.Singleton);
+            builder.Register<BattleFieldViewModel>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Singleton);
             builder.Register<GameResultSequenceController>(Lifetime.Singleton);
             builder.Register<IReadyPulseCoordinator, ReadyPulseCoordinator>(Lifetime.Singleton);

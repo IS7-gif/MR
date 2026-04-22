@@ -53,9 +53,9 @@ namespace Project.Scripts.Gameplay
         private IMoveBarService _moveBarService;
         private GameResultPresenter _gameResultPresenter;
         private GameResultSequenceController _gameResultSequenceController;
-        private BattleHUDViewModel _battleHUDViewModel;
+        private BattleFieldViewModel _battleFieldViewModel;
         private IBoardBoundsProvider _boardBoundsProvider;
-        private BattleHUDView _battleHUDView;
+        private BattleFieldView _battleFieldView;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
@@ -118,7 +118,7 @@ namespace Project.Scripts.Gameplay
 
         private void OnDestroy()
         {
-            _battleHUDView?.ReleaseSceneInstance();
+            _battleFieldView?.ReleaseSceneInstance();
             _battleWorldLayout?.EnergyView?.Cleanup();
 
             if (_moveBarService?.IsEnabled == true)
@@ -162,7 +162,7 @@ namespace Project.Scripts.Gameplay
             IMoveBarService moveBarService,
             GameResultPresenter gameResultPresenter,
             GameResultSequenceController gameResultSequenceController,
-            BattleHUDViewModel battleHUDViewModel,
+            BattleFieldViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
             IBattleTimerService battleTimerService,
             IBattleFlowService battleFlowService,
@@ -190,7 +190,7 @@ namespace Project.Scripts.Gameplay
             _moveBarService = moveBarService;
             _gameResultPresenter = gameResultPresenter;
             _gameResultSequenceController = gameResultSequenceController;
-            _battleHUDViewModel = battleHUDViewModel;
+            _battleFieldViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
             _battleTimerService = battleTimerService;
             _battleFlowService = battleFlowService;
@@ -223,16 +223,16 @@ namespace Project.Scripts.Gameplay
             var boardHalfWidth = frameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, cellSize);
 
-            await _uiService.Show<TopBarView, BattleHUDViewModel>(_battleHUDViewModel);
+            await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
 
             _inputService = new InputService(_inputConfig);
 
-            _battleHUDView = _battleWorldLayout.BattleHUDView;
-            _battleHUDView.SetDependencies(_inputService, _boardBoundsProvider);
-            await _battleHUDView.InitializeAsync(_battleHUDViewModel);
-            await _battleHUDView.ShowAsync();
-            _battleWorldLayout.EnergyView?.Bind(_battleHUDViewModel);
-            _gameResultSequenceController.BindVisuals(_battleHUDView);
+            _battleFieldView = _battleWorldLayout.BattleFieldView;
+            _battleFieldView.SetDependencies(_inputService, _boardBoundsProvider);
+            await _battleFieldView.InitializeAsync(_battleFieldViewModel);
+            await _battleFieldView.ShowAsync();
+            _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel);
+            _gameResultSequenceController.BindVisuals(_battleFieldView);
 
             var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, cellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);

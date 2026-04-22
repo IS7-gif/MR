@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Project.Scripts.Gameplay.UI
 {
-    public class TopBarView : BaseView<BattleHUDViewModel>
+    public class TopBarView : BaseView<BattleFieldViewModel>
     {
         [Tooltip("Отображает имя противника")]
         [SerializeField] private TMP_Text _enemyNameTMP;

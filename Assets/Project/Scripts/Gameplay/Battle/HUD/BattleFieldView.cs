@@ -14,7 +14,7 @@ using UnityEngine.Pool;
 
 namespace Project.Scripts.Gameplay.Battle.HUD
 {
-    public class BattleHUDView : BaseView<BattleHUDViewModel>, IGameResultVisuals
+    public class BattleFieldView : BaseView<BattleFieldViewModel>, IGameResultVisuals
     {
         private const int FloatingNumberDefaultPoolCapacity = 4;
         private const int FloatingNumberMaxPoolSize = 16;

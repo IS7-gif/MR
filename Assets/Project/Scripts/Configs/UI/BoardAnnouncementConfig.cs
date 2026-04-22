@@ -24,7 +24,7 @@ namespace Project.Scripts.Configs.UI
         [Tooltip("Кривая ослабления для движения и затухания обычного объявления")]
         [SerializeField] private Ease _fadeOutEase = Ease.InQuad;
 
-        [Tooltip("Вертикальное смещение в мировых координатах относительно трансформа AnnouncementAnchor в префабе BattleHUDView; при значении 0 объявление выводится точно в позиции якоря")]
+        [Tooltip("Вертикальное смещение в мировых координатах относительно трансформа AnnouncementAnchor в префабе BattleFieldView; при значении 0 объявление выводится точно в позиции якоря")]
         [SerializeField] private float _verticalWorldOffset;
 
         [Tooltip("Цвет текста цифры обратного отсчёта перед овертаймом")]
