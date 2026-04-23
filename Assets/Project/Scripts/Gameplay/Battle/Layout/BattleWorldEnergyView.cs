@@ -13,8 +13,14 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         [Tooltip("Текст для отображения текущей энергии игрока")]
         [SerializeField] private TMP_Text _playerEnergyText;
 
+        [Tooltip("Маркер высоты, на которой сферы энергии игрока поглощаются общим запасом")]
+        [SerializeField] private Transform _playerEnergyAbsorbTarget;
+
 
         private CompositeDisposable _disposables;
+
+
+        public Transform PlayerEnergyAbsorbTarget => _playerEnergyAbsorbTarget ? _playerEnergyAbsorbTarget : _playerEnergyText ? _playerEnergyText.transform : null;
 
 
         private void OnDestroy()

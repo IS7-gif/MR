@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Project.Scripts.Configs.Battle;
+using Project.Scripts.Configs.Board;
 using Project.Scripts.Gameplay.Battle.FX;
-using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Services.Events;
-using Project.Scripts.Shared;
-using Project.Scripts.Shared.Tiles;
 using Project.Scripts.Utils;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -25,12 +22,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [SerializeField] private Transform _fxContainer;
 
 
-        private readonly Dictionary<TileKind, TargetBinding> _targetsByKind = new();
         private BattleAnimationConfig _animationConfig;
+        private TileKindPaletteConfig _palette;
         private IDisposable _subscription;
         private ObjectPool<EnergyTransferView> _transferPool;
-        private AvatarSlotView _playerAvatarSlot;
-        private Color _avatarColor;
+        private Transform _playerEnergyAbsorbTarget;
 
 
         private void OnDestroy()
@@ -41,11 +37,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         public void Initialize(
             EventBus eventBus,
-            HeroSlotView[] playerHeroSlots,
-            HeroSlotViewModel[] playerHeroViewModels,
-            TileKind[] playerHeroKinds,
-            AvatarSlotView playerAvatarSlot,
-            Color avatarColor,
+            TileKindPaletteConfig palette,
+            Transform playerEnergyAbsorbTarget,
             BattleAnimationConfig animationConfig)
         {
             Cleanup();
@@ -54,9 +47,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 return;
 
             _animationConfig = animationConfig;
-            _playerAvatarSlot = playerAvatarSlot;
-            _avatarColor = avatarColor;
-            BuildTargets(playerHeroSlots, playerHeroViewModels, playerHeroKinds);
+            _palette = palette;
+            _playerEnergyAbsorbTarget = playerEnergyAbsorbTarget;
 
             var container = _fxContainer ? _fxContainer : transform;
             _transferPool = new ObjectPool<EnergyTransferView>(
@@ -84,86 +76,36 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _subscription = null;
             _transferPool?.Dispose();
             _transferPool = null;
-            _targetsByKind.Clear();
             _animationConfig = null;
-            _playerAvatarSlot = null;
+            _palette = null;
+            _playerEnergyAbsorbTarget = null;
         }
 
 
         private void OnEnergyGenerated(EnergyGeneratedVisualEvent e)
         {
-            if (null == _transferPool)
+            if (null == _transferPool || false == _playerEnergyAbsorbTarget)
                 return;
 
             foreach (var pair in e.SourceByKind)
             {
-                if (false == _targetsByKind.TryGetValue(pair.Key, out var target))
-                    continue;
-
-                if (false == target.IsValid)
-                    continue;
+                var from = pair.Value.ToUnityVector3();
+                var to = BuildAbsorbTargetPosition(from);
+                var color = _palette ? _palette.GetColor(pair.Key, Color.white) : Color.white;
 
                 var transfer = _transferPool.Get();
                 transfer.Play(
-                    pair.Value.ToUnityVector3(),
-                    target.View.EnergyAnchor.position,
-                    target.ViewModel.SlotColor,
+                    from,
+                    to,
+                    color,
                     _animationConfig,
                     () => _transferPool.Release(transfer));
             }
-
-            if (_playerAvatarSlot && e.SourceByKind.Count > 0)
-            {
-                var centroid = ComputeCentroid(e.SourceByKind);
-                var avatarTransfer = _transferPool.Get();
-                avatarTransfer.Play(
-                    centroid,
-                    _playerAvatarSlot.EnergyAnchor.position,
-                    _avatarColor,
-                    _animationConfig,
-                    () => _transferPool.Release(avatarTransfer));
-            }
         }
 
-        private static Vector3 ComputeCentroid(IReadOnlyDictionary<TileKind, SharedVector3> positions)
+        private Vector3 BuildAbsorbTargetPosition(Vector3 from)
         {
-            var sum = Vector3.zero;
-            foreach (var pair in positions)
-                sum += pair.Value.ToUnityVector3();
-            
-            return sum / positions.Count;
-        }
-
-        private void BuildTargets(HeroSlotView[] playerHeroSlots, HeroSlotViewModel[] playerHeroViewModels, TileKind[] playerHeroKinds)
-        {
-            if (null == playerHeroSlots || null == playerHeroViewModels || null == playerHeroKinds)
-                return;
-
-            var count = Mathf.Min(playerHeroSlots.Length, playerHeroViewModels.Length, playerHeroKinds.Length);
-            for (var i = 0; i < count; i++)
-            {
-                var view = playerHeroSlots[i];
-                var viewModel = playerHeroViewModels[i];
-                if (false == view || null == viewModel)
-                    continue;
-
-                _targetsByKind[playerHeroKinds[i]] = new TargetBinding(view, viewModel);
-            }
-        }
-
-
-        private readonly struct TargetBinding
-        {
-            public HeroSlotView View { get; }
-            public HeroSlotViewModel ViewModel { get; }
-            public bool IsValid => View && null != ViewModel && ViewModel.IsAssigned && false == ViewModel.IsDefeated.CurrentValue;
-
-
-            public TargetBinding(HeroSlotView view, HeroSlotViewModel viewModel)
-            {
-                View = view;
-                ViewModel = viewModel;
-            }
+            return new Vector3(from.x, _playerEnergyAbsorbTarget.position.y, from.z);
         }
     }
 }

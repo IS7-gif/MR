@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Scripts.Configs.Board;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.Battle.Targeting;
@@ -65,6 +66,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private IInputService _inputService;
         private IBoardBoundsProvider _boardBounds;
         private ObjectPool<FloatingDamageNumber> _floatingPool;
+        private TileKindPaletteConfig _tileKindPalette;
+        private Transform _playerEnergyAbsorbTarget;
 
 
         protected override UniTask OnBindViewModel()
@@ -92,10 +95,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         }
 
 
-        public void SetDependencies(IInputService inputService, IBoardBoundsProvider boardBounds)
+        public void SetDependencies(IInputService inputService, IBoardBoundsProvider boardBounds, TileKindPaletteConfig tileKindPalette, Transform playerEnergyAbsorbTarget)
         {
             _inputService = inputService;
             _boardBounds = boardBounds;
+            _tileKindPalette = tileKindPalette;
+            _playerEnergyAbsorbTarget = playerEnergyAbsorbTarget;
         }
 
         public async UniTask PlayAvatarPulse(BattleSide side, AvatarPulseStepConfig config)
@@ -221,11 +226,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             _energyFXView.Initialize(
                 ViewModel.EventBus,
-                _playerHeroSlots,
-                ViewModel.PlayerHeroSlots,
-                ViewModel.PlayerHeroKinds,
-                _playerAvatarSlot,
-                ViewModel.PlayerAvatar.SlotColor,
+                _tileKindPalette,
+                _playerEnergyAbsorbTarget,
                 ViewModel.BattleAnimConfig);
         }
 

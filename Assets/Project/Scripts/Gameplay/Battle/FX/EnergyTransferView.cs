@@ -32,8 +32,11 @@ namespace Project.Scripts.Gameplay.Battle.FX
         {
             Kill();
 
+            SetTrailEmission(false);
             transform.position = from;
+            ClearTrails();
             ApplyColor(color);
+            SetTrailEmission(true);
 
             var delta = to - from;
             var direction = delta.sqrMagnitude > 0.0001f ? delta.normalized : Vector3.up;
@@ -106,6 +109,32 @@ namespace Project.Scripts.Gameplay.Battle.FX
         {
             _flightTween?.Kill();
             _flightTween = null;
+            SetTrailEmission(false);
+            ClearTrails();
+        }
+
+        private void SetTrailEmission(bool isEmitting)
+        {
+            if (_renderers == null || _renderers.Length == 0)
+                return;
+
+            for (var i = 0; i < _renderers.Length; i++)
+            {
+                if (_renderers[i] is TrailRenderer trail)
+                    trail.emitting = isEmitting;
+            }
+        }
+
+        private void ClearTrails()
+        {
+            if (_renderers == null || _renderers.Length == 0)
+                return;
+
+            for (var i = 0; i < _renderers.Length; i++)
+            {
+                if (_renderers[i] is TrailRenderer trail)
+                    trail.Clear();
+            }
         }
     }
 }

@@ -228,7 +228,11 @@ namespace Project.Scripts.Gameplay
             _inputService = new InputService(_inputConfig);
 
             _battleFieldView = _battleWorldLayout.BattleFieldView;
-            _battleFieldView.SetDependencies(_inputService, _boardBoundsProvider);
+            _battleFieldView.SetDependencies(
+                _inputService,
+                _boardBoundsProvider,
+                _palette,
+                _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyAbsorbTarget : null);
             await _battleFieldView.InitializeAsync(_battleFieldViewModel);
             await _battleFieldView.ShowAsync();
             _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel);
