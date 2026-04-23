@@ -70,6 +70,10 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Цвет свечения допустимой цели лечения")]
         [SerializeField] private Color _healTargetColor = new(0.15f, 1f, 0.25f, 1f);
 
+        [Header("Shield Pulse")]
+        [Tooltip("Параметры пульсации щитов при попытке атаковать защищенного аватара")]
+        [SerializeField] private ShieldPulseConfig _shieldPulse = new();
+
         [Header("Floating Numbers")]
         [Tooltip("Цвет метки числа урона")]
         [SerializeField] private Color _damageNumberColor = new(1f, 0.25f, 0.25f, 1f);
@@ -112,5 +116,6 @@ namespace Project.Scripts.Configs.Battle
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;
+        public ShieldPulseConfig ShieldPulse => _shieldPulse;
     }
 }

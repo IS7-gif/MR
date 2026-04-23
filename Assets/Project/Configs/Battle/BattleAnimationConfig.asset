@@ -32,6 +32,11 @@ MonoBehaviour:
   _sourceHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _attackTargetColor: {r: 1, g: 0.15, b: 0.15, a: 1}
   _healTargetColor: {r: 0.15, g: 1, b: 0.25, a: 1}
+  _shieldPulse:
+    _scaleMultiplier: 1.25
+    _duration: 0.25
+    _interval: 0.65
+    _ease: 4
   _damageNumberColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   _healNumberColor: {r: 0.25, g: 1, b: 0.25, a: 1}
   _floatDamageDistance: 0.75

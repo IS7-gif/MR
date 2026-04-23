@@ -73,6 +73,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             BindGroupShields();
             PublishAnnouncementAnchor();
             SetupTargeting();
+            BindShieldPulse();
             SetupEnergyFX();
             SetupFloatingNumbers();
             BindInteractionOverlay();
@@ -142,6 +143,30 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _playerGroup2Shield?.Bind(playerDef.Select(s => false == s.IsGroup2Destroyed));
             _enemyGroup1Shield?.Bind(enemyDef.Select(s => false == s.IsGroup1Destroyed));
             _enemyGroup2Shield?.Bind(enemyDef.Select(s => false == s.IsGroup2Destroyed));
+        }
+
+        private void BindShieldPulse()
+        {
+            if (false == _targetingInputHandler || false == ViewModel.BattleAnimConfig)
+                return;
+
+            var config = ViewModel.BattleAnimConfig.ShieldPulse;
+
+            _targetingInputHandler.IsHoveringBlockedAvatar
+                .Subscribe(hovering =>
+                {
+                    if (hovering)
+                    {
+                        _enemyGroup1Shield?.StartPulse(config);
+                        _enemyGroup2Shield?.StartPulse(config);
+                    }
+                    else
+                    {
+                        _enemyGroup1Shield?.StopPulse();
+                        _enemyGroup2Shield?.StopPulse();
+                    }
+                })
+                .AddTo(Disposables);
         }
 
         private void BindHeroRow(HeroSlotView[] views, HeroSlotViewModel[] viewModels)

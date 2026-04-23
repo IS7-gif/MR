@@ -14,6 +14,9 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         private const float OffsetPx = 20f;
 
 
+        public ReadOnlyReactiveProperty<bool> IsHoveringBlockedAvatar => _isHoveringBlockedAvatar;
+
+
         private IInputService _input;
         private TargetingRegistry _registry;
         private IAbilityExecutionService _abilityExecution;
@@ -26,12 +29,14 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
         private int _actionSessionVersion = -1;
         private IDisposable _runtimeStateSubscription;
         private IDisposable _gameStateSubscription;
+        private readonly ReactiveProperty<bool> _isHoveringBlockedAvatar = new(false);
 
 
         private void OnDestroy()
         {
             ClearSelection();
             Unsubscribe();
+            _isHoveringBlockedAvatar.Dispose();
         }
 
 
@@ -105,6 +110,12 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
                 _target = candidate;
                 _target.SetTargetHighlight(true, _source.Descriptor.ActionType);
             }
+
+            _isHoveringBlockedAvatar.Value = candidate != null
+                && false == valid
+                && candidate.Descriptor.Kind == UnitKind.Avatar
+                && candidate.Descriptor.Side == BattleSide.Enemy
+                && _source.Descriptor.ActionType == HeroActionType.DealDamage;
         }
 
         private void HandleDragCanceled()
@@ -191,6 +202,7 @@ namespace Project.Scripts.Gameplay.Battle.Targeting
             _source = null;
             _target = null;
             _actionSessionVersion = -1;
+            _isHoveringBlockedAvatar.Value = false;
         }
     }
 }
