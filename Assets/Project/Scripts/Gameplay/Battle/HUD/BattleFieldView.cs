@@ -115,12 +115,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             await targetView.PlayResultPulse(config);
         }
 
-#if UNITY_EDITOR
         public void RefreshPosition()
         {
             PublishAnnouncementAnchor();
         }
-#endif
 
         private void PublishAnnouncementAnchor()
         {
