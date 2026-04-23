@@ -15,6 +15,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
     {
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
+        private static readonly int GrayscaleEnabledShaderId = Shader.PropertyToID("_GrayscaleEnabled");
         private const float DisabledPortraitBrightness = 0.45f;
 
         
@@ -32,6 +33,9 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Space(10)]
         [Tooltip("SpriteRenderer портрета - отображает изображение аватара")]
         [SerializeField] private SpriteRenderer _portrait;
+
+        [Tooltip("Radial cooldown overlay - shown on top of portrait during cooldown")]
+        [SerializeField] private CooldownSweepView _cooldownSweep;
 
         [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
         [SerializeField] private SpriteRenderer _glow;
@@ -110,6 +114,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindHitReaction(viewModel);
             BindDeathState(viewModel);
             BindAvailabilityState(viewModel);
+            BindCooldownSweep(viewModel);
             GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
         }
 
@@ -264,6 +269,30 @@ namespace Project.Scripts.Gameplay.Battle.Units
                             if (go) go.SetActive(false == defeated);
                 })
                 .AddTo(_disposables);
+        }
+
+        private void BindCooldownSweep(AvatarSlotViewModel viewModel)
+        {
+            _cooldownSweep?.SetSprite(_portrait ? _portrait.sprite : null);
+            _cooldownSweep?.SetCooldown(0f, 0f);
+
+            viewModel.EnergyBar.CooldownProgress
+                .Subscribe(info =>
+                {
+                    _cooldownSweep?.SetCooldown(info.Remaining, info.Duration);
+                    SetPortraitGrayscale(info.Remaining > 0f && _config && _config.CooldownGrayscaleEnabled);
+                })
+                .AddTo(_disposables);
+        }
+
+        private void SetPortraitGrayscale(bool active)
+        {
+            if (false == _portrait)
+                return;
+
+            _portraitPropertyBlock ??= new MaterialPropertyBlock();
+            _portraitPropertyBlock.SetFloat(GrayscaleEnabledShaderId, active ? 1f : 0f);
+            _portrait.SetPropertyBlock(_portraitPropertyBlock);
         }
 
         private void BindAvailabilityState(AvatarSlotViewModel viewModel)

@@ -70,6 +70,10 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Цвет свечения допустимой цели лечения")]
         [SerializeField] private Color _healTargetColor = new(0.15f, 1f, 0.25f, 1f);
 
+        [Header("Cooldown Visuals")]
+        [Tooltip("Переводить портрет в черно-белый режим во время кулдауна способности")]
+        [SerializeField] private bool _cooldownGrayscaleEnabled = true;
+
         [Header("Shield Pulse")]
         [Tooltip("Параметры пульсации щитов при попытке атаковать защищенного аватара")]
         [SerializeField] private ShieldPulseConfig _shieldPulse = new();
@@ -116,6 +120,7 @@ namespace Project.Scripts.Configs.Battle
         public float ReadyPulseDuration => _readyPulseDuration;
         public float ReadyPulseAlpha => _readyPulseAlpha;
         public Ease ReadyPulseEase => _readyPulseEase;
+        public bool CooldownGrayscaleEnabled => _cooldownGrayscaleEnabled;
         public ShieldPulseConfig ShieldPulse => _shieldPulse;
     }
 }

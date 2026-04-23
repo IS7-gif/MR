@@ -6,6 +6,7 @@ Shader "Custom/SpriteOutlineAndFill"
         _FillEnabled("Fill Enabled", Range(0, 1)) = 0
         _FillColor("Fill Color", Color) = (1, 1, 1, 1)
         _FillReplace("Fill Replace", Range(0, 1)) = 0
+        _GrayscaleEnabled("Grayscale Enabled", Range(0, 1)) = 0
         _OutlineEnabled("Outline Enabled", Range(0, 1)) = 0
         _OutlineColor("Outline Color", Color) = (1, 1, 1, 1)
         _OutlineWidth("Outline Width", Range(0, 50)) = 2
@@ -36,6 +37,7 @@ Shader "Custom/SpriteOutlineAndFill"
             float4 _OutlineColor;
             float _FillEnabled;
             float _FillReplace;
+            float _GrayscaleEnabled;
             float _OutlineEnabled;
             float _OutlineWidth;
             float _AlphaCutoff;
@@ -160,7 +162,14 @@ Shader "Custom/SpriteOutlineAndFill"
                 return GetFilledSpriteColor(spriteSample, input.color);
 
             if (spriteSample.a > 0.0)
+            {
+                if (_GrayscaleEnabled > 0.5)
+                {
+                    float gray = dot(spriteColor.rgb, float3(0.299, 0.587, 0.114));
+                    spriteColor.rgb = float3(gray, gray, gray);
+                }
                 return spriteColor;
+            }
 
             if (outlineEnabled <= 0.5)
                 return 0.0;

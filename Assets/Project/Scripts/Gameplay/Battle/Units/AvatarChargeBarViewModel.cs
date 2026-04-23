@@ -16,6 +16,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public ReactiveProperty<bool> IsReady { get; } = new (false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new (UnitActivationBlockReason.None);
         public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new (false);
+        public ReactiveProperty<(float Remaining, float Duration)> CooldownProgress { get; } = new ((0f, 0f));
 
 
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
@@ -50,6 +51,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsReady.Dispose();
             ActivationBlockReason.Dispose();
             IsAvailabilityDimmed.Dispose();
+            CooldownProgress.Dispose();
             _subscriptions.Dispose();
         }
 
@@ -101,13 +103,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 return;
 
             _isOnCooldown = e.RemainingSeconds > 0f;
+            CooldownProgress.Value = (e.RemainingSeconds, e.DurationSeconds);
             RefreshReadyState();
         }
 
         private void RefreshAvailabilityVisualState()
         {
             IsAvailabilityDimmed.Value = _battleActionRuntimeService.CanAcceptNormalActions
-                && ActivationBlockReason.Value != UnitActivationBlockReason.None;
+                && ActivationBlockReason.Value != UnitActivationBlockReason.None
+                && ActivationBlockReason.Value != UnitActivationBlockReason.Cooldown;
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
         public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new(false);
+        public ReactiveProperty<(float Remaining, float Duration)> CooldownProgress { get; } = new((0f, 0f));
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
         public int CurrentHP { get; private set; }
@@ -119,6 +120,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsActivatable.Dispose();
             ActivationBlockReason.Dispose();
             IsAvailabilityDimmed.Dispose();
+            CooldownProgress.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();
             _healthBarUpdated.Dispose();
@@ -183,6 +185,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 return;
 
             _isOnCooldown = e.RemainingSeconds > 0f;
+            CooldownProgress.Value = (e.RemainingSeconds, e.DurationSeconds);
             RefreshActivatable();
         }
 
@@ -190,7 +193,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             IsAvailabilityDimmed.Value = IsAssigned
                 && _battleActionRuntimeService.CanAcceptNormalActions
-                && ActivationBlockReason.Value != UnitActivationBlockReason.None;
+                && ActivationBlockReason.Value != UnitActivationBlockReason.None
+                && ActivationBlockReason.Value != UnitActivationBlockReason.Cooldown;
         }
     }
 }
