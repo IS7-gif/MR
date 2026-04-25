@@ -6,10 +6,12 @@ using Project.Scripts.Configs.Levels;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Services.Board;
+using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 using R3;
@@ -54,6 +56,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly SlotLayoutConfig _slotLayoutConfig;
         private readonly IBoardBoundsProvider _boardBounds;
         private readonly IGameStateService _gameStateService;
+        private readonly IBattleFlowService _battleFlowService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly BattleFlowConfig _battleFlowConfig;
         private readonly UnitDeathConfig _unitDeathConfig;
@@ -78,6 +81,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             SlotLayoutConfig slotLayoutConfig,
             IBoardBoundsProvider boardBounds,
             IGameStateService gameStateService,
+            IBattleFlowService battleFlowService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IReadyPulseCoordinator pulseCoordinator,
             IAbilityExecutionService abilityExecution,
@@ -97,6 +101,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _slotLayoutConfig = slotLayoutConfig;
             _boardBounds = boardBounds;
             _gameStateService = gameStateService;
+            _battleFlowService = battleFlowService;
             _battleActionRuntimeService = battleActionRuntimeService;
             PulseCoordinator = pulseCoordinator;
             AbilityExecution = abilityExecution;
@@ -156,6 +161,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             Disposables.Add(_eventBus.Subscribe<HeroHPChangedEvent>(OnHeroHPChanged));
             Disposables.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            Disposables.Add(_eventBus.Subscribe<BattleFlowPhaseChangedEvent>(_ => RefreshInteractionOverlay()));
             Disposables.Add(_eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnBattleFlowTimerChanged));
             Disposables.Add(_eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
             Disposables.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshInteractionOverlay()));
@@ -213,8 +219,23 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         private void RefreshInteractionOverlay()
         {
-            _isInteractionOverlayVisible.Value = _gameStateService.State.CurrentValue == GameState.Playing
-                && false == _battleActionRuntimeService.CanAcceptNormalActions;
+            _isInteractionOverlayVisible.Value = ShouldShowBattleOverlay();
+        }
+
+        private bool ShouldShowBattleOverlay()
+        {
+            if (_gameStateService.State.CurrentValue != GameState.Playing)
+                return false;
+
+            if (_battleFlowService.IsPrePhase)
+            {
+                if (_battleFlowConfig.DimCurrentPhaseDuringPrePhase)
+                    return true;
+
+                return _battleFlowService.Snapshot.UpcomingPhase == BattlePhaseKind.Match;
+            }
+
+            return false == _battleActionRuntimeService.CanAcceptNormalActions;
         }
 
         private HeroSlotViewModel[] CreateHeroSlotViewModels(

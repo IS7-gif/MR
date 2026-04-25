@@ -85,6 +85,7 @@ namespace Project.Scripts.DI
 
             builder.Register<IBattleTimerService, BattleTimerService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<BoardAnnouncementService>().As<IBoardAnnouncementService>();
+            builder.RegisterEntryPoint<BattlePrePhaseAnnouncementService>();
             builder.RegisterEntryPoint<BattleTimerAnnouncementService>();
 
             if (EnableBurndownModule)

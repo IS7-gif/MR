@@ -7,6 +7,7 @@ namespace Project.Scripts.Services.BattleFlow
     public class BattleFlowService : IBattleFlowService
     {
         public bool IsInitialized { get; private set; }
+        public bool IsPrePhase => IsInitialized && _engine.Snapshot.Phase == BattlePhaseKind.PrePhase;
         public BattleFlowSnapshot Snapshot => _engine.Snapshot;
 
 
@@ -29,6 +30,7 @@ namespace Project.Scripts.Services.BattleFlow
                 _config.RoundCount,
                 _config.MatchPhaseDuration,
                 _config.HeroPhaseDuration,
+                _config.PrePhaseDuration,
                 _config.CountdownThreshold,
                 _config.EnergyCarryoverMode);
 
@@ -39,6 +41,9 @@ namespace Project.Scripts.Services.BattleFlow
             PublishRoundChanged(_engine.Snapshot);
             PublishPhaseChanged(_engine.Snapshot);
             PublishTimerChanged(_engine.Snapshot);
+
+            if (_engine.Snapshot.Phase == BattlePhaseKind.PrePhase)
+                _eventBus.Publish(new BattlePrePhaseStartedEvent(_engine.Snapshot.UpcomingPhase ?? BattlePhaseKind.Match));
         }
 
         public void Tick(float deltaTime)
@@ -56,6 +61,7 @@ namespace Project.Scripts.Services.BattleFlow
             if (after.Phase != before.Phase)
             {
                 _lastPublishedSecond = (int)after.TimeRemaining;
+                PublishPrePhaseLifecycle(before, after);
                 PublishPhaseChanged(after);
                 PublishTimerChanged(after);
                 TryPublishCountdown(after);
@@ -86,6 +92,7 @@ namespace Project.Scripts.Services.BattleFlow
                 return;
 
             _lastPublishedSecond = (int)after.TimeRemaining;
+            PublishPrePhaseLifecycle(before, after);
             PublishPhaseChanged(after);
             PublishTimerChanged(after);
             TryPublishCountdown(after);
@@ -102,6 +109,7 @@ namespace Project.Scripts.Services.BattleFlow
 
             if (after.Phase != before.Phase)
             {
+                PublishPrePhaseLifecycle(before, after);
                 PublishPhaseChanged(after);
                 PublishTimerChanged(after);
             }
@@ -129,11 +137,26 @@ namespace Project.Scripts.Services.BattleFlow
 
         private void TryPublishCountdown(BattleFlowSnapshot snapshot)
         {
+            if (snapshot.Phase == BattlePhaseKind.PrePhase)
+                return;
+
             var remainingSeconds = (int)snapshot.TimeRemaining;
             if (remainingSeconds <= 0 || remainingSeconds > _config.CountdownThreshold)
                 return;
 
             _eventBus.Publish(new BattleFlowCountdownTickEvent(snapshot.Phase, remainingSeconds));
+        }
+
+        private void PublishPrePhaseLifecycle(BattleFlowSnapshot before, BattleFlowSnapshot after)
+        {
+            if (after.Phase == BattlePhaseKind.PrePhase && before.Phase != BattlePhaseKind.PrePhase)
+            {
+                _eventBus.Publish(new BattlePrePhaseStartedEvent(after.UpcomingPhase ?? BattlePhaseKind.Match));
+                return;
+            }
+
+            if (before.Phase == BattlePhaseKind.PrePhase && after.Phase != BattlePhaseKind.PrePhase)
+                _eventBus.Publish(new BattlePrePhaseEndedEvent(after.Phase));
         }
     }
 }

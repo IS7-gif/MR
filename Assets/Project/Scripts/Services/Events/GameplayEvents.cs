@@ -285,6 +285,28 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct BattlePrePhaseStartedEvent
+    {
+        public BattlePhaseKind UpcomingPhase { get; }
+
+
+        public BattlePrePhaseStartedEvent(BattlePhaseKind upcomingPhase)
+        {
+            UpcomingPhase = upcomingPhase;
+        }
+    }
+
+    public readonly struct BattlePrePhaseEndedEvent
+    {
+        public BattlePhaseKind NextPhase { get; }
+
+
+        public BattlePrePhaseEndedEvent(BattlePhaseKind nextPhase)
+        {
+            NextPhase = nextPhase;
+        }
+    }
+
     public readonly struct BurndownStartedEvent
     {
 

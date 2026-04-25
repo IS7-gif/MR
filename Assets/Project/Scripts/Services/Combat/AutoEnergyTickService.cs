@@ -1,4 +1,5 @@
 using System;
+using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
@@ -14,6 +15,7 @@ namespace Project.Scripts.Services.Combat
         private readonly AutoEnergyConfig _autoEnergyConfig;
         private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly IGameStateService _gameStateService;
+        private readonly IBattleFlowService _battleFlowService;
         private readonly CompositeDisposable _subscriptions = new();
 
         private float _elapsed;
@@ -24,12 +26,14 @@ namespace Project.Scripts.Services.Combat
             EventBus eventBus,
             AutoEnergyConfig autoEnergyConfig,
             IBattleEconomyModifierService battleEconomyModifier,
-            IGameStateService gameStateService)
+            IGameStateService gameStateService,
+            IBattleFlowService battleFlowService)
         {
             _eventBus = eventBus;
             _autoEnergyConfig = autoEnergyConfig;
             _battleEconomyModifier = battleEconomyModifier;
             _gameStateService = gameStateService;
+            _battleFlowService = battleFlowService;
         }
 
         public void Start()
@@ -44,6 +48,9 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             if (false == _gameStateService.IsPlaying)
+                return;
+
+            if (false == _battleFlowService.IsInitialized || _battleFlowService.IsPrePhase)
                 return;
 
             _elapsed += Time.deltaTime;

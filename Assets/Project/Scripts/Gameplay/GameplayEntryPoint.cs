@@ -21,6 +21,7 @@ using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.Timer;
 using Project.Scripts.Services.UISystem;
+using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Grid;
 using UnityEngine;
 using VContainer;
@@ -46,6 +47,7 @@ namespace Project.Scripts.Gameplay
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
         private BattleViewConfig _battleViewConfig;
+        private BattleFlowConfig _battleFlowConfig;
         private UIService _uiService;
         private MoveBarViewModel _moveBarViewModel;
         private IGameStateService _gameStateService;
@@ -71,6 +73,7 @@ namespace Project.Scripts.Gameplay
         private DebugConfig _debugConfig;
         private IDisposable _boardRuntimeSubscription;
         private IDisposable _gameStateSubscription;
+        private IDisposable _battleFlowPhaseSubscription;
         private IDisposable _burndownStartedSubscription;
 
 #if UNITY_EDITOR
@@ -91,13 +94,17 @@ namespace Project.Scripts.Gameplay
             if (null == _moveBarService)
                 return;
 
-            _battleTimerService?.Tick(Time.deltaTime);
-            _burndownService?.Tick(Time.deltaTime);
-
             if (false == _gameStateService.IsPlaying)
                 return;
 
+            var isPrePhase = _battleFlowService is { IsInitialized: true, IsPrePhase: true };
             _battleFlowService?.Tick(Time.deltaTime);
+
+            if (isPrePhase)
+                return;
+
+            _battleTimerService?.Tick(Time.deltaTime);
+            _burndownService?.Tick(Time.deltaTime);
             _unitActivationCooldownService?.Tick(Time.deltaTime);
 
             if (_moveBarService.IsEnabled && _boardRuntimeService.CanAcceptInput)
@@ -134,6 +141,8 @@ namespace Project.Scripts.Gameplay
             _boardRuntimeSubscription = null;
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = null;
+            _battleFlowPhaseSubscription?.Dispose();
+            _battleFlowPhaseSubscription = null;
             _burndownStartedSubscription?.Dispose();
             _burndownStartedSubscription = null;
 
@@ -155,6 +164,7 @@ namespace Project.Scripts.Gameplay
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
             BattleViewConfig battleViewConfig,
+            BattleFlowConfig battleFlowConfig,
             UIService uiService,
             MoveBarViewModel moveBarViewModel,
             IGameStateService gameStateService,
@@ -183,6 +193,7 @@ namespace Project.Scripts.Gameplay
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
             _battleViewConfig = battleViewConfig;
+            _battleFlowConfig = battleFlowConfig;
             _uiService = uiService;
             _moveBarViewModel = moveBarViewModel;
             _gameStateService = gameStateService;
@@ -290,6 +301,8 @@ namespace Project.Scripts.Gameplay
             _boardRuntimeSubscription = _boardRuntimeService.State.Subscribe(_ => RefreshPhaseOverlays());
             _gameStateSubscription?.Dispose();
             _gameStateSubscription = _gameStateService.State.Subscribe(_ => RefreshPhaseOverlays());
+            _battleFlowPhaseSubscription?.Dispose();
+            _battleFlowPhaseSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(_ => RefreshPhaseOverlays());
             RefreshPhaseOverlays();
 
             _burndownStartedSubscription?.Dispose();
@@ -397,9 +410,24 @@ namespace Project.Scripts.Gameplay
 
         private void RefreshPhaseOverlays()
         {
-            var showOverlay = _gameStateService.State.CurrentValue == GameState.Playing
-                && false == _boardRuntimeService.CanAcceptInput;
+            var showOverlay = ShouldShowBoardOverlay();
             _battleWorldLayout?.BoardView?.SetInteractionOverlayActive(showOverlay);
+        }
+
+        private bool ShouldShowBoardOverlay()
+        {
+            if (_gameStateService.State.CurrentValue != GameState.Playing)
+                return false;
+
+            if (_battleFlowService is { IsInitialized: true, IsPrePhase: true })
+            {
+                if (_battleFlowConfig.DimCurrentPhaseDuringPrePhase)
+                    return true;
+
+                return _battleFlowService.Snapshot.UpcomingPhase == BattlePhaseKind.Hero;
+            }
+
+            return false == _boardRuntimeService.CanAcceptInput;
         }
     }
 }

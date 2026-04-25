@@ -43,6 +43,9 @@ namespace Project.Scripts.Services.Game
             BattleActionRuntimeState nextState;
             switch (phase)
             {
+                case BattlePhaseKind.PrePhase:
+                    nextState = BattleActionRuntimeState.PrePhase;
+                    break;
                 case BattlePhaseKind.Match:
                     nextState = BattleActionRuntimeState.MatchPhaseBlocked;
                     break;
@@ -89,6 +92,9 @@ namespace Project.Scripts.Services.Game
 
         private static BattleActionPhase MapPhase(BattleActionRuntimeState state)
         {
+            if (state == BattleActionRuntimeState.PrePhase)
+                return BattleActionPhase.PrePhase;
+
             if (state == BattleActionRuntimeState.MatchPhaseBlocked)
                 return BattleActionPhase.MatchPhase;
 

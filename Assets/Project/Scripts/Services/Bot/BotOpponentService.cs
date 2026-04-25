@@ -34,6 +34,7 @@ namespace Project.Scripts.Services.Bot
         private BotDecisionEngine _engine;
         private CancellationTokenSource _cts;
         private IDisposable _stateSub;
+        private IDisposable _phaseSub;
         private readonly bool[] _heroActivationPending = new bool[4];
         private bool _dischargeScheduled;
 
@@ -72,15 +73,14 @@ namespace Project.Scripts.Services.Bot
 
             _engine = new BotDecisionEngine(_botConfig.ToSettings(), UnityEngine.Random.Range(0, int.MaxValue));
 
-            _cts = new CancellationTokenSource();
-
             _stateSub = _gameStateService.State
                 .Where(s => s != GameState.Playing)
                 .Take(1)
                 .Subscribe(_ => StopLoops());
+            _phaseSub = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged);
 
-            RunEnemyChargeLoop(_cts.Token).Forget();
-            RunHeroEnergyLoop(_cts.Token).Forget();
+            if (_battleFlowService.IsInitialized)
+                SyncLoopState(_battleFlowService.Snapshot.Phase);
         }
 
         public void Dispose()
@@ -88,8 +88,15 @@ namespace Project.Scripts.Services.Bot
             StopLoops();
             _stateSub?.Dispose();
             _stateSub = null;
+            _phaseSub?.Dispose();
+            _phaseSub = null;
         }
 
+
+        private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
+        {
+            SyncLoopState(e.Phase);
+        }
 
         private async UniTaskVoid RunEnemyChargeLoop(CancellationToken ct)
         {
@@ -407,6 +414,40 @@ namespace Project.Scripts.Services.Bot
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = null;
+            ResetPendingActions();
+        }
+
+        private void SyncLoopState(BattlePhaseKind phase)
+        {
+            if (false == _gameStateService.IsPlaying)
+            {
+                StopLoops();
+                return;
+            }
+
+            if (phase is BattlePhaseKind.Match or BattlePhaseKind.Hero)
+            {
+                EnsureLoopsRunning();
+                return;
+            }
+
+            StopLoops();
+        }
+
+        private void EnsureLoopsRunning()
+        {
+            if (_cts != null)
+                return;
+
+            _cts = new CancellationTokenSource();
+            RunEnemyChargeLoop(_cts.Token).Forget();
+            RunHeroEnergyLoop(_cts.Token).Forget();
+        }
+
+        private void ResetPendingActions()
+        {
+            Array.Clear(_heroActivationPending, 0, _heroActivationPending.Length);
+            _dischargeScheduled = false;
         }
     }
 }

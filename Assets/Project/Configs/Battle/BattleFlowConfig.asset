@@ -15,5 +15,7 @@ MonoBehaviour:
   _roundCount: 3
   _matchPhaseDuration: 30
   _heroPhaseDuration: 30
-  _countdownThreshold: 5
   _energyCarryoverMode: 0
+  _prePhaseDuration: 4
+  _dimCurrentPhaseDuringPrePhase: 1
+  _countdownThreshold: 5

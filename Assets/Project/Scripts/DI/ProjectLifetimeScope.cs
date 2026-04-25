@@ -1,6 +1,4 @@
 using Project.Scripts.Configs;
-using Project.Scripts.Configs.Battle;
-using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.UISystem;
@@ -17,20 +15,10 @@ namespace Project.Scripts.DI
 
         protected override void Configure(IContainerBuilder builder)
         {
-            var gameResultSequenceConfig = _mainConfig.GameResultSequenceConfig
-                ? _mainConfig.GameResultSequenceConfig
-                : ScriptableObject.CreateInstance<GameResultSequenceConfig>();
-            var burndownConfig = _mainConfig.BurndownConfig
-                ? _mainConfig.BurndownConfig
-                : ScriptableObject.CreateInstance<BurndownConfig>();
-            var battleFlowConfig = _mainConfig.BattleFlowConfig
-                ? _mainConfig.BattleFlowConfig
-                : ScriptableObject.CreateInstance<BattleFlowConfig>();
-
             builder.RegisterInstance(_mainConfig.BoardConfig);
             builder.RegisterInstance(_mainConfig.BoardAnimationConfig);
             builder.RegisterInstance(_mainConfig.BattleAnimationConfig);
-            builder.RegisterInstance(gameResultSequenceConfig);
+            builder.RegisterInstance(_mainConfig.GameResultSequenceConfig);
             builder.RegisterInstance(_mainConfig.InputConfig);
             builder.RegisterInstance(_mainConfig.CascadeEnergyConfig);
             builder.RegisterInstance(_mainConfig.AudioMusicConfig);
@@ -44,8 +32,8 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
             builder.RegisterInstance(_mainConfig.BattleTimerConfig);
-            builder.RegisterInstance(battleFlowConfig);
-            builder.RegisterInstance(burndownConfig);
+            builder.RegisterInstance(_mainConfig.BattleFlowConfig);
+            builder.RegisterInstance(_mainConfig.BurndownConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);
             builder.RegisterInstance(_mainConfig.AutoEnergyConfig);
             builder.RegisterInstance(_mainConfig.EscalationConfig);

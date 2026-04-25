@@ -4,6 +4,9 @@ namespace Project.Scripts.Shared.Rules
     {
         public static BattleActionGateResult Evaluate(BattleActionPhase phase, BattleActionKind actionKind)
         {
+            if (phase == BattleActionPhase.PrePhase)
+                return new BattleActionGateResult(BattleActionBlockReason.PrePhase);
+
             if (phase == BattleActionPhase.MatchPhase)
             {
                 return actionKind == BattleActionKind.BoardSwap
@@ -42,6 +45,7 @@ namespace Project.Scripts.Shared.Rules
     
     public enum BattleActionPhase
     {
+        PrePhase,
         MatchPhase,
         HeroPhase,
         Burndown,
@@ -60,6 +64,7 @@ namespace Project.Scripts.Shared.Rules
     public enum BattleActionBlockReason
     {
         None,
+        PrePhase,
         MatchPhase,
         HeroPhase,
         Burndown,

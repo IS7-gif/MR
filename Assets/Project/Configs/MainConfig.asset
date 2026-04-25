@@ -30,7 +30,7 @@ MonoBehaviour:
   _slotLayoutConfig: {fileID: 11400000, guid: 930f2ff79998a144c9415e78b34f4409, type: 2}
   _battleTimerConfig: {fileID: 11400000, guid: 1d2e42b857e256849860ef5101594dd4, type: 2}
   _battleFlowConfig: {fileID: 11400000, guid: b42c2996aa482aa4abac2782938ef0c9, type: 2}
-  _burndownConfig: {fileID: 0}
+  _burndownConfig: {fileID: 11400000, guid: 0b3adf65b88a46068d76abf94b1bc623, type: 2}
   _unitDeathConfig: {fileID: 11400000, guid: 3376c745fcd728c43bcb625f04131074, type: 2}
   _autoEnergyConfig: {fileID: 11400000, guid: fb69d75f46621ee429f17cc0a2369424, type: 2}
   _escalationConfig: {fileID: 11400000, guid: 94634fb3bbc965a4b9a9c81369bde7b5, type: 2}
