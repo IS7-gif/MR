@@ -1,5 +1,6 @@
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Audio.AudioSystem.Configs;
@@ -19,8 +20,11 @@ namespace Project.Scripts.Configs
         [Tooltip("Настройки ввода: чувствительность свайпов и касаний")]
         [SerializeField] private InputConfig _inputConfig;
 
-        [Tooltip("Параметры игрового поля: размер сетки, типы тайлов, правила матчей")]
+        [Tooltip("Визуальные параметры игрового поля: отступы, рамка, маска и prefab тайла")]
         [SerializeField] private BoardConfig _boardConfig;
+
+        [Tooltip("Правила сетки тайлов: размерность доски")]
+        [SerializeField] private GridConfig _gridConfig;
 
         [Tooltip("Анимации поля: скорости падения, слияния и появления тайлов")]
         [SerializeField] private BoardAnimationConfig _boardAnimationConfig;
@@ -87,6 +91,7 @@ namespace Project.Scripts.Configs
         public AudioSFXConfig AudioSFXConfig => _audioSFXConfig;
         public InputConfig InputConfig => _inputConfig;
         public BoardConfig BoardConfig => _boardConfig;
+        public GridConfig GridConfig => _gridConfig;
         public BoardAnimationConfig BoardAnimationConfig => _boardAnimationConfig;
         public BattleAnimationConfig BattleAnimationConfig => _battleAnimationConfig;
         public GameResultSequenceConfig GameResultSequenceConfig => _gameResultSequenceConfig;

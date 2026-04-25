@@ -1,6 +1,6 @@
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Gameplay.Battle.Layout;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
     {
         [SerializeField] private BoardConfig _boardConfig;
         [SerializeField] private BattleViewConfig _battleViewConfig;
-        [SerializeField] private LevelConfig _levelConfig;
+        [SerializeField] private GridConfig _gridConfig;
 
 
         private void Update()
@@ -25,7 +25,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
         public void Apply(float tileCellSize = -1f)
         {
             var cam = Camera.main;
-            if (!cam || !_boardConfig || !_battleViewConfig || !_levelConfig)
+            if (!cam || !_boardConfig || !_battleViewConfig || !_gridConfig)
                 return;
 
             var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions(cam);
@@ -63,12 +63,12 @@ namespace Project.Scripts.Gameplay.Battle.Board
             var camWidth = camHeight * GetAspect(cam);
             var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _levelConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _gridConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
             var cellSize = Mathf.Min(byWidth, byHeight);
 
-            var frameWidth  = _levelConfig.Width  * cellSize;
-            var frameHeight = _levelConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
+            var frameWidth  = _gridConfig.Width  * cellSize;
+            var frameHeight = _gridConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
             return (frameWidth, frameHeight, cellSize);
         }
 
@@ -78,8 +78,8 @@ namespace Project.Scripts.Gameplay.Battle.Board
             var camWidth = camHeight * GetAspect(cam);
             var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _levelConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _gridConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
 
             return Mathf.Min(byWidth, byHeight);
         }

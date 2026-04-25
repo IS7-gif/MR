@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 using DG.Tweening;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
 using UnityEngine;
@@ -12,18 +12,18 @@ namespace Project.Scripts.Services.BoardEdit
     {
         private IGridState _state;
         private IGridView _view;
-        private LevelConfig _levelConfig;
+        private GridConfig _gridConfig;
         private float _cellSize;
         private GameObject _overlayGo;
         private LineRenderer _overlay;
         private Tween _overlayTween;
 
 
-        public void Init(IGridState state, IGridView view, LevelConfig levelConfig, float cellSize)
+        public void Init(IGridState state, IGridView view, GridConfig gridConfig, float cellSize)
         {
             _state = state;
             _view = view;
-            _levelConfig = levelConfig;
+            _gridConfig = gridConfig;
             _cellSize = cellSize;
             BoardEditMode.OnToggled += OnEditModeToggled;
         }
@@ -90,9 +90,9 @@ namespace Project.Scripts.Services.BoardEdit
         {
             var half = _cellSize * 0.5f;
             var bl = _view.GridToWorld(new GridPoint(0, 0)) + new Vector3(-half, -half, 0f);
-            var br = _view.GridToWorld(new GridPoint(_levelConfig.Width - 1, 0)) + new Vector3( half, -half, 0f);
-            var tr = _view.GridToWorld(new GridPoint(_levelConfig.Width - 1, _levelConfig.Height - 1)) + new Vector3( half,  half, 0f);
-            var tl = _view.GridToWorld(new GridPoint(0, _levelConfig.Height - 1)) + new Vector3(-half,  half, 0f);
+            var br = _view.GridToWorld(new GridPoint(_gridConfig.Width - 1, 0)) + new Vector3( half, -half, 0f);
+            var tr = _view.GridToWorld(new GridPoint(_gridConfig.Width - 1, _gridConfig.Height - 1)) + new Vector3( half,  half, 0f);
+            var tl = _view.GridToWorld(new GridPoint(0, _gridConfig.Height - 1)) + new Vector3(-half,  half, 0f);
 
             _overlayGo = new GameObject("BoardEditOverlay");
             _overlay = _overlayGo.AddComponent<LineRenderer>();

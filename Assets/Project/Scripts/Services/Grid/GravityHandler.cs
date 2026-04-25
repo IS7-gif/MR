@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Shared;
 
@@ -11,11 +11,11 @@ namespace Project.Scripts.Services.Grid
         private readonly IGridState _state;
         private readonly IGridView _view;
         private readonly TilePool _pool;
-        private readonly LevelConfig _config;
+        private readonly GridConfig _config;
         private readonly IBoardRuntimeService _boardRuntimeService;
 
 
-        public GravityHandler(IGridState state, IGridView view, TilePool pool, LevelConfig config,
+        public GravityHandler(IGridState state, IGridView view, TilePool pool, GridConfig config,
             IBoardRuntimeService boardRuntimeService)
         {
             _state = state;

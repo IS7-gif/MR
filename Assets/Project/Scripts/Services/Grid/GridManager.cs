@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Shared;
@@ -18,6 +19,7 @@ namespace Project.Scripts.Services.Grid
         
         
         private readonly LevelConfig _levelConfig;
+        private readonly GridConfig _gridConfig;
         private readonly BoardAnimationConfig _animConfig;
         private readonly TilePool _pool;
         private readonly Tile[,] _tiles;
@@ -27,15 +29,16 @@ namespace Project.Scripts.Services.Grid
         private Vector3 _origin;
        
 
-        public GridManager(LevelConfig levelConfig, BoardAnimationConfig animConfig, TilePool pool, float cellSize,
-            IBoardRuntimeService boardRuntimeService)
+        public GridManager(LevelConfig levelConfig, GridConfig gridConfig, BoardAnimationConfig animConfig,
+            TilePool pool, float cellSize, IBoardRuntimeService boardRuntimeService)
         {
             _levelConfig = levelConfig;
+            _gridConfig = gridConfig;
             _animConfig = animConfig;
             _pool = pool;
             _cellSize = cellSize;
-            _tiles = new Tile[levelConfig.Width, levelConfig.Height];
-            _state = new GridState(levelConfig.Width, levelConfig.Height);
+            _tiles = new Tile[gridConfig.Width, gridConfig.Height];
+            _state = new GridState(gridConfig.Width, gridConfig.Height);
             _boardRuntimeService = boardRuntimeService;
         }
 
@@ -78,8 +81,8 @@ namespace Project.Scripts.Services.Grid
 #if UNITY_EDITOR
         public void RepositionAllTiles()
         {
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var tile = _tiles[x, y];
                     if (tile)
@@ -119,11 +122,11 @@ namespace Project.Scripts.Services.Grid
         // IGridOperations
         public async UniTask PopulateGrid()
         {
-            var kindCache = new TileKind[_levelConfig.Width, _levelConfig.Height];
-            var tasks = new UniTask[_levelConfig.Width * _levelConfig.Height];
+            var kindCache = new TileKind[_gridConfig.Width, _gridConfig.Height];
+            var tasks = new UniTask[_gridConfig.Width * _gridConfig.Height];
             var idx = 0;
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var pos = new GridPoint(x, y);
                     var tileConfig = GetNoMatchConfig(x, y, kindCache);
@@ -257,8 +260,8 @@ namespace Project.Scripts.Services.Grid
 
             var positions = new List<GridPoint>();
             var configs = new List<TileConfig>();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var tile = _tiles[x, y];
                     if (tile)
@@ -274,7 +277,7 @@ namespace Project.Scripts.Services.Grid
                 (configs[i], configs[j]) = (configs[j], configs[i]);
             }
 
-            var assignedKinds = new TileKind[_levelConfig.Width, _levelConfig.Height];
+            var assignedKinds = new TileKind[_gridConfig.Width, _gridConfig.Height];
             for (var i = 0; i < positions.Count; i++)
             {
                 var pos = positions[i];
@@ -305,8 +308,8 @@ namespace Project.Scripts.Services.Grid
         {
             ClearPendingScheduledRemovals();
 
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var tile = _tiles[x, y];
                     if (tile)
@@ -314,8 +317,8 @@ namespace Project.Scripts.Services.Grid
                 }
 
             var tasks = new List<UniTask>();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var tile = _tiles[x, y];
 
@@ -331,7 +334,7 @@ namespace Project.Scripts.Services.Grid
 
         public void ForceInjectMove()
         {
-            if (_levelConfig.RegularTiles.Length < 2 || _levelConfig.Width < 4)
+            if (_levelConfig.RegularTiles.Length < 2 || _gridConfig.Width < 4)
                 return;
 
             var configT = _levelConfig.RegularTiles[0];
@@ -353,8 +356,8 @@ namespace Project.Scripts.Services.Grid
             }
 
             var kinds = _state.GetGridState();
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     var pos = new GridPoint(x, y);
                     var tile = _tiles[x, y];
@@ -388,8 +391,8 @@ namespace Project.Scripts.Services.Grid
                     kinds[x, y] = tile.Kind;
                 }
 
-            for (var x = 0; x < _levelConfig.Width; x++)
-                for (var y = 0; y < _levelConfig.Height; y++)
+            for (var x = 0; x < _gridConfig.Width; x++)
+                for (var y = 0; y < _gridConfig.Height; y++)
                 {
                     if (_tiles[x, y])
                         continue;
@@ -581,7 +584,7 @@ namespace Project.Scripts.Services.Grid
 
         private bool IsSameKindAt(int x, int y, TileKind kind, TileKind[,] kinds)
         {
-            if (x < 0 || x >= _levelConfig.Width || y < 0 || y >= _levelConfig.Height)
+            if (x < 0 || x >= _gridConfig.Width || y < 0 || y >= _gridConfig.Height)
                 return false;
 
             return kinds[x, y] == kind;

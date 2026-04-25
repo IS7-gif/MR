@@ -39,10 +39,6 @@ namespace Project.Scripts.Configs.Board
         [Range(-2f, 3f)]
         [SerializeField] private float _maskTopPadding = -0.3f;
 
-        [Tooltip("Минимальное количество тайлов в ряду/столбце для засчитывания совпадения")]
-        [Range(2, 6)]
-        [SerializeField] private int _minMatchLength = 3;
-
         [Tooltip("Максимальное соотношение ширины к высоте игровой области. На широких экранах контент обрамляется до этого соотношения (0.5 = 1:2)")]
         [Range(0.3f, 1f)]
         [SerializeField] private float _maxAspectRatio = 0.5f;
@@ -68,7 +64,6 @@ namespace Project.Scripts.Configs.Board
         public float FramePaddingPercent => _framePaddingPercent;
         public float FrameExtraHeight => _frameExtraHeight;
         public float MaskTopPadding => _maskTopPadding;
-        public int MinMatchLength => _minMatchLength;
         public float MaxAspectRatio => _maxAspectRatio;
         public Tile TilePrefab => _tilePrefab;
     }

@@ -17,12 +17,6 @@ namespace Project.Scripts.Configs.Levels
         [SerializeField] private int _levelId = 1;
 
         [Header("Board")]
-        [Tooltip("Количество столбцов тайлов на доске")]
-        [SerializeField] private int _width = 7;
-
-        [Tooltip("Количество строк тайлов на доске")]
-        [SerializeField] private int _height = 6;
-
         [Tooltip("Типы тайлов, доступные для обычных совпадений на этой доске")]
         [SerializeField] private TileConfig[] _regularTiles;
 
@@ -57,8 +51,6 @@ namespace Project.Scripts.Configs.Levels
 
 
         public int LevelId => _levelId;
-        public int Width => _width;
-        public int Height => _height;
         public TileConfig[] RegularTiles => _regularTiles;
         public TileConfig[] SpecialTiles => _specialTiles;
         public LevelGoalType GoalType => _goalType;

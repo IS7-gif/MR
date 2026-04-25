@@ -1,5 +1,4 @@
-using Project.Scripts.Configs;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
 using Project.Scripts.Shared.Tiles;
@@ -12,10 +11,10 @@ namespace Project.Scripts.Services.Grid
         private readonly IGridState _state;
         private readonly IGridView _view;
         private readonly IMatchFinder _matchFinder;
-        private readonly LevelConfig _config;
+        private readonly GridConfig _config;
 
 
-        public MoveChecker(IGridState state, IGridView view, IMatchFinder matchFinder, LevelConfig config)
+        public MoveChecker(IGridState state, IGridView view, IMatchFinder matchFinder, GridConfig config)
         {
             _state = state;
             _view = view;

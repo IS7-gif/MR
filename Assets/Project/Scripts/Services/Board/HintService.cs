@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Board;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Game;
 using Project.Scripts.Services.Grid;
@@ -21,7 +21,7 @@ namespace Project.Scripts.Services.Board
         private readonly IGridState _gridState;
         private readonly IGridView _gridView;
         private readonly IMatchFinder _matchFinder;
-        private readonly LevelConfig _levelConfig;
+        private readonly GridConfig _gridConfig;
         private readonly IGameStateService _gameStateService;
         private readonly IBoardRuntimeService _boardRuntimeService;
         private readonly EventBus _eventBus;
@@ -39,7 +39,7 @@ namespace Project.Scripts.Services.Board
             IGridState gridState,
             IGridView gridView,
             IMatchFinder matchFinder,
-            LevelConfig levelConfig,
+            GridConfig gridConfig,
             IGameStateService gameStateService,
             IBoardRuntimeService boardRuntimeService,
             EventBus eventBus,
@@ -49,7 +49,7 @@ namespace Project.Scripts.Services.Board
             _gridState = gridState;
             _gridView = gridView;
             _matchFinder = matchFinder;
-            _levelConfig = levelConfig;
+            _gridConfig = gridConfig;
             _gameStateService = gameStateService;
             _boardRuntimeService = boardRuntimeService;
             _eventBus = eventBus;
@@ -137,7 +137,7 @@ namespace Project.Scripts.Services.Board
             if (false == _boardRuntimeService.CanAcceptInput)
                 return;
 
-            var candidate = HintSelector.Select(_gridState, _gridView, _matchFinder, _levelConfig);
+            var candidate = HintSelector.Select(_gridState, _gridView, _matchFinder, _gridConfig);
             if (false == candidate.IsValid)
                 return;
 

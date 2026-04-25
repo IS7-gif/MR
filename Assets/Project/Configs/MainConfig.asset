@@ -16,6 +16,7 @@ MonoBehaviour:
   _audioSFXConfig: {fileID: 11400000, guid: 6585699740abdfe40b9dd6ce3a1f5ca1, type: 2}
   _inputConfig: {fileID: 11400000, guid: c7ad45c134bcf124b87f16c0b55446d5, type: 2}
   _boardConfig: {fileID: 11400000, guid: be905cc36eebaa048b09269c08009310, type: 2}
+  _gridConfig: {fileID: 11400000, guid: 6a3f0d9e8c7b4a1290fedcba98765432, type: 2}
   _boardAnimationConfig: {fileID: 11400000, guid: cbd98e1f82be3af488e15870bc436ae1, type: 2}
   _battleAnimationConfig: {fileID: 11400000, guid: 78800f9186b816a479bc920c3b746561, type: 2}
   _gameResultSequenceConfig: {fileID: 11400000, guid: a46c0d4d77a24f14bb61c31f9c9b4a01, type: 2}

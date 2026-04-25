@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Project.Scripts.Configs.Levels;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
@@ -14,20 +14,20 @@ namespace Project.Scripts.Services.Board.Hinting
             IGridState gridState,
             IGridView gridView,
             IMatchFinder matchFinder,
-            LevelConfig levelConfig)
+            GridConfig gridConfig)
         {
             var state = gridState.GetGridState();
             var tier1 = new List<HintCandidate>();
             var tier2 = new List<HintCandidate>();
             var tier3 = new List<HintCandidate>();
 
-            for (var x = 0; x < levelConfig.Width; x++)
+            for (var x = 0; x < gridConfig.Width; x++)
             {
-                for (var y = 0; y < levelConfig.Height; y++)
+                for (var y = 0; y < gridConfig.Height; y++)
                 {
-                    TrySwapDirection(x, y, x + 1, y, state, gridView, matchFinder, levelConfig,
+                    TrySwapDirection(x, y, x + 1, y, state, gridView, matchFinder, gridConfig,
                         tier1, tier2, tier3);
-                    TrySwapDirection(x, y, x, y + 1, state, gridView, matchFinder, levelConfig,
+                    TrySwapDirection(x, y, x, y + 1, state, gridView, matchFinder, gridConfig,
                         tier1, tier2, tier3);
                 }
             }
@@ -50,12 +50,12 @@ namespace Project.Scripts.Services.Board.Hinting
             TileKind[,] state,
             IGridView gridView,
             IMatchFinder matchFinder,
-            LevelConfig levelConfig,
+            GridConfig gridConfig,
             List<HintCandidate> tier1,
             List<HintCandidate> tier2,
             List<HintCandidate> tier3)
         {
-            if (x2 >= levelConfig.Width || y2 >= levelConfig.Height)
+            if (x2 >= gridConfig.Width || y2 >= gridConfig.Height)
                 return;
 
             var posA = new GridPoint(x1, y1);

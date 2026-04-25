@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Level_06
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.LevelConfig
   _levelId: 6
-  _width: 7
-  _height: 6
   _regularTiles:
   - {fileID: 11400000, guid: 45e3651fed728ad4487420bf9819b91a, type: 2}
   - {fileID: 11400000, guid: 1119a0ba92910f542a294d24513a6914, type: 2}

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Grid;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.HUD;
@@ -40,6 +41,7 @@ namespace Project.Scripts.Gameplay
         private EventBus _eventBus;
         private AudioService _audioService;
         private BoardConfig _boardConfig;
+        private GridConfig _gridConfig;
         private LevelConfig _levelConfig;
         private BoardAnimationConfig _animConfig;
         private InputConfig _inputConfig;
@@ -157,6 +159,7 @@ namespace Project.Scripts.Gameplay
             EventBus eventBus,
             AudioService audioService,
             BoardConfig boardConfig,
+            GridConfig gridConfig,
             LevelConfig levelConfig,
             BoardAnimationConfig animConfig,
             InputConfig inputConfig,
@@ -186,6 +189,7 @@ namespace Project.Scripts.Gameplay
             _eventBus = eventBus;
             _audioService = audioService;
             _boardConfig = boardConfig;
+            _gridConfig = gridConfig;
             _levelConfig = levelConfig;
             _animConfig = animConfig;
             _inputConfig = inputConfig;
@@ -250,8 +254,8 @@ namespace Project.Scripts.Gameplay
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
             var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, cellSize, _boardConfig.TileScale);
-            var matchFinder = new MatchFinder(_boardConfig.MinMatchLength);
-            var gridManager = new GridManager(_levelConfig, _animConfig, pool, cellSize, _boardRuntimeService);
+            var matchFinder = new MatchFinder(MatchRules.MinMatchLength);
+            var gridManager = new GridManager(_levelConfig, _gridConfig, _animConfig, pool, cellSize, _boardRuntimeService);
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
 
 #if UNITY_EDITOR
@@ -266,11 +270,11 @@ namespace Project.Scripts.Gameplay
 
             _battleWorldLayout.BoardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
 
-            var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _levelConfig, _boardRuntimeService);
+            var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _gridConfig, _boardRuntimeService);
 
             _swapHandler = new SwapInputHandler(_inputService, gridManager.State, gridManager, _inputConfig.WorldDragThreshold, _inputConfig.ReanchorOnUnlock);
 
-            var moveChecker = new MoveChecker(gridManager.State, gridManager, matchFinder, _levelConfig);
+            var moveChecker = new MoveChecker(gridManager.State, gridManager, matchFinder, _gridConfig);
             var specialTileResolver = new SpecialTileResolver(_specialTileConfig, _levelConfig);
             var swapComboResolver = new SwapComboResolver();
 
@@ -292,7 +296,7 @@ namespace Project.Scripts.Gameplay
                 _debugConfig);
 
             _hintService = new HintService(_hintConfig, gridManager.State, gridManager, matchFinder,
-                _levelConfig, _gameStateService, _boardRuntimeService, _eventBus, _palette);
+                _gridConfig, _gameStateService, _boardRuntimeService, _eventBus, _palette);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
@@ -318,7 +322,7 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
             var editHandler = gameObject.AddComponent<BoardEditClickHandler>();
-            editHandler.Init(gridManager.State, gridManager, _levelConfig, cellSize);
+            editHandler.Init(gridManager.State, gridManager, _gridConfig, cellSize);
 #endif
 
             await _inputService.InitAsync();
@@ -364,12 +368,12 @@ namespace Project.Scripts.Gameplay
             var camWidth = camHeight * cam.aspect;
             var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _levelConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _gridConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
             var cellSize = Mathf.Min(byWidth, byHeight);
 
-            var frameWidth  = _levelConfig.Width  * cellSize;
-            var frameHeight = _levelConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
+            var frameWidth  = _gridConfig.Width  * cellSize;
+            var frameHeight = _gridConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
             return (frameWidth, frameHeight, cellSize);
         }
 
@@ -380,8 +384,8 @@ namespace Project.Scripts.Gameplay
             var camWidth = camHeight * cam.aspect;
             var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
 
-            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _levelConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _levelConfig.Height;
+            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _gridConfig.Width;
+            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
 
             return Mathf.Min(byWidth, byHeight);
         }
@@ -402,8 +406,8 @@ namespace Project.Scripts.Gameplay
         private Vector3 ComputeGridOrigin(Vector3 boardCenter, float cellSize)
         {
             return boardCenter + new Vector3(
-                -(_levelConfig.Width - 1) * cellSize * 0.5f,
-                -(_levelConfig.Height - 1) * cellSize * 0.5f,
+                -(_gridConfig.Width - 1) * cellSize * 0.5f,
+                -(_gridConfig.Height - 1) * cellSize * 0.5f,
                 0f
             );
         }
