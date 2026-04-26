@@ -1,5 +1,6 @@
 using Project.Scripts.Tiles;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using System;
 #endif
@@ -12,11 +13,11 @@ namespace Project.Scripts.Configs.Board
         [Header("Tile Grid")]
         [Tooltip("Доля ширины экрана, зарезервированная как отступ вокруг сетки тайлов (0 = без отступа, 0.5 = половина экрана)")]
         [Range(0f, 0.5f)]
-        [SerializeField] private float _tilePaddingPercent = 0.08f;
+        [SerializeField] private float _tilePaddingPercent = 0.16f;
 
-        [Tooltip("Визуальный размер тайла относительно ячейки (1 = заполняет ячейку полностью, <1 = зазоры, >1 = тайлы перекрываются прозрачными краями спрайта)")]
-        [Range(0.5f, 2f)]
-        [SerializeField] private float _tileScale = 1.162f;
+        [Tooltip("Доля ячейки, которую занимает визуальный тайл. Сохраняет одинаковые визуальные зазоры при авто-масштабировании доски.")]
+        [Range(0.5f, 1.2f)]
+        [SerializeField] private float _tileFillPercent = 1.2f;
 
         [Header("Frame / Background")]
         [Tooltip("Доля ширины экрана, зарезервированная как отступ вокруг рамки-фона доски. " +
@@ -46,16 +47,61 @@ namespace Project.Scripts.Configs.Board
 
 #if UNITY_EDITOR
         public static event Action LayoutChanged;
+        public static event Action TileLayoutChanged;
+
+        private bool _hasValidated;
+        private float _lastTilePaddingPercent;
+        private float _lastTileFillPercent;
+        private float _lastFramePaddingPercent;
+        private float _lastFrameExtraHeight;
+        private float _lastMaskTopPadding;
+        private float _lastMaxAspectRatio;
+
+
+        private void OnEnable()
+        {
+            CaptureValidatedValues();
+        }
 
         
         private void OnValidate()
         {
-            LayoutChanged?.Invoke();
+            if (!_hasValidated)
+            {
+                CaptureValidatedValues();
+                TileLayoutChanged?.Invoke();
+                return;
+            }
+
+            var tileLayoutChanged = !Mathf.Approximately(_lastTilePaddingPercent, _tilePaddingPercent)
+                                    || !Mathf.Approximately(_lastTileFillPercent, _tileFillPercent);
+            var boardLayoutChanged = !Mathf.Approximately(_lastFramePaddingPercent, _framePaddingPercent)
+                                     || !Mathf.Approximately(_lastFrameExtraHeight, _frameExtraHeight)
+                                     || !Mathf.Approximately(_lastMaskTopPadding, _maskTopPadding)
+                                     || !Mathf.Approximately(_lastMaxAspectRatio, _maxAspectRatio);
+
+            CaptureValidatedValues();
+
+            if (boardLayoutChanged)
+                LayoutChanged?.Invoke();
+            else if (tileLayoutChanged)
+                TileLayoutChanged?.Invoke();
+        }
+
+        private void CaptureValidatedValues()
+        {
+            _hasValidated = true;
+            _lastTilePaddingPercent = _tilePaddingPercent;
+            _lastTileFillPercent = _tileFillPercent;
+            _lastFramePaddingPercent = _framePaddingPercent;
+            _lastFrameExtraHeight = _frameExtraHeight;
+            _lastMaskTopPadding = _maskTopPadding;
+            _lastMaxAspectRatio = _maxAspectRatio;
         }
 #endif
 
         public float TilePaddingPercent => _tilePaddingPercent;
-        public float TileScale => _tileScale;
+        public float TileFillPercent => _tileFillPercent;
         public float FramePaddingPercent => _framePaddingPercent;
         public float FrameExtraHeight => _frameExtraHeight;
         public float MaskTopPadding => _maskTopPadding;

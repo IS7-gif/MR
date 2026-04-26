@@ -156,6 +156,7 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
+            BoardConfig.TileLayoutChanged -= OnTileLayoutChanged;
             BattleViewConfig.LayoutChanged -= OnBattleLayoutChanged;
 #endif
         }
@@ -262,7 +263,7 @@ namespace Project.Scripts.Gameplay
 
             _battleWorldLayout.SetVerticalLayout(
                 boardTopWorldY,
-                worldLayout.TileCellSize,
+                worldLayout.FrameCellSize,
                 _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
@@ -270,7 +271,7 @@ namespace Project.Scripts.Gameplay
 
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
-            var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, worldLayout.TileCellSize, _boardConfig.TileScale);
+            var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, worldLayout.TileCellSize, _boardConfig.TileFillPercent);
             var matchFinder = new MatchFinder(MatchRules.MinMatchLength);
             var gridManager = new GridManager(_levelConfig, _gridConfig, _animConfig, pool, worldLayout.TileCellSize, _boardRuntimeService);
             gridManager.SetOrigin(ComputeGridOrigin(boardCenter, worldLayout.TileCellSize));
@@ -282,6 +283,7 @@ namespace Project.Scripts.Gameplay
             _lastWidth = Screen.width;
             _lastHeight = Screen.height;
             BoardConfig.LayoutChanged += OnLayoutChanged;
+            BoardConfig.TileLayoutChanged += OnTileLayoutChanged;
             BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
 #endif
 
@@ -358,9 +360,32 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
         private void OnLayoutChanged()  => ApplyLiveLayout();
+        private void OnTileLayoutChanged() => ApplyLiveTileLayout();
         private void OnBattleLayoutChanged() => ApplyLiveLayout();
 
         private void ApplyLiveResize() => ApplyLiveLayout();
+
+        private void ApplyLiveTileLayout()
+        {
+            if (_gridManager == null || _pool == null || !_battleWorldLayout)
+                return;
+
+            var worldLayout = ComputeGameplayWorldLayout();
+            _cellSize = worldLayout.TileCellSize;
+            var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
+
+            _gridManager.SetCellSize(_cellSize);
+
+            var newOrigin = ComputeGridOrigin(boardCenter, _cellSize);
+            _gridManager.SetOrigin(newOrigin);
+            _gridManager.RepositionAllTiles();
+
+            _pool.UpdateScale(_cellSize, _boardConfig.TileFillPercent);
+
+            var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
+            var boardHalfWidth = worldLayout.FrameWidth * 0.5f;
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
+        }
 
         private void ApplyLiveLayout()
         {
@@ -376,7 +401,7 @@ namespace Project.Scripts.Gameplay
             _gridManager.RepositionAllTiles();
 
             _battleWorldLayout.BoardView.Setup(worldLayout.FrameWidth, worldLayout.FrameHeight, _cellSize, _boardConfig.MaskTopPadding);
-            _pool.UpdateScale(_cellSize, _boardConfig.TileScale);
+            _pool.UpdateScale(_cellSize, _boardConfig.TileFillPercent);
 
             var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
             var boardHalfWidth = worldLayout.FrameWidth * 0.5f;
@@ -384,7 +409,7 @@ namespace Project.Scripts.Gameplay
 
             _battleWorldLayout?.SetVerticalLayout(
                 boardTopWorldY,
-                _cellSize,
+                worldLayout.FrameCellSize,
                 _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);

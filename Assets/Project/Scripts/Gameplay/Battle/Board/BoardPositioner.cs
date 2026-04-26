@@ -51,7 +51,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
                 var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
                 layout.SetVerticalLayout(
                     boardTopWorldY,
-                    tileCellSize,
+                    worldLayout.FrameCellSize,
                     _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
                     _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
                     _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);

@@ -18,9 +18,9 @@ namespace Project.Scripts.Services.Grid
 #endif
 
 
-        public TilePool(Tile prefab, Transform parent, BoardAnimationConfig animConfig, float cellSize, float tileScale)
+        public TilePool(Tile prefab, Transform parent, BoardAnimationConfig animConfig, float cellSize, float tileFillPercent)
         {
-            _tileVisualSize = cellSize * tileScale;
+            _tileVisualSize = CalculateTileVisualSize(cellSize, tileFillPercent);
             _pool = new ObjectPool<Tile>(
                 createFunc: () =>
                 {
@@ -63,9 +63,9 @@ namespace Project.Scripts.Services.Grid
         public void Release(Tile tile) => _pool.Release(tile);
 
 #if UNITY_EDITOR
-        public void UpdateScale(float cellSize, float tileScale)
+        public void UpdateScale(float cellSize, float tileFillPercent)
         {
-            _tileVisualSize = cellSize * tileScale;
+            _tileVisualSize = CalculateTileVisualSize(cellSize, tileFillPercent);
             foreach (var tile in _activeTiles)
             {
                 tile.transform.localScale = Vector3.one * _tileVisualSize;
@@ -73,5 +73,10 @@ namespace Project.Scripts.Services.Grid
             }
         }
 #endif
+
+        private static float CalculateTileVisualSize(float cellSize, float tileFillPercent)
+        {
+            return cellSize * Mathf.Max(0f, tileFillPercent);
+        }
     }
 }

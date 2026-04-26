@@ -92,15 +92,17 @@ namespace Project.Scripts.Shared.Layout
         public ScreenLayoutRect WorldRect { get; }
         public float FrameWidth { get; }
         public float FrameHeight { get; }
+        public float FrameCellSize { get; }
         public float TileCellSize { get; }
         public float GapScale { get; }
 
 
-        public GameplayWorldLayout(ScreenLayoutRect worldRect, float frameWidth, float frameHeight, float tileCellSize, float gapScale)
+        public GameplayWorldLayout(ScreenLayoutRect worldRect, float frameWidth, float frameHeight, float frameCellSize, float tileCellSize, float gapScale)
         {
             WorldRect = worldRect;
             FrameWidth = frameWidth;
             FrameHeight = frameHeight;
+            FrameCellSize = frameCellSize;
             TileCellSize = tileCellSize;
             GapScale = gapScale;
         }
@@ -122,7 +124,7 @@ namespace Project.Scripts.Shared.Layout
             float minCellSize)
         {
             if (gridWidth <= 0 || gridHeight <= 0)
-                return new GameplayWorldLayout(worldRect, 0f, 0f, minCellSize, 1f);
+                return new GameplayWorldLayout(worldRect, 0f, 0f, minCellSize, minCellSize, 1f);
 
             var safeMinCellSize = Max(0f, minCellSize);
             var safeMinGapScale = Clamp01(minGapScale);
@@ -143,12 +145,12 @@ namespace Project.Scripts.Shared.Layout
                 frameHeight,
                 fixedContentHeight,
                 gapCellUnits,
-                tileCellSize,
+                frameCellSize,
                 safeMinGapScale);
 
-            if (gapScale <= safeMinGapScale && StackHeight(frameHeight, fixedContentHeight, gapCellUnits, tileCellSize, gapScale) > worldRect.Height)
+            if (gapScale <= safeMinGapScale && StackHeight(frameHeight, fixedContentHeight, gapCellUnits, frameCellSize, gapScale) > worldRect.Height)
             {
-                var denominator = gridHeight + gapCellUnits * gapScale * tileToFrameRatio;
+                var denominator = gridHeight + gapCellUnits * gapScale;
                 var heightFrameCellSize = denominator > 0f
                     ? (worldRect.Height - fixedContentHeight - frameExtraHeight) / denominator
                     : safeMinCellSize;
@@ -160,7 +162,7 @@ namespace Project.Scripts.Shared.Layout
 
             var frameWidth = gridWidth * frameCellSize;
 
-            return new GameplayWorldLayout(worldRect, frameWidth, frameHeight, tileCellSize, gapScale);
+            return new GameplayWorldLayout(worldRect, frameWidth, frameHeight, frameCellSize, tileCellSize, gapScale);
         }
 
 

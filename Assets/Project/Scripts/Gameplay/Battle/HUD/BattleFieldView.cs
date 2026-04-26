@@ -48,6 +48,32 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
         [SerializeField] private Transform _announcementAnchor;
 
+        [Header("Layout Geometry")]
+        [Tooltip("Высота визуальной области боевого поля в world units. Управляет Background, Floor, layout anchors и позициями panel rows.")]
+        [Min(0.01f)]
+        [SerializeField] private float _layoutHeight = 4.2f;
+
+        [Tooltip("Sliced SpriteRenderer фоновой рамки боевого поля.")]
+        [SerializeField] private SpriteRenderer _backgroundRenderer;
+
+        [Tooltip("Внутренняя подложка поля, масштабируется по Y пропорционально Layout Height.")]
+        [SerializeField] private Transform _floorTransform;
+
+        [Tooltip("Панель героев игрока, позиционируется от нижней границы Layout Height.")]
+        [SerializeField] private Transform _playerPanel;
+
+        [Tooltip("Панель героев врага, позиционируется от верхней границы Layout Height.")]
+        [SerializeField] private Transform _enemyPanel;
+
+        [Tooltip("Floor.localScale.y на одну единицу Layout Height.")]
+        [SerializeField] private float _floorScaleYPerLayoutHeight = 89.50952f;
+
+        [Tooltip("Отступ PlayerPanel от нижней границы Layout Height.")]
+        [SerializeField] private float _playerPanelBottomPadding = 1.11f;
+
+        [Tooltip("Отступ EnemyPanel от верхней границы Layout Height.")]
+        [SerializeField] private float _enemyPanelTopPadding = 1.09f;
+
         [Tooltip("Маркер нижнего края визуальной области боевого поля; используется для вертикального автостекинга блоков над доской матчинга")]
         [SerializeField] private Transform _layoutBottomAnchor;
 
@@ -77,6 +103,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         protected override UniTask OnBindViewModel()
         {
+            ApplyBattleFieldGeometry();
             BindSlots();
             BindGroupShields();
             PublishAnnouncementAnchor();
@@ -122,11 +149,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         public void RefreshPosition()
         {
+            ApplyBattleFieldGeometry();
             PublishAnnouncementAnchor();
         }
 
         public void SetLayoutBottomWorldY(float worldY)
         {
+            ApplyBattleFieldGeometry();
             float pivotToBottom;
 
             if (_layoutBottomAnchor)
@@ -151,8 +180,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         public float GetLayoutHeight()
         {
-            if (_layoutBottomAnchor && _layoutTopAnchor)
-                return Mathf.Abs(_layoutTopAnchor.position.y - _layoutBottomAnchor.position.y);
+            ApplyBattleFieldGeometry();
+
+            if (_layoutHeight > 0f)
+                return _layoutHeight;
 
             var renderers = GetComponentsInChildren<SpriteRenderer>(false);
             if (renderers.Length == 0)
@@ -170,6 +201,91 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             }
 
             return float.IsInfinity(minY) || float.IsInfinity(maxY) ? 0f : maxY - minY;
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            ApplyBattleFieldGeometry();
+        }
+#endif
+
+        private void ApplyBattleFieldGeometry()
+        {
+            var safeHeight = Mathf.Max(0.01f, _layoutHeight);
+            if (false == Mathf.Approximately(_layoutHeight, safeHeight))
+                _layoutHeight = safeHeight;
+
+            if (_backgroundRenderer)
+            {
+                var size = _backgroundRenderer.size;
+                if (false == Mathf.Approximately(size.y, safeHeight))
+                    _backgroundRenderer.size = new Vector2(size.x, safeHeight);
+            }
+
+            if (_floorTransform)
+            {
+                var scale = _floorTransform.localScale;
+                var floorScaleY = safeHeight * _floorScaleYPerLayoutHeight;
+                if (false == Mathf.Approximately(scale.y, floorScaleY))
+                    _floorTransform.localScale = new Vector3(scale.x, floorScaleY, scale.z);
+            }
+
+            if (_phaseOverlay)
+            {
+                var overlayTransform = _phaseOverlay.transform;
+                var overlayScale = overlayTransform.localScale;
+                var overlayScaleX = CalculateRendererScaleX(_phaseOverlay, _backgroundRenderer);
+                var overlayScaleY = CalculateRendererScaleY(_phaseOverlay, safeHeight);
+
+                if (false == Mathf.Approximately(overlayScale.x, overlayScaleX)
+                    || false == Mathf.Approximately(overlayScale.y, overlayScaleY))
+                {
+                    overlayTransform.localScale = new Vector3(overlayScaleX, overlayScaleY, overlayScale.z);
+                }
+            }
+
+            var halfHeight = safeHeight * 0.5f;
+
+            if (_layoutBottomAnchor)
+                SetLocalY(_layoutBottomAnchor, -halfHeight);
+
+            if (_layoutTopAnchor)
+                SetLocalY(_layoutTopAnchor, halfHeight);
+
+            if (_playerPanel)
+                SetLocalY(_playerPanel, -halfHeight + _playerPanelBottomPadding);
+
+            if (_enemyPanel)
+                SetLocalY(_enemyPanel, halfHeight - _enemyPanelTopPadding);
+        }
+
+        private static void SetLocalY(Transform target, float y)
+        {
+            var localPosition = target.localPosition;
+            if (Mathf.Approximately(localPosition.y, y))
+                return;
+
+            target.localPosition = new Vector3(localPosition.x, y, localPosition.z);
+        }
+
+        private static float CalculateRendererScaleX(SpriteRenderer targetRenderer, SpriteRenderer sourceRenderer)
+        {
+            if (false == targetRenderer || false == targetRenderer.sprite)
+                return 1f;
+
+            var width = sourceRenderer ? sourceRenderer.size.x : targetRenderer.size.x;
+            var spriteWidth = targetRenderer.sprite.bounds.size.x;
+            return spriteWidth > 0f ? width / spriteWidth : 1f;
+        }
+
+        private static float CalculateRendererScaleY(SpriteRenderer targetRenderer, float height)
+        {
+            if (false == targetRenderer || false == targetRenderer.sprite)
+                return 1f;
+
+            var spriteHeight = targetRenderer.sprite.bounds.size.y;
+            return spriteHeight > 0f ? height / spriteHeight : 1f;
         }
 
         private void PublishAnnouncementAnchor()
