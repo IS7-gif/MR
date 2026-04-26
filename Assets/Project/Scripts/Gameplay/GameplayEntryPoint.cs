@@ -108,11 +108,24 @@ namespace Project.Scripts.Gameplay
             ApplyLiveResizeIfNeeded();
 #endif
 
-            if (false == _gameStateService.IsPlaying)
+            var gameState = _gameStateService.State.CurrentValue;
+            if (gameState != GameState.Playing && gameState != GameState.Burndown)
                 return;
+
+            if (gameState == GameState.Burndown)
+            {
+                _burndownService?.Tick(Time.deltaTime);
+                return;
+            }
 
             var isPrePhase = _battleFlowService is { IsInitialized: true, IsPrePhase: true };
             _battleFlowService?.Tick(Time.deltaTime);
+
+            if (_gameStateService.State.CurrentValue == GameState.Burndown)
+            {
+                _burndownService?.Tick(Time.deltaTime);
+                return;
+            }
 
             if (isPrePhase)
                 return;

@@ -18,4 +18,5 @@ MonoBehaviour:
   _energyCarryoverMode: 0
   _prePhaseDuration: 4
   _dimCurrentPhaseDuringPrePhase: 1
+  _enablePrePhaseOnBattleStart: 1
   _countdownThreshold: 5
