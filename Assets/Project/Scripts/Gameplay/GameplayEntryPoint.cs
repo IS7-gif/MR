@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Gameplay;
 using Project.Scripts.Configs.Grid;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
@@ -20,10 +21,12 @@ using Project.Scripts.Shared.Rules;
 using Project.Scripts.Services.Audio.AudioSystem;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Input;
+using Project.Scripts.Services.Layout;
 using Project.Scripts.Services.Timer;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Grid;
+using Project.Scripts.Shared.Layout;
 using UnityEngine;
 using VContainer;
 using R3;
@@ -38,6 +41,8 @@ namespace Project.Scripts.Gameplay
         [Tooltip("Родительский Transform для всех инстанцируемых объектов тайлов")]
         [SerializeField] private BattleWorldLayout _battleWorldLayout;
 
+        private const float MinLayoutCellSize = 0.01f;
+
         private EventBus _eventBus;
         private AudioService _audioService;
         private BoardConfig _boardConfig;
@@ -49,6 +54,7 @@ namespace Project.Scripts.Gameplay
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
         private BattleViewConfig _battleViewConfig;
+        private GameplayScreenLayoutConfig _gameplayScreenLayoutConfig;
         private BattleFlowConfig _battleFlowConfig;
         private UIService _uiService;
         private MoveBarViewModel _moveBarViewModel;
@@ -59,7 +65,9 @@ namespace Project.Scripts.Gameplay
         private GameResultSequenceController _gameResultSequenceController;
         private BattleFieldViewModel _battleFieldViewModel;
         private IBoardBoundsProvider _boardBoundsProvider;
+        private IGameplayScreenLayoutService _gameplayScreenLayoutService;
         private BattleFieldView _battleFieldView;
+        private TopBarView _topBarView;
         private InputService _inputService;
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
@@ -165,6 +173,7 @@ namespace Project.Scripts.Gameplay
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
             BattleViewConfig battleViewConfig,
+            GameplayScreenLayoutConfig gameplayScreenLayoutConfig,
             BattleFlowConfig battleFlowConfig,
             UIService uiService,
             MoveBarViewModel moveBarViewModel,
@@ -175,6 +184,7 @@ namespace Project.Scripts.Gameplay
             GameResultSequenceController gameResultSequenceController,
             BattleFieldViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
+            IGameplayScreenLayoutService gameplayScreenLayoutService,
             IBattleFlowService battleFlowService,
             IBurndownService burndownService,
             BurndownConfig burndownConfig,
@@ -194,6 +204,7 @@ namespace Project.Scripts.Gameplay
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
             _battleViewConfig = battleViewConfig;
+            _gameplayScreenLayoutConfig = gameplayScreenLayoutConfig;
             _battleFlowConfig = battleFlowConfig;
             _uiService = uiService;
             _moveBarViewModel = moveBarViewModel;
@@ -204,6 +215,7 @@ namespace Project.Scripts.Gameplay
             _gameResultSequenceController = gameResultSequenceController;
             _battleFieldViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
+            _gameplayScreenLayoutService = gameplayScreenLayoutService;
             _battleFlowService = battleFlowService;
             _burndownService = burndownService;
             _burndownConfig = burndownConfig;
@@ -225,16 +237,8 @@ namespace Project.Scripts.Gameplay
             if (_moveBarService.IsEnabled)
                 await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
-            var cellSize = ComputeTileCellSize();
-            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions();
-            var boardCenter = ComputeBoardCenter(frameHeight, frameCellSize);
-            _battleWorldLayout.SetBoardWorldCenter(boardCenter);
-
-            var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
-            var boardHalfWidth = frameWidth * 0.5f;
-            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, cellSize);
-
-            await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
+            _topBarView = await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
+            ApplyTopBarLayout();
 
             _inputService = new InputService(_inputConfig);
 
@@ -248,32 +252,40 @@ namespace Project.Scripts.Gameplay
             await _battleFieldView.ShowAsync();
             _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel);
 
+            var worldLayout = ComputeGameplayWorldLayout();
+            var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
+            _battleWorldLayout.SetBoardWorldCenter(boardCenter);
+
+            var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
+            var boardHalfWidth = worldLayout.FrameWidth * 0.5f;
+            _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, worldLayout.TileCellSize);
+
             _battleWorldLayout.SetVerticalLayout(
                 boardTopWorldY,
-                cellSize,
-                _battleViewConfig.GapBoardToPlayerEnergy,
-                _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
-                _battleViewConfig.GapEnemyEnergyToBattleField);
+                worldLayout.TileCellSize,
+                _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout.RefreshBindings();
 
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
-            var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, cellSize, _boardConfig.TileScale);
+            var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, worldLayout.TileCellSize, _boardConfig.TileScale);
             var matchFinder = new MatchFinder(MatchRules.MinMatchLength);
-            var gridManager = new GridManager(_levelConfig, _gridConfig, _animConfig, pool, cellSize, _boardRuntimeService);
-            gridManager.SetOrigin(ComputeGridOrigin(boardCenter, cellSize));
+            var gridManager = new GridManager(_levelConfig, _gridConfig, _animConfig, pool, worldLayout.TileCellSize, _boardRuntimeService);
+            gridManager.SetOrigin(ComputeGridOrigin(boardCenter, worldLayout.TileCellSize));
 
 #if UNITY_EDITOR
             _pool = pool;
             _gridManager = gridManager;
-            _cellSize = cellSize;
+            _cellSize = worldLayout.TileCellSize;
             _lastWidth = Screen.width;
             _lastHeight = Screen.height;
             BoardConfig.LayoutChanged += OnLayoutChanged;
             BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
 #endif
 
-            _battleWorldLayout.BoardView.Setup(frameWidth, frameHeight, cellSize, _boardConfig.MaskTopPadding);
+            _battleWorldLayout.BoardView.Setup(worldLayout.FrameWidth, worldLayout.FrameHeight, worldLayout.TileCellSize, _boardConfig.MaskTopPadding);
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _gridConfig, _boardRuntimeService);
 
@@ -326,13 +338,22 @@ namespace Project.Scripts.Gameplay
 
 #if UNITY_EDITOR
             var editHandler = gameObject.AddComponent<BoardEditClickHandler>();
-            editHandler.Init(gridManager.State, gridManager, _gridConfig, cellSize);
+            editHandler.Init(gridManager.State, gridManager, _gridConfig, worldLayout.TileCellSize);
 #endif
 
             await _inputService.InitAsync();
             await _swapHandler.InitAsync();
             await _orchestrator.InitAsync();
             await _orchestrator.StartGame();
+        }
+
+        private void ApplyTopBarLayout()
+        {
+            if (!_topBarView || _gameplayScreenLayoutService == null)
+                return;
+
+            var layout = _gameplayScreenLayoutService.Calculate();
+            _topBarView.ApplyScreenRect(_gameplayScreenLayoutService.ToUnityRect(layout.TopBarRect));
         }
 
 #if UNITY_EDITOR
@@ -343,9 +364,9 @@ namespace Project.Scripts.Gameplay
 
         private void ApplyLiveLayout()
         {
-            _cellSize = ComputeTileCellSize();
-            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions();
-            var boardCenter = ComputeBoardCenter(frameHeight, frameCellSize);
+            var worldLayout = ComputeGameplayWorldLayout();
+            _cellSize = worldLayout.TileCellSize;
+            var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
             _battleWorldLayout.SetBoardWorldCenter(boardCenter);
 
             _gridManager.SetCellSize(_cellSize);
@@ -354,63 +375,68 @@ namespace Project.Scripts.Gameplay
             _gridManager.SetOrigin(newOrigin);
             _gridManager.RepositionAllTiles();
 
-            _battleWorldLayout.BoardView.Setup(frameWidth, frameHeight, _cellSize, _boardConfig.MaskTopPadding);
+            _battleWorldLayout.BoardView.Setup(worldLayout.FrameWidth, worldLayout.FrameHeight, _cellSize, _boardConfig.MaskTopPadding);
             _pool.UpdateScale(_cellSize, _boardConfig.TileScale);
 
-            var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
-            var boardHalfWidth = frameWidth * 0.5f;
+            var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
+            var boardHalfWidth = worldLayout.FrameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
 
             _battleWorldLayout?.SetVerticalLayout(
                 boardTopWorldY,
                 _cellSize,
-                _battleViewConfig.GapBoardToPlayerEnergy,
-                _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
-                _battleViewConfig.GapEnemyEnergyToBattleField);
+                _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout?.RefreshBindings();
+            ApplyTopBarLayout();
         }
 #endif
 
-        private (float width, float height, float cellSize) ComputeFrameDimensions()
-        {
-            var cam  = Camera.main;
-            var camHeight = cam.orthographicSize * 2f;
-            var camWidth = camHeight * cam.aspect;
-            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
-
-            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _gridConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
-            var cellSize = Mathf.Min(byWidth, byHeight);
-
-            var frameWidth  = _gridConfig.Width  * cellSize;
-            var frameHeight = _gridConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
-            return (frameWidth, frameHeight, cellSize);
-        }
-
-        private float ComputeTileCellSize()
+        private GameplayWorldLayout ComputeGameplayWorldLayout()
         {
             var cam = Camera.main;
-            var camHeight = cam.orthographicSize * 2f;
-            var camWidth = camHeight * cam.aspect;
-            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
-
-            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _gridConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
-
-            return Mathf.Min(byWidth, byHeight);
+            var layout = _gameplayScreenLayoutService.Calculate();
+            var worldRect = _gameplayScreenLayoutService.ToWorldRect(cam, layout.WorldRect);
+            var fixedHeight = GetBattleWorldFixedHeight();
+            var gapCellUnits = GetBattleWorldGapCellUnits();
+            return GameplayWorldLayoutCalculator.Calculate(
+                ToScreenLayoutRect(worldRect),
+                _boardConfig.MaxAspectRatio,
+                _boardConfig.FramePaddingPercent,
+                _boardConfig.TilePaddingPercent,
+                _gridConfig.Width,
+                _gridConfig.Height,
+                _boardConfig.FrameExtraHeight,
+                fixedHeight,
+                gapCellUnits,
+                _gameplayScreenLayoutConfig.WorldStackMinGapScale,
+                MinLayoutCellSize);
         }
 
-        private Vector3 ComputeBoardCenter(float frameHeight, float frameCellSize)
+        private float GetBattleWorldFixedHeight()
         {
-            var cam = Camera.main;
-            var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var bottomPadding = _battleViewConfig.BattleWorldBottomPadding * frameCellSize;
+            var playerEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyHeight : 0f;
+            var enemyEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.EnemyEnergyHeight : 0f;
+            var battleFieldHeight = _battleFieldView ? _battleFieldView.GetLayoutHeight() : 0f;
+            return playerEnergyHeight + enemyEnergyHeight + battleFieldHeight;
+        }
 
-            return new Vector3(
-                cam.transform.position.x,
-                camBottomY + bottomPadding + frameHeight * 0.5f,
-                0f
-            );
+        private float GetBattleWorldGapCellUnits()
+        {
+            return _battleViewConfig.GapBoardToPlayerEnergy
+                   + _battleViewConfig.GapPlayerEnergyToEnemyEnergy
+                   + _battleViewConfig.GapEnemyEnergyToBattleField;
+        }
+
+        private Vector3 ComputeBoardCenter(ScreenLayoutRect worldRect, float frameHeight)
+        {
+            return new Vector3(worldRect.X + worldRect.Width * 0.5f, worldRect.YMin + frameHeight * 0.5f, 0f);
+        }
+
+        private static ScreenLayoutRect ToScreenLayoutRect(Rect rect)
+        {
+            return new ScreenLayoutRect(rect.x, rect.y, rect.width, rect.height);
         }
 
         private Vector3 ComputeGridOrigin(Vector3 boardCenter, float cellSize)

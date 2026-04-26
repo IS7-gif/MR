@@ -51,6 +51,8 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Маркер нижнего края визуальной области боевого поля; используется для вертикального автостекинга блоков над доской матчинга")]
         [SerializeField] private Transform _layoutBottomAnchor;
 
+        [SerializeField] private Transform _layoutTopAnchor;
+
         [Space(10)]
         
         [Tooltip("Щит первой группы героев врага - скрывается, когда первая группа уничтожена")]
@@ -145,6 +147,29 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             var pos = transform.position;
             transform.position = new Vector3(pos.x, worldY + pivotToBottom, pos.z);
+        }
+
+        public float GetLayoutHeight()
+        {
+            if (_layoutBottomAnchor && _layoutTopAnchor)
+                return Mathf.Abs(_layoutTopAnchor.position.y - _layoutBottomAnchor.position.y);
+
+            var renderers = GetComponentsInChildren<SpriteRenderer>(false);
+            if (renderers.Length == 0)
+                return 0f;
+
+            var minY = float.PositiveInfinity;
+            var maxY = float.NegativeInfinity;
+            for (var i = 0; i < renderers.Length; i++)
+            {
+                if (false == renderers[i].sprite)
+                    continue;
+
+                minY = Mathf.Min(minY, renderers[i].bounds.min.y);
+                maxY = Mathf.Max(maxY, renderers[i].bounds.max.y);
+            }
+
+            return float.IsInfinity(minY) || float.IsInfinity(maxY) ? 0f : maxY - minY;
         }
 
         private void PublishAnnouncementAnchor()

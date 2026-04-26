@@ -9,6 +9,7 @@ using Project.Scripts.Services.Board;
 using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Bot;
 using Project.Scripts.Services.Game;
+using Project.Scripts.Services.Layout;
 using Project.Scripts.Services.Progression;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Timer;
@@ -69,6 +70,7 @@ namespace Project.Scripts.DI
 
             builder.Register<IBoardRuntimeService, BoardRuntimeService>(Lifetime.Singleton);
             builder.Register<IBoardBoundsProvider, BoardBoundsProvider>(Lifetime.Singleton);
+            builder.Register<IGameplayScreenLayoutService, GameplayScreenLayoutService>(Lifetime.Singleton);
             builder.Register<IBattleFlowService, BattleFlowService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<Project.Scripts.Services.BattleFlow.BattleFlowPhaseCoordinator>();
 

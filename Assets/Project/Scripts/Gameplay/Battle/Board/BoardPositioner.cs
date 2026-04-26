@@ -1,7 +1,9 @@
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Gameplay;
 using Project.Scripts.Configs.Grid;
 using Project.Scripts.Gameplay.Battle.Layout;
+using Project.Scripts.Shared.Layout;
 using UnityEngine;
 
 namespace Project.Scripts.Gameplay.Battle.Board
@@ -12,6 +14,9 @@ namespace Project.Scripts.Gameplay.Battle.Board
         [SerializeField] private BoardConfig _boardConfig;
         [SerializeField] private BattleViewConfig _battleViewConfig;
         [SerializeField] private GridConfig _gridConfig;
+        [SerializeField] private GameplayScreenLayoutConfig _screenLayoutConfig;
+
+        private const float MinLayoutCellSize = 0.01f;
 
 
         private void Update()
@@ -25,31 +30,31 @@ namespace Project.Scripts.Gameplay.Battle.Board
         public void Apply(float tileCellSize = -1f)
         {
             var cam = Camera.main;
-            if (!cam || !_boardConfig || !_battleViewConfig || !_gridConfig)
+            if (!cam || !_boardConfig || !_battleViewConfig || !_gridConfig || !_screenLayoutConfig)
                 return;
 
-            var (frameWidth, frameHeight, frameCellSize) = ComputeFrameDimensions(cam);
+            var layout = GetComponentInParent<BattleWorldLayout>();
+            var worldLayout = ComputeBattleWorldLayout(cam, layout);
 
             if (tileCellSize < 0f)
-                tileCellSize = ComputeTileCellSize(cam);
+                tileCellSize = worldLayout.TileCellSize;
 
             var boardView = GetComponent<BoardView>();
             if (boardView)
-                boardView.Setup(frameWidth, frameHeight, tileCellSize, _boardConfig.MaskTopPadding);
+                boardView.Setup(worldLayout.FrameWidth, worldLayout.FrameHeight, tileCellSize, _boardConfig.MaskTopPadding);
 
-            var boardCenter = ComputeBoardCenter(cam, frameHeight, frameCellSize);
-            var layout = GetComponentInParent<BattleWorldLayout>();
+            var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
             if (layout)
             {
                 layout.SetBoardWorldCenter(boardCenter);
 
-                var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
+                var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
                 layout.SetVerticalLayout(
                     boardTopWorldY,
                     tileCellSize,
-                    _battleViewConfig.GapBoardToPlayerEnergy,
-                    _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
-                    _battleViewConfig.GapEnemyEnergyToBattleField);
+                    _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                    _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                    _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
                 layout.RefreshBindings();
                 return;
             }
@@ -58,46 +63,91 @@ namespace Project.Scripts.Gameplay.Battle.Board
         }
 
 
-        private Vector3 ComputeBoardCenter(Camera cam, float frameHeight, float frameCellSize)
+        private GameplayWorldLayout ComputeBattleWorldLayout(Camera cam, BattleWorldLayout layout)
         {
-            var camBottomY = cam.transform.position.y - cam.orthographicSize;
-            var bottomPadding = _battleViewConfig.BattleWorldBottomPadding * frameCellSize;
-
-            return new Vector3(cam.transform.position.x, camBottomY + bottomPadding + frameHeight * 0.5f, 0f);
+            var gameplayScreenLayout = CalculateScreenLayout();
+            var worldRect = ToScreenLayoutRect(ToWorldRect(cam, gameplayScreenLayout.WorldRect));
+            var fixedHeight = GetBattleWorldFixedHeight(layout);
+            var gapCellUnits = GetBattleWorldGapCellUnits();
+            return GameplayWorldLayoutCalculator.Calculate(
+                worldRect,
+                _boardConfig.MaxAspectRatio,
+                _boardConfig.FramePaddingPercent,
+                _boardConfig.TilePaddingPercent,
+                _gridConfig.Width,
+                _gridConfig.Height,
+                _boardConfig.FrameExtraHeight,
+                fixedHeight,
+                gapCellUnits,
+                _screenLayoutConfig.WorldStackMinGapScale,
+                MinLayoutCellSize);
         }
 
-        private (float width, float height, float cellSize) ComputeFrameDimensions(Camera cam)
+        private GameplayScreenLayout CalculateScreenLayout()
         {
-            var camHeight = cam.orthographicSize * 2f;
-            var camWidth = camHeight * GetAspect(cam);
-            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
+            var screenRect = GetScreenRect();
+            var safeArea = Screen.safeArea;
+            var safeAreaRect = safeArea.width > 0f && safeArea.height > 0f
+                ? new ScreenLayoutRect(safeArea.x, safeArea.y, safeArea.width, safeArea.height)
+                : screenRect;
 
-            var byWidth = effectiveWidth * (1f - _boardConfig.FramePaddingPercent) / _gridConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
-            var cellSize = Mathf.Min(byWidth, byHeight);
-
-            var frameWidth  = _gridConfig.Width  * cellSize;
-            var frameHeight = _gridConfig.Height * cellSize + _boardConfig.FrameExtraHeight;
-            return (frameWidth, frameHeight, cellSize);
+            return GameplayScreenLayoutCalculator.Calculate(
+                screenRect,
+                safeAreaRect,
+                _screenLayoutConfig.UseSafeArea,
+                _screenLayoutConfig.WorldExtendsIntoUnsafeBottomArea,
+                _screenLayoutConfig.SafeAreaPadding,
+                _screenLayoutConfig.GameplayAspect,
+                _screenLayoutConfig.ReferenceResolutionWidth,
+                _screenLayoutConfig.ReferenceResolutionHeight,
+                _screenLayoutConfig.TopBarHeight,
+                _screenLayoutConfig.TopBarTopPadding,
+                _screenLayoutConfig.TopBarSidePadding,
+                _screenLayoutConfig.TopBarToWorldGap,
+                _screenLayoutConfig.WorldBottomPadding,
+                _screenLayoutConfig.WorldSidePadding);
         }
 
-        private float ComputeTileCellSize(Camera cam)
+        private ScreenLayoutRect GetScreenRect()
         {
-            var camHeight = cam.orthographicSize * 2f;
-            var camWidth = camHeight * GetAspect(cam);
-            var effectiveWidth = Mathf.Min(camWidth, camHeight * _boardConfig.MaxAspectRatio);
-
-            var byWidth = effectiveWidth * (1f - _boardConfig.TilePaddingPercent) / _gridConfig.Width;
-            var byHeight = camHeight * (1f - _boardConfig.UIReservedHeightPercent) / _gridConfig.Height;
-
-            return Mathf.Min(byWidth, byHeight);
+            var width = Screen.width > 0 ? Screen.width : UnityEngine.Device.Screen.width;
+            var height = Screen.height > 0 ? Screen.height : UnityEngine.Device.Screen.height;
+            return new ScreenLayoutRect(0f, 0f, width, height);
         }
 
-        private static float GetAspect(Camera cam)
+        private Rect ToWorldRect(Camera cam, ScreenLayoutRect rect)
         {
-            var h = UnityEngine.Device.Screen.height;
-            
-            return h > 0 ? (float)UnityEngine.Device.Screen.width / h : cam.aspect;
+            var min = cam.ScreenToWorldPoint(new Vector3(rect.XMin, rect.YMin, -cam.transform.position.z));
+            var max = cam.ScreenToWorldPoint(new Vector3(rect.XMax, rect.YMax, -cam.transform.position.z));
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+        }
+
+        private static ScreenLayoutRect ToScreenLayoutRect(Rect rect)
+        {
+            return new ScreenLayoutRect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        private float GetBattleWorldFixedHeight(BattleWorldLayout layout)
+        {
+            if (!layout)
+                return 0f;
+
+            var playerEnergyHeight = layout.EnergyView ? layout.EnergyView.PlayerEnergyHeight : 0f;
+            var enemyEnergyHeight = layout.EnergyView ? layout.EnergyView.EnemyEnergyHeight : 0f;
+            var battleFieldHeight = layout.BattleFieldView ? layout.BattleFieldView.GetLayoutHeight() : 0f;
+            return playerEnergyHeight + enemyEnergyHeight + battleFieldHeight;
+        }
+
+        private float GetBattleWorldGapCellUnits()
+        {
+            return _battleViewConfig.GapBoardToPlayerEnergy
+                   + _battleViewConfig.GapPlayerEnergyToEnemyEnergy
+                   + _battleViewConfig.GapEnemyEnergyToBattleField;
+        }
+
+        private static Vector3 ComputeBoardCenter(ScreenLayoutRect worldRect, float frameHeight)
+        {
+            return new Vector3(worldRect.X + worldRect.Width * 0.5f, worldRect.YMin + frameHeight * 0.5f, 0f);
         }
     }
 }

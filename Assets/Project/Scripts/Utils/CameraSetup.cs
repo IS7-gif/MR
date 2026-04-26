@@ -1,3 +1,4 @@
+using Project.Scripts.Configs.Gameplay;
 using UnityEngine;
 
 namespace Project.Scripts.Utils
@@ -16,6 +17,9 @@ namespace Project.Scripts.Utils
         [Tooltip("Ортографический размер для эталонного соотношения сторон. Скопируйте сюда значение, установленное на компоненте Camera.")]
         [SerializeField] private float _referenceOrthographicSize = 5f;
 
+        [SerializeField] private GameplayScreenLayoutConfig _layoutConfig;
+
+        
         private Camera _camera;
 
 
@@ -34,8 +38,11 @@ namespace Project.Scripts.Utils
                 return;
 
             var screenAspect = (float)Screen.width / Screen.height;
-            _camera.orthographicSize = _referenceOrthographicSize
-                                       * Mathf.Max(1f, _referenceAspect / screenAspect);
+            var referenceAspect = _layoutConfig ? _layoutConfig.GameplayAspect : _referenceAspect;
+            var referenceOrthographicSize = _layoutConfig ? _layoutConfig.ReferenceOrthographicSize : _referenceOrthographicSize;
+
+            _camera.orthographicSize = referenceOrthographicSize
+                                       * Mathf.Max(1f, referenceAspect / screenAspect);
         }
 
 

@@ -12,11 +12,7 @@ namespace Project.Scripts.Configs.Board
         [Header("Tile Grid")]
         [Tooltip("Доля ширины экрана, зарезервированная как отступ вокруг сетки тайлов (0 = без отступа, 0.5 = половина экрана)")]
         [Range(0f, 0.5f)]
-        [SerializeField] private float _tilePaddingPercent = 0.166f;
-
-        [Tooltip("Доля высоты экрана, зарезервированная для UI (счёт, кнопки и т.д.) - доска не будет расширяться в эту область")]
-        [Range(0f, 0.5f)]
-        [SerializeField] private float _uiReservedHeightPercent = 0.4f;
+        [SerializeField] private float _tilePaddingPercent = 0.08f;
 
         [Tooltip("Визуальный размер тайла относительно ячейки (1 = заполняет ячейку полностью, <1 = зазоры, >1 = тайлы перекрываются прозрачными краями спрайта)")]
         [Range(0.5f, 2f)]
@@ -59,7 +55,6 @@ namespace Project.Scripts.Configs.Board
 #endif
 
         public float TilePaddingPercent => _tilePaddingPercent;
-        public float UIReservedHeightPercent => _uiReservedHeightPercent;
         public float TileScale => _tileScale;
         public float FramePaddingPercent => _framePaddingPercent;
         public float FrameExtraHeight => _frameExtraHeight;

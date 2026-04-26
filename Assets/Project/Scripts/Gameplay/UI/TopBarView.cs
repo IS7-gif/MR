@@ -16,6 +16,37 @@ namespace Project.Scripts.Gameplay.UI
         [SerializeField] private TMP_Text _timerTMP;
 
 
+        public void ApplyScreenRect(Rect screenRect)
+        {
+            if (transform is not RectTransform rectTransform)
+                return;
+
+            if (rectTransform.parent is not RectTransform parentRectTransform)
+                return;
+
+            var canvas = GetComponentInParent<Canvas>();
+            var camera = canvas && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRectTransform,
+                screenRect.min,
+                camera,
+                out var localMin);
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRectTransform,
+                screenRect.max,
+                camera,
+                out var localMax);
+
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            rectTransform.anchoredPosition = (localMin + localMax) * 0.5f;
+            rectTransform.sizeDelta = localMax - localMin;
+        }
+
+
         protected override UniTask OnBindViewModel()
         {
             if (_enemyNameTMP)

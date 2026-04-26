@@ -1,5 +1,6 @@
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.Board;
+using Project.Scripts.Configs.Gameplay;
 using Project.Scripts.Configs.Grid;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Configs.UI;
@@ -56,6 +57,9 @@ namespace Project.Scripts.Configs
         [Tooltip("Визуальные параметры боя: позиции и размеры слотов аватаров и героев")]
         [SerializeField] private BattleViewConfig _battleViewConfig;
 
+        [Tooltip("Единые настройки экранной компоновки Gameplay: aspect, safe area, камера, зоны UI и world-content")]
+        [SerializeField] private GameplayScreenLayoutConfig _gameplayScreenLayoutConfig;
+
         [Tooltip("Палитра цветов тайлов: цветовые значения для каждого типа тайла")]
         [SerializeField] private TileKindPaletteConfig _tileKindPaletteConfig;
 
@@ -99,6 +103,7 @@ namespace Project.Scripts.Configs
         public BoardAnnouncementConfig BoardAnnouncementConfig => _boardAnnouncementConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
         public BattleViewConfig BattleViewConfig => _battleViewConfig;
+        public GameplayScreenLayoutConfig GameplayScreenLayoutConfig => _gameplayScreenLayoutConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
         public BattleFlowConfig BattleFlowConfig => _battleFlowConfig;
