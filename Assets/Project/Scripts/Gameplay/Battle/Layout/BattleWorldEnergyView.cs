@@ -21,11 +21,38 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 
 
         public Transform PlayerEnergyAbsorbTarget => _playerEnergyAbsorbTarget ? _playerEnergyAbsorbTarget : _playerEnergyText ? _playerEnergyText.transform : null;
+        public float PlayerEnergyHeight => _playerEnergyText ? _playerEnergyText.preferredHeight : 0f;
+        public float EnemyEnergyHeight => _enemyEnergyText ? _enemyEnergyText.preferredHeight : 0f;
 
 
         private void OnDestroy()
         {
             Cleanup();
+        }
+
+
+        public void SetPlayerEnergyWorldY(float worldCenterY)
+        {
+            if (false == _playerEnergyText)
+                return;
+
+            var textPos = _playerEnergyText.transform.position;
+            _playerEnergyText.transform.position = new Vector3(textPos.x, worldCenterY, textPos.z);
+
+            if (_playerEnergyAbsorbTarget && _playerEnergyAbsorbTarget.parent != _playerEnergyText.transform)
+            {
+                var absorbPos = _playerEnergyAbsorbTarget.position;
+                _playerEnergyAbsorbTarget.position = new Vector3(absorbPos.x, worldCenterY, absorbPos.z);
+            }
+        }
+
+        public void SetEnemyEnergyWorldY(float worldCenterY)
+        {
+            if (false == _enemyEnergyText)
+                return;
+
+            var pos = _enemyEnergyText.transform.position;
+            _enemyEnergyText.transform.position = new Vector3(pos.x, worldCenterY, pos.z);
         }
 
 

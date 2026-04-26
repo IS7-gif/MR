@@ -247,6 +247,15 @@ namespace Project.Scripts.Gameplay
             await _battleFieldView.InitializeAsync(_battleFieldViewModel);
             await _battleFieldView.ShowAsync();
             _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel);
+
+            _battleWorldLayout.SetVerticalLayout(
+                boardTopWorldY,
+                cellSize,
+                _battleViewConfig.GapBoardToPlayerEnergy,
+                _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
+                _battleViewConfig.GapEnemyEnergyToBattleField);
+            _battleWorldLayout.RefreshBindings();
+
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
             var pool = new TilePool(_boardConfig.TilePrefab, _battleWorldLayout.TileContainer, _animConfig, cellSize, _boardConfig.TileScale);
@@ -352,6 +361,12 @@ namespace Project.Scripts.Gameplay
             var boardHalfWidth = frameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
 
+            _battleWorldLayout?.SetVerticalLayout(
+                boardTopWorldY,
+                _cellSize,
+                _battleViewConfig.GapBoardToPlayerEnergy,
+                _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
+                _battleViewConfig.GapEnemyEnergyToBattleField);
             _battleWorldLayout?.RefreshBindings();
         }
 #endif

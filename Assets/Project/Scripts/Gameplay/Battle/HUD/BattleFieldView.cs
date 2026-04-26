@@ -48,6 +48,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
         [SerializeField] private Transform _announcementAnchor;
 
+        [Tooltip("Маркер нижнего края визуальной области боевого поля; используется для вертикального автостекинга блоков над доской матчинга")]
+        [SerializeField] private Transform _layoutBottomAnchor;
+
         [Space(10)]
         
         [Tooltip("Щит первой группы героев врага - скрывается, когда первая группа уничтожена")]
@@ -118,6 +121,30 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public void RefreshPosition()
         {
             PublishAnnouncementAnchor();
+        }
+
+        public void SetLayoutBottomWorldY(float worldY)
+        {
+            float pivotToBottom;
+
+            if (_layoutBottomAnchor)
+            {
+                pivotToBottom = transform.position.y - _layoutBottomAnchor.position.y;
+            }
+            else
+            {
+                var renderers = GetComponentsInChildren<SpriteRenderer>(false);
+                var minY = transform.position.y;
+                for (var i = 0; i < renderers.Length; i++)
+                {
+                    if (renderers[i].sprite)
+                        minY = Mathf.Min(minY, renderers[i].bounds.min.y);
+                }
+                pivotToBottom = transform.position.y - minY;
+            }
+
+            var pos = transform.position;
+            transform.position = new Vector3(pos.x, worldY + pivotToBottom, pos.z);
         }
 
         private void PublishAnnouncementAnchor()

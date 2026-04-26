@@ -33,6 +33,26 @@ namespace Project.Scripts.Gameplay.Battle.Layout
             transform.position = boardWorldCenter - _boardView.transform.localPosition;
         }
 
+        public void SetVerticalLayout(float boardTopWorldY, float cellSize,
+            float gapBoardToPlayerEnergy, float gapPlayerEnergyToEnemyEnergy, float gapEnemyEnergyToBattleField)
+        {
+            var cursor = boardTopWorldY + gapBoardToPlayerEnergy * cellSize;
+
+            if (_energyView)
+            {
+                var playerH = _energyView.PlayerEnergyHeight;
+                _energyView.SetPlayerEnergyWorldY(cursor + playerH * 0.5f);
+                cursor += playerH + gapPlayerEnergyToEnemyEnergy * cellSize;
+
+                var enemyH = _energyView.EnemyEnergyHeight;
+                _energyView.SetEnemyEnergyWorldY(cursor + enemyH * 0.5f);
+                cursor += enemyH + gapEnemyEnergyToBattleField * cellSize;
+            }
+
+            if (_battleFieldView)
+                _battleFieldView.SetLayoutBottomWorldY(cursor);
+        }
+
         public void RefreshBindings()
         {
             _battleFieldView?.RefreshPosition();

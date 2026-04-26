@@ -42,6 +42,15 @@ namespace Project.Scripts.Gameplay.Battle.Board
             if (layout)
             {
                 layout.SetBoardWorldCenter(boardCenter);
+
+                var boardTopWorldY = boardCenter.y + frameHeight * 0.5f;
+                layout.SetVerticalLayout(
+                    boardTopWorldY,
+                    tileCellSize,
+                    _battleViewConfig.GapBoardToPlayerEnergy,
+                    _battleViewConfig.GapPlayerEnergyToEnemyEnergy,
+                    _battleViewConfig.GapEnemyEnergyToBattleField);
+                layout.RefreshBindings();
                 return;
             }
 
