@@ -15,7 +15,7 @@ namespace Project.Scripts.Shared.BattleFlow
             _settings = settings;
             _initialized = true;
 
-            _snapshot = settings.PrePhaseDuration > 0
+            _snapshot = settings.PrePhaseDuration > 0 && settings.EnablePrePhaseOnBattleStart
                 ? MakePrePhase(1, BattlePhaseKind.Match)
                 : MakeActionPhase(1, BattlePhaseKind.Match);
         }

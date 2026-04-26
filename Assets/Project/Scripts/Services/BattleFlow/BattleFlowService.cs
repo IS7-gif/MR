@@ -31,6 +31,7 @@ namespace Project.Scripts.Services.BattleFlow
                 _config.MatchPhaseDuration,
                 _config.HeroPhaseDuration,
                 _config.PrePhaseDuration,
+                _config.EnablePrePhaseOnBattleStart,
                 _config.CountdownThreshold,
                 _config.EnergyCarryoverMode);
 

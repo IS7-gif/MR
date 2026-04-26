@@ -32,7 +32,6 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.BattleViewConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);
-            builder.RegisterInstance(_mainConfig.BattleTimerConfig);
             builder.RegisterInstance(_mainConfig.BattleFlowConfig);
             builder.RegisterInstance(_mainConfig.BurndownConfig);
             builder.RegisterInstance(_mainConfig.UnitDeathConfig);

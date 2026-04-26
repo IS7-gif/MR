@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: GridConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Grid.GridConfig
   _width: 7
-  _height: 6
+  _height: 7

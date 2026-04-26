@@ -62,9 +62,6 @@ namespace Project.Scripts.Configs
         [Tooltip("Раскладка слотов: порядок цветов ячеек героев и аватара на поле")]
         [SerializeField] private SlotLayoutConfig _slotLayoutConfig;
 
-        [Tooltip("Таймер боя: длительность основной фазы и настройки обратного отсчёта")]
-        [SerializeField] private BattleTimerConfig _battleTimerConfig;
-
         [Tooltip("Фазы боя: число раундов, длительности Match/Hero Phase и правило переноса энергии между раундами")]
         [SerializeField] private BattleFlowConfig _battleFlowConfig;
 
@@ -104,7 +101,6 @@ namespace Project.Scripts.Configs
         public BattleViewConfig BattleViewConfig => _battleViewConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
-        public BattleTimerConfig BattleTimerConfig => _battleTimerConfig;
         public BattleFlowConfig BattleFlowConfig => _battleFlowConfig;
         public BurndownConfig BurndownConfig => _burndownConfig;
         public UnitDeathConfig UnitDeathConfig => _unitDeathConfig;

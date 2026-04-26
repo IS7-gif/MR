@@ -2,6 +2,7 @@ using System;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared.BattleFlow;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Timer
@@ -24,7 +25,7 @@ namespace Project.Scripts.Services.Timer
             _escalationModifierService = escalationModifierService;
             _eventBus = eventBus;
 
-            _timerSub = _eventBus.Subscribe<BattleTimerChangedEvent>(OnTimerChanged);
+            _timerSub = _eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnTimerChanged);
         }
 
 
@@ -38,14 +39,14 @@ namespace Project.Scripts.Services.Timer
         }
 
 
-        private void OnTimerChanged(BattleTimerChangedEvent e)
+        private void OnTimerChanged(BattleFlowTimerChangedEvent e)
         {
             TryTriggerEscalation(e);
         }
 
-        private void TryTriggerEscalation(BattleTimerChangedEvent e)
+        private void TryTriggerEscalation(BattleFlowTimerChangedEvent e)
         {
-            if (_escalationTriggered || e.TimeRemaining > _config.ActivationThreshold)
+            if (_escalationTriggered || e.Phase != BattlePhaseKind.Hero || e.TimeRemaining > _config.ActivationThreshold)
                 return;
 
             _escalationTriggered = true;

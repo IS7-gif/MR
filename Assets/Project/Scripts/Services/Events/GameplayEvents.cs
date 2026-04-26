@@ -214,17 +214,6 @@ namespace Project.Scripts.Services.Events
         }
     }
 
-    public readonly struct BattleTimerChangedEvent
-    {
-        public float TimeRemaining { get; }
-
-
-        public BattleTimerChangedEvent(float timeRemaining)
-        {
-            TimeRemaining = timeRemaining;
-        }
-    }
-
     public readonly struct BattleFlowRoundChangedEvent
     {
         public int CurrentRound { get; }

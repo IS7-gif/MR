@@ -64,7 +64,6 @@ namespace Project.Scripts.Gameplay
         private SwapInputHandler _swapHandler;
         private BoardOrchestrator _orchestrator;
         private GameAudioController _gameAudioController;
-        private IBattleTimerService _battleTimerService;
         private IBattleFlowService _battleFlowService;
         private IBurndownService _burndownService;
         private BurndownConfig _burndownConfig;
@@ -105,7 +104,6 @@ namespace Project.Scripts.Gameplay
             if (isPrePhase)
                 return;
 
-            _battleTimerService?.Tick(Time.deltaTime);
             _burndownService?.Tick(Time.deltaTime);
             _unitActivationCooldownService?.Tick(Time.deltaTime);
 
@@ -177,7 +175,6 @@ namespace Project.Scripts.Gameplay
             GameResultSequenceController gameResultSequenceController,
             BattleFieldViewModel battleHUDViewModel,
             IBoardBoundsProvider boardBoundsProvider,
-            IBattleTimerService battleTimerService,
             IBattleFlowService battleFlowService,
             IBurndownService burndownService,
             BurndownConfig burndownConfig,
@@ -207,7 +204,6 @@ namespace Project.Scripts.Gameplay
             _gameResultSequenceController = gameResultSequenceController;
             _battleFieldViewModel = battleHUDViewModel;
             _boardBoundsProvider = boardBoundsProvider;
-            _battleTimerService = battleTimerService;
             _battleFlowService = battleFlowService;
             _burndownService = burndownService;
             _burndownConfig = burndownConfig;
@@ -317,7 +313,6 @@ namespace Project.Scripts.Gameplay
 
             _gameResultPresenter.Initialize();
             _gameResultSequenceController.Initialize();
-            _battleTimerService.Initialize();
             _battleFlowService.Initialize();
 
 #if UNITY_EDITOR

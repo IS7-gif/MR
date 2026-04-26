@@ -26,6 +26,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Если включено, во время подготовительной паузы затемняются оба экрана фаз")]
         [SerializeField] private bool _dimCurrentPhaseDuringPrePhase = true;
 
+        [Tooltip("Если включено, перед самой первой фазой боя проигрывается подготовительная пауза. Если выключено - бой стартует сразу, без preroll-паузы (на последующие фазы не влияет)")]
+        [SerializeField] private bool _enablePrePhaseOnBattleStart = true;
+
         [Header("Final countdown settings")]
         [Tooltip("Оставшееся время в секундах, при котором начинается посекундный обратный отсчёт")]
         [SerializeField] private int _countdownThreshold = 5;
@@ -36,6 +39,7 @@ namespace Project.Scripts.Configs.Battle
         public float HeroPhaseDuration => _heroPhaseDuration;
         public int PrePhaseDuration => _prePhaseDuration;
         public bool DimCurrentPhaseDuringPrePhase => _dimCurrentPhaseDuringPrePhase;
+        public bool EnablePrePhaseOnBattleStart => _enablePrePhaseOnBattleStart;
         public int CountdownThreshold => _countdownThreshold;
         public EnergyCarryoverMode EnergyCarryoverMode => _energyCarryoverMode;
     }
