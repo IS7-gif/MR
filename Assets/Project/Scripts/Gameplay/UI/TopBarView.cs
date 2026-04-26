@@ -21,29 +21,18 @@ namespace Project.Scripts.Gameplay.UI
             if (transform is not RectTransform rectTransform)
                 return;
 
-            if (rectTransform.parent is not RectTransform parentRectTransform)
+            if (Screen.width <= 0 || Screen.height <= 0)
                 return;
 
-            var canvas = GetComponentInParent<Canvas>();
-            var camera = canvas && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                parentRectTransform,
-                screenRect.min,
-                camera,
-                out var localMin);
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                parentRectTransform,
-                screenRect.max,
-                camera,
-                out var localMax);
-
-            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMin = new Vector2(
+                screenRect.xMin / Screen.width,
+                screenRect.yMin / Screen.height);
+            rectTransform.anchorMax = new Vector2(
+                screenRect.xMax / Screen.width,
+                screenRect.yMax / Screen.height);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.anchoredPosition = (localMin + localMax) * 0.5f;
-            rectTransform.sizeDelta = localMax - localMin;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.offsetMax = Vector2.zero;
         }
 
 

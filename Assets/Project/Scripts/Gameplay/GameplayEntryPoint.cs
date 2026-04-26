@@ -91,6 +91,7 @@ namespace Project.Scripts.Gameplay
         private float _cellSize;
         private int _lastWidth;
         private int _lastHeight;
+        private Rect _lastSafeArea;
 #endif
 
         private void Start()
@@ -102,6 +103,10 @@ namespace Project.Scripts.Gameplay
         {
             if (null == _moveBarService)
                 return;
+
+#if UNITY_EDITOR
+            ApplyLiveResizeIfNeeded();
+#endif
 
             if (false == _gameStateService.IsPlaying)
                 return;
@@ -117,18 +122,6 @@ namespace Project.Scripts.Gameplay
 
             if (_moveBarService.IsEnabled && _boardRuntimeService.CanAcceptInput)
                 _moveBarService.Tick(Time.deltaTime);
-
-#if UNITY_EDITOR
-            if (_gridManager == null)
-                return;
-
-            if (Screen.width == _lastWidth && Screen.height == _lastHeight)
-                return;
-
-            _lastWidth = Screen.width;
-            _lastHeight = Screen.height;
-            ApplyLiveResize();
-#endif
         }
 
         private void OnDestroy()
@@ -282,6 +275,7 @@ namespace Project.Scripts.Gameplay
             _cellSize = worldLayout.TileCellSize;
             _lastWidth = Screen.width;
             _lastHeight = Screen.height;
+            _lastSafeArea = Screen.safeArea;
             BoardConfig.LayoutChanged += OnLayoutChanged;
             BoardConfig.TileLayoutChanged += OnTileLayoutChanged;
             BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
@@ -364,6 +358,21 @@ namespace Project.Scripts.Gameplay
         private void OnBattleLayoutChanged() => ApplyLiveLayout();
 
         private void ApplyLiveResize() => ApplyLiveLayout();
+
+        private void ApplyLiveResizeIfNeeded()
+        {
+            if (_gridManager == null)
+                return;
+
+            var safeArea = Screen.safeArea;
+            if (Screen.width == _lastWidth && Screen.height == _lastHeight && safeArea == _lastSafeArea)
+                return;
+
+            _lastWidth = Screen.width;
+            _lastHeight = Screen.height;
+            _lastSafeArea = safeArea;
+            ApplyLiveResize();
+        }
 
         private void ApplyLiveTileLayout()
         {

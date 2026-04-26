@@ -34,11 +34,12 @@ namespace Project.Scripts.Shared.Layout
             var scaledWorldBottomPadding = worldBottomPadding * pixelScale;
             var scaledWorldSidePadding = worldSidePadding * pixelScale;
 
+            var topBarAreaRect = useSafeArea ? paddedAvailableRect : gameplayRect;
             var topBarRect = ScreenLayoutRect.FromMinMax(
                 gameplayRect.XMin + scaledTopBarSidePadding,
-                gameplayRect.YMax - scaledTopBarTopPadding - scaledTopBarHeight,
+                topBarAreaRect.YMax - scaledTopBarTopPadding - scaledTopBarHeight,
                 gameplayRect.XMax - scaledTopBarSidePadding,
-                gameplayRect.YMax - scaledTopBarTopPadding);
+                topBarAreaRect.YMax - scaledTopBarTopPadding);
 
             var worldTop = topBarRect.YMin - scaledTopBarToWorldGap;
             var worldBottomBase = worldExtendsIntoUnsafeBottomArea
