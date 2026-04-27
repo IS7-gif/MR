@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1b033c9f999a55488766d3586714010, type: 3}
   m_Name: DebugConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.DebugConfig
-  _logEnergyAccumulation: 1
+  _logEnergyAccumulation: 0
   _logCascades: 0
   _logCombatDamage: 0
   _logUIEvents: 0

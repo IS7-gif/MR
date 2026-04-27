@@ -19,3 +19,11 @@ MonoBehaviour:
   _activationCooldownSeconds: 3
   _portrait: {fileID: 21300000, guid: d64c345563825e5468d81f94e7b15af5, type: 3}
   _displayName: 
+  _passiveAbilities:
+  - _abilityKind: 1
+    _conditionKind: 1
+    _conditionRequirement: 1
+    _power: 50
+    _allowMultipleActivations: 0
+    _activationLimit: 0
+    _conditionWindowSeconds: 0

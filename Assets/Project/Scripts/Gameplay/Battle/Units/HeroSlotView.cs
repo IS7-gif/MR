@@ -31,11 +31,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Portrait SpriteRenderer - displays the character sprite and flashes on hit")]
         [SerializeField] private SpriteRenderer _portrait;
 
-        [Tooltip("Radial cooldown overlay - shown on top of portrait during cooldown")]
-        [SerializeField] private CooldownSweepView _cooldownSweep;
-
         [Tooltip("SpriteRenderer свечения с материалом Additive - отображается как подсветка источника или цели")]
         [SerializeField] private SpriteRenderer _glow;
+        
+        [Tooltip("Radial cooldown overlay - shown on top of portrait during cooldown")]
+        [SerializeField] private CooldownSweepView _cooldownSweep;
 
         [Tooltip("Основная полоса HP - мгновенно обновляется при получении урона")]
         [SerializeField] private BarRenderer _hpBar;
@@ -49,20 +49,24 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
         [SerializeField] private Transform _hitAnchor;
 
-        [Tooltip("Якорь для прилёта орбов передачи энергии - по умолчанию HitAnchor, если не назначен")]
-        [SerializeField] private Transform _energyAnchor;
-
         [Space(10)]
-        [Tooltip("GameObject-ы, которые активируются при смерти героя")]
+        [Tooltip("GameObjects, которые активируются при смерти героя")]
         [SerializeField] private GameObject[] _activateOnDeath;
 
         [Space(10)]
-        [Tooltip("GameObject-ы, которые деактивируются при смерти героя")]
+        [Tooltip("GameObjects, которые деактивируются при смерти героя")]
         [SerializeField] private GameObject[] _deactivateOnDeath;
+
+        [Space(10)]
+        [Tooltip("GameObjects, которые включаются, пока у героя активна пассивная способность, связанная с типом его ячейки")]
+        [SerializeField] private GameObject[] _activateOnSlotKindPassive;
+
+        [Space(10)]
+        [Tooltip("GameObjects, которые выключаются, пока у героя активна пассивная способность, связанная с типом его ячейки")]
+        [SerializeField] private GameObject[] _deactivateOnSlotKindPassive;
 
         
         public Transform HitAnchor => _hitAnchor ? _hitAnchor : transform;
-        public Transform EnergyAnchor => _energyAnchor ? _energyAnchor : HitAnchor;
         public UnitDescriptor Descriptor => UnitDescriptor.Hero(_viewModel.Side, _viewModel.SlotIndex, _viewModel.ActionType);
         public bool IsReadySource => _viewModel is { IsAssigned: true } && _viewModel.IsActivatable.CurrentValue;
         public Bounds WorldBounds => _boundsSource ? _boundsSource.bounds : new Bounds(transform.position, Vector3.one);
@@ -107,6 +111,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindDeathState(viewModel);
             BindAvailabilityState(viewModel);
             BindCooldownSweep(viewModel);
+            BindSlotKindPassiveState(viewModel);
             GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
         }
 
@@ -233,6 +238,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     if (_deactivateOnDeath != null)
                         foreach (var go in _deactivateOnDeath)
                             if (go) go.SetActive(false == defeated);
+
+                    ApplySlotKindPassiveObjectsState();
                 })
                 .AddTo(_disposables);
         }
@@ -252,6 +259,33 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     SetPortraitGrayscale(info.Remaining > 0f && _config && _config.CooldownGrayscaleEnabled);
                 })
                 .AddTo(_disposables);
+        }
+
+        private void BindSlotKindPassiveState(HeroSlotViewModel viewModel)
+        {
+            ApplySlotKindPassiveObjectsState();
+            viewModel.IsSlotKindPassiveActive
+                .Subscribe(_ => ApplySlotKindPassiveObjectsState())
+                .AddTo(_disposables);
+        }
+
+        private void ApplySlotKindPassiveObjectsState()
+        {
+            var defeated = _viewModel != null && _viewModel.IsDefeated.CurrentValue;
+            var active = _viewModel != null && _viewModel.IsSlotKindPassiveActive.CurrentValue;
+
+            SetObjectsActive(_activateOnSlotKindPassive, active && false == defeated);
+            SetObjectsActive(_deactivateOnSlotKindPassive, false == active && false == defeated);
+        }
+
+        private static void SetObjectsActive(GameObject[] gameObjects, bool active)
+        {
+            if (gameObjects == null)
+                return;
+
+            for (var i = 0; i < gameObjects.Length; i++)
+                if (gameObjects[i])
+                    gameObjects[i].SetActive(active);
         }
 
         private void SetPortraitGrayscale(bool active)

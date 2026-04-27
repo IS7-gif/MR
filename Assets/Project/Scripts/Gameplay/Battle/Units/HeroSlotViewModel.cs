@@ -23,6 +23,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
         public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new(false);
+        public ReactiveProperty<bool> IsSlotKindPassiveActive { get; } = new(false);
         public ReactiveProperty<(float Remaining, float Duration)> CooldownProgress { get; } = new((0f, 0f));
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool>  IsDefeated { get; } = new(false);
@@ -115,11 +116,17 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 IsDefeated.Value = true;
         }
 
+        public void SetSlotKindPassiveActive(bool active)
+        {
+            IsSlotKindPassiveActive.Value = active;
+        }
+
         public void Dispose()
         {
             IsActivatable.Dispose();
             ActivationBlockReason.Dispose();
             IsAvailabilityDimmed.Dispose();
+            IsSlotKindPassiveActive.Dispose();
             CooldownProgress.Dispose();
             HPFill.Dispose();
             IsDefeated.Dispose();

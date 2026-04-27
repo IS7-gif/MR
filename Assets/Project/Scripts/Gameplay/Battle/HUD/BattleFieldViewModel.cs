@@ -161,6 +161,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             Disposables.Add(_eventBus.Subscribe<HeroHPChangedEvent>(OnHeroHPChanged));
             Disposables.Add(_eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated));
+            Disposables.Add(_eventBus.Subscribe<HeroSlotKindPassiveStateChangedEvent>(OnHeroSlotKindPassiveStateChanged));
             Disposables.Add(_eventBus.Subscribe<BattleFlowPhaseChangedEvent>(_ => RefreshInteractionOverlay()));
             Disposables.Add(_eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnBattleFlowTimerChanged));
             Disposables.Add(_eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
@@ -202,6 +203,15 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private void OnHeroDefeated(HeroDefeatedEvent e)
         {
             // Reserved for future side effects (sound, particles, etc.).
+        }
+
+        private void OnHeroSlotKindPassiveStateChanged(HeroSlotKindPassiveStateChangedEvent e)
+        {
+            var slots = e.Side == BattleSide.Player ? _playerHeroSlots : _enemyHeroSlots;
+            if (null == slots || e.SlotIndex < 0 || e.SlotIndex >= slots.Length)
+                return;
+
+            slots[e.SlotIndex]?.SetSlotKindPassiveActive(e.IsActive);
         }
 
         private void OnBattleFlowTimerChanged(BattleFlowTimerChangedEvent e)

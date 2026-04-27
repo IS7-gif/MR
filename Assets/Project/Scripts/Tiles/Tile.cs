@@ -7,10 +7,13 @@ namespace Project.Scripts.Tiles
 {
     public class Tile : MonoBehaviour
     {
+        [Tooltip("SpriteRenderer основного изображения тайла")]
         [SerializeField] private SpriteRenderer _spriteRenderer;
+
+        [Tooltip("Компонент анимаций тайла: появление, уничтожение и пульсация подсказки")]
         [SerializeField] private TileAnimator _animator;
 
-        [Tooltip("SpriteRenderer подсветки, отображаемый за тайлом во время подсказки")]
+        [Tooltip("SpriteRenderer подсветки, отображаемый за тайлом для активных пассивных бонусов")]
         [SerializeField] private SpriteRenderer _glowRenderer;
 
 
@@ -28,6 +31,7 @@ namespace Project.Scripts.Tiles
             GridPosition = gridPos;
             PayloadKind = payloadKind;
             _spriteRenderer.sprite = config.Sprite;
+            SetGlowActive(false, Color.white);
         }
 
         public void SetPayloadKind(TileKind kind)
@@ -39,6 +43,7 @@ namespace Project.Scripts.Tiles
         {
             if (!_glowRenderer)
                 return;
+            
             _glowRenderer.color = color;
             _glowRenderer.gameObject.SetActive(active);
         }

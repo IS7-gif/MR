@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.GroupDefense;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Passives;
 using Project.Scripts.Shared.Tiles;
 
 namespace Project.Scripts.Services.Events
@@ -33,11 +34,18 @@ namespace Project.Scripts.Services.Events
 
     public readonly struct EnergyGeneratedEvent
     {
+        public BattleSide Side { get; }
         public IReadOnlyDictionary<TileKind, float> EnergyByKind { get; }
 
 
         public EnergyGeneratedEvent(IReadOnlyDictionary<TileKind, float> energyByKind)
+            : this(BattleSide.Player, energyByKind)
         {
+        }
+
+        public EnergyGeneratedEvent(BattleSide side, IReadOnlyDictionary<TileKind, float> energyByKind)
+        {
+            Side = side;
             EnergyByKind = energyByKind;
         }
     }
@@ -105,6 +113,45 @@ namespace Project.Scripts.Services.Events
             SlotIndex = slotIndex;
             ActionType = actionType;
             ActionValue = actionValue;
+        }
+    }
+
+    public readonly struct HeroPassiveActivatedEvent
+    {
+        public HeroPassiveRuntimeState State { get; }
+
+
+        public HeroPassiveActivatedEvent(HeroPassiveRuntimeState state)
+        {
+            State = state;
+        }
+    }
+
+    public readonly struct HeroPassiveDisabledEvent
+    {
+        public BattleSide Side { get; }
+        public int SlotIndex { get; }
+
+
+        public HeroPassiveDisabledEvent(BattleSide side, int slotIndex)
+        {
+            Side = side;
+            SlotIndex = slotIndex;
+        }
+    }
+
+    public readonly struct HeroSlotKindPassiveStateChangedEvent
+    {
+        public BattleSide Side { get; }
+        public int SlotIndex { get; }
+        public bool IsActive { get; }
+
+
+        public HeroSlotKindPassiveStateChangedEvent(BattleSide side, int slotIndex, bool isActive)
+        {
+            Side = side;
+            SlotIndex = slotIndex;
+            IsActive = isActive;
         }
     }
 

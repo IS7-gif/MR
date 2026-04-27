@@ -3,8 +3,8 @@ using Project.Scripts.Configs;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.BattleFlow;
-using Project.Scripts.Shared.Energy;
 using Project.Scripts.Shared.Heroes;
+using Project.Scripts.Shared.Energy;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Combat
@@ -15,6 +15,7 @@ namespace Project.Scripts.Services.Combat
         private readonly DebugConfig _debugConfig;
         private readonly BattleFlowConfig _battleFlowConfig;
         private readonly IBattleEconomyModifierService _battleEconomyModifier;
+        private readonly IEnergyGainModifierService _energyGainModifier;
         private readonly SideEnergyPoolEngine _playerPool = new SideEnergyPoolEngine();
         private readonly SideEnergyPoolEngine _enemyPool = new SideEnergyPoolEngine();
         private IDisposable _energyGeneratedSubscription;
@@ -25,12 +26,14 @@ namespace Project.Scripts.Services.Combat
             EventBus eventBus,
             DebugConfig debugConfig,
             BattleFlowConfig battleFlowConfig,
-            IBattleEconomyModifierService battleEconomyModifier)
+            IBattleEconomyModifierService battleEconomyModifier,
+            IEnergyGainModifierService energyGainModifier)
         {
             _eventBus = eventBus;
             _debugConfig = debugConfig;
             _battleFlowConfig = battleFlowConfig;
             _battleEconomyModifier = battleEconomyModifier;
+            _energyGainModifier = energyGainModifier;
         }
 
 
@@ -89,14 +92,15 @@ namespace Project.Scripts.Services.Combat
 
         private void OnEnergyGenerated(EnergyGeneratedEvent e)
         {
-            var gain = EnergyGainRules.SumAll(e.EnergyByKind) * _battleEconomyModifier.CascadeEnergyMultiplier;
+            var gain = _energyGainModifier.CalculateMatchEnergy(e.Side, e.EnergyByKind)
+                       * _battleEconomyModifier.CascadeEnergyMultiplier;
             if (gain <= 0f)
                 return;
 
             if (_debugConfig.LogEnergyAccumulation)
-                UnityEngine.Debug.Log($"[SharedEnergy] Player +{gain:F2}");
+                UnityEngine.Debug.Log($"[SharedEnergy] {e.Side} +{gain:F2}");
 
-            AddEnergy(BattleSide.Player, gain);
+            AddEnergy(e.Side, gain);
         }
 
         private void OnRoundChanged(BattleFlowRoundChangedEvent e)

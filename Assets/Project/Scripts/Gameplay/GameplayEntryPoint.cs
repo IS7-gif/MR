@@ -78,7 +78,9 @@ namespace Project.Scripts.Gameplay
         private IUnitActivationCooldownService _unitActivationCooldownService;
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
+        private IHeroPassiveService _heroPassiveService;
         private HintService _hintService;
+        private PassiveTileGlowService _passiveTileGlowService;
         private DebugConfig _debugConfig;
         private IDisposable _boardRuntimeSubscription;
         private IDisposable _gameStateSubscription;
@@ -148,6 +150,7 @@ namespace Project.Scripts.Gameplay
             _uiService?.Close<TopBarView>();
 
             _hintService?.Dispose();
+            _passiveTileGlowService?.Dispose();
             _orchestrator?.Dispose();
             _swapHandler?.Dispose();
             _inputService?.Dispose();
@@ -198,6 +201,7 @@ namespace Project.Scripts.Gameplay
             IUnitActivationCooldownService unitActivationCooldownService,
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
+            IHeroPassiveService heroPassiveService,
             DebugConfig debugConfig)
         {
             _eventBus = eventBus;
@@ -229,6 +233,7 @@ namespace Project.Scripts.Gameplay
             _unitActivationCooldownService = unitActivationCooldownService;
             _hintConfig = hintConfig;
             _palette = palette;
+            _heroPassiveService = heroPassiveService;
             _debugConfig = debugConfig;
         }
 
@@ -322,7 +327,13 @@ namespace Project.Scripts.Gameplay
                 _debugConfig);
 
             _hintService = new HintService(_hintConfig, gridManager.State, gridManager, matchFinder,
-                _gridConfig, _gameStateService, _boardRuntimeService, _eventBus, _palette);
+                _gridConfig, _gameStateService, _boardRuntimeService, _eventBus);
+            _passiveTileGlowService = new PassiveTileGlowService(
+                _eventBus,
+                gridManager,
+                _gridConfig,
+                _heroPassiveService,
+                _palette);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();

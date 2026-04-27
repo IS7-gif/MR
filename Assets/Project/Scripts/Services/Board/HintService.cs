@@ -9,9 +9,7 @@ using Project.Scripts.Services.Grid;
 using Project.Scripts.Services.Board.Hinting;
 using Project.Scripts.Shared;
 using Project.Scripts.Shared.Grid;
-using Project.Scripts.Shared.Tiles;
 using R3;
-using UnityEngine;
 
 namespace Project.Scripts.Services.Board
 {
@@ -25,7 +23,6 @@ namespace Project.Scripts.Services.Board
         private readonly IGameStateService _gameStateService;
         private readonly IBoardRuntimeService _boardRuntimeService;
         private readonly EventBus _eventBus;
-        private readonly TileKindPaletteConfig _palette;
         private IDisposable _matchSub;
         private IDisposable _stateSub;
         private IDisposable _boardRuntimeSub;
@@ -42,8 +39,7 @@ namespace Project.Scripts.Services.Board
             GridConfig gridConfig,
             IGameStateService gameStateService,
             IBoardRuntimeService boardRuntimeService,
-            EventBus eventBus,
-            TileKindPaletteConfig palette)
+            EventBus eventBus)
         {
             _config = config;
             _gridState = gridState;
@@ -53,7 +49,6 @@ namespace Project.Scripts.Services.Board
             _gameStateService = gameStateService;
             _boardRuntimeService = boardRuntimeService;
             _eventBus = eventBus;
-            _palette = palette;
 
             _matchSub = _eventBus.Subscribe<MatchPlayedEvent>(OnMatchPlayed);
             _stateSub = _gameStateService.State.Subscribe(OnGameStateChanged);
@@ -154,12 +149,6 @@ namespace Project.Scripts.Services.Board
             _firstHintedTile = firstTile;
             _secondHintedTile = secondTile;
 
-            if (_config.ShowGlow)
-            {
-                ShowHintGlow(firstTile);
-                ShowHintGlow(secondTile);
-            }
-
             if (_config.AnimatePulse)
             {
                 firstTile.Animator.AnimateHintPulse(_config);
@@ -172,12 +161,6 @@ namespace Project.Scripts.Services.Board
             if (!_firstHintedTile && !_secondHintedTile)
                 return;
 
-            if (_config.ShowGlow)
-            {
-                HideHintGlow(_firstHintedTile);
-                HideHintGlow(_secondHintedTile);
-            }
-
             if (_config.AnimatePulse)
             {
                 StopHintPulse(_firstHintedTile);
@@ -186,20 +169,6 @@ namespace Project.Scripts.Services.Board
 
             _firstHintedTile = null;
             _secondHintedTile = null;
-        }
-
-        private void ShowHintGlow(Tiles.Tile tile)
-        {
-            var color = tile.Kind.IsColor() ? _palette.GetColor(tile.Kind, Color.white) : Color.white;
-            tile.SetGlowActive(true, color);
-        }
-
-        private static void HideHintGlow(Tiles.Tile tile)
-        {
-            if (!tile)
-                return;
-
-            tile.SetGlowActive(false, Color.white);
         }
 
         private static void StopHintPulse(Tiles.Tile tile)

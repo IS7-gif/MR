@@ -27,6 +27,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Отображаемое имя героя, для будущих UI-ярлыков")]
         [SerializeField] private string _displayName;
 
+        [Tooltip("Пассивные способности героя. Пустой список означает, что пассивных способностей нет")]
+        [SerializeField] private HeroPassiveConfig[] _passiveAbilities;
+
 
         public HeroActionType AbilityType => _abilityType;
         public int AbilityPower => _abilityPower;
@@ -35,5 +38,6 @@ namespace Project.Scripts.Configs.Battle
         public string DisplayName => _displayName;
         public int ActivationEnergyCost => _activationEnergyCost;
         public float ActivationCooldownSeconds => _activationCooldownSeconds;
+        public HeroPassiveConfig[] PassiveAbilities => _passiveAbilities;
     }
 }
