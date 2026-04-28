@@ -5,6 +5,7 @@ using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.UI.Windows;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.UISystem;
+using R3;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Announcements
@@ -20,6 +21,9 @@ namespace Project.Scripts.Services.Announcements
 
         private readonly Queue<BoardAnnouncementView> _pool = new();
         private readonly List<BoardAnnouncementView> _all = new();
+
+        private readonly ReactiveProperty<bool> _isEnergyTextHidden = new(false);
+        public ReadOnlyReactiveProperty<bool> IsEnergyTextHidden => _isEnergyTextHidden;
 
 
         public BoardAnnouncementService(
@@ -47,6 +51,11 @@ namespace Project.Scripts.Services.Announcements
             if (false == _config.ViewPrefab)
                 return;
 
+            var hideEnergyText = @params?.HideEnergyText ?? _config.HideEnergyText;
+
+            if (hideEnergyText)
+                _isEnergyTextHidden.Value = true;
+
             var view = GetOrCreate();
             var vm = BuildViewModel(text, @params);
 
@@ -55,10 +64,15 @@ namespace Project.Scripts.Services.Announcements
             await view.HideAsync();
 
             _pool.Enqueue(view);
+
+            if (hideEnergyText)
+                _isEnergyTextHidden.Value = false;
         }
 
         public void Dispose()
         {
+            _isEnergyTextHidden.Dispose();
+
             for (var i = 0; i < _all.Count; i++)
             {
                 if (_all[i])
@@ -72,20 +86,36 @@ namespace Project.Scripts.Services.Announcements
 
         private BoardAnnouncementViewModel BuildViewModel(string text, BoardAnnouncementParams @params)
         {
+            var style = @params?.Style ?? _config.Style;
+            var anchor = @params?.Anchor ?? _config.DefaultAnchor;
             var textColor = @params?.TextColor ?? _config.TextColor;
             var displayDuration = @params?.DisplayDuration ?? _config.DisplayDuration;
             var fadeOutDuration = @params?.FadeOutDuration ?? _config.FadeOutDuration;
             var flyDistance = @params?.FlyDistance ?? _config.FlyDistance;
+            var scaleTarget = @params?.ScaleTarget ?? _config.ScaleTarget;
             var fadeOutEase = @params?.FadeOutEase ?? _config.FadeOutEase;
+            var worldY = GetAnchorWorldY(anchor) + _config.VerticalWorldOffset;
 
             return new BoardAnnouncementViewModel(
+                style,
                 text,
                 textColor,
                 displayDuration,
                 fadeOutDuration,
                 flyDistance,
+                scaleTarget,
                 fadeOutEase,
-                _boardBounds.AnnouncementAnchorWorldY + _config.VerticalWorldOffset);
+                worldY);
+        }
+
+        private float GetAnchorWorldY(AnnouncementAnchorKind anchor)
+        {
+            return anchor switch
+            {
+                AnnouncementAnchorKind.EnergyBars => _boardBounds.EnergyBarsAnchorWorldY,
+                AnnouncementAnchorKind.Board       => _boardBounds.BoardAnchorWorldY,
+                _                                  => _boardBounds.BattleFieldAnchorWorldY
+            };
         }
 
         private BoardAnnouncementView GetOrCreate()
@@ -103,7 +133,7 @@ namespace Project.Scripts.Services.Announcements
             var view = go.GetComponent<BoardAnnouncementView>();
             go.SetActive(false);
             _all.Add(view);
-            
+
             return view;
         }
     }

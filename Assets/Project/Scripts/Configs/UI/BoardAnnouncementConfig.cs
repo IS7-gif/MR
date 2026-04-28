@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Project.Scripts.Services.Announcements;
 using UnityEngine;
 
 namespace Project.Scripts.Configs.UI
@@ -27,6 +28,18 @@ namespace Project.Scripts.Configs.UI
         [Tooltip("Вертикальное смещение в мировых координатах относительно трансформа AnnouncementAnchor в префабе BattleFieldView; при значении 0 объявление выводится точно в позиции якоря")]
         [SerializeField] private float _verticalWorldOffset;
 
+        [Tooltip("Стиль анимации по умолчанию для обычных объявлений")]
+        [SerializeField] private AnnouncementStyle _style = AnnouncementStyle.FlyUp;
+
+        [Tooltip("Масштаб, до которого текст увеличивается при исчезновении в стиле ScaleFade")]
+        [SerializeField] private float _scaleTarget = 1.5f;
+
+        [Tooltip("Якорь позиции по умолчанию для обычных объявлений")]
+        [SerializeField] private AnnouncementAnchorKind _defaultAnchor = AnnouncementAnchorKind.BattleField;
+
+        [Tooltip("Скрывать ли тексты значений энергии на время показа объявления по умолчанию")]
+        [SerializeField] private bool _hideEnergyText;
+
         [Tooltip("Цвет текста цифры обратного отсчёта перед овертаймом")]
         [SerializeField] private Color _countdownTextColor = Color.white;
 
@@ -44,10 +57,14 @@ namespace Project.Scripts.Configs.UI
 
 
         public GameObject ViewPrefab => _viewPrefab;
+        public AnnouncementStyle Style => _style;
+        public AnnouncementAnchorKind DefaultAnchor => _defaultAnchor;
+        public bool HideEnergyText => _hideEnergyText;
         public Color TextColor => _textColor;
         public float DisplayDuration => _displayDuration;
         public float FadeOutDuration => _fadeOutDuration;
         public float FlyDistance => _flyDistance;
+        public float ScaleTarget => _scaleTarget;
         public Ease FadeOutEase => _fadeOutEase;
         public float VerticalWorldOffset => _verticalWorldOffset;
         public Color CountdownTextColor => _countdownTextColor;

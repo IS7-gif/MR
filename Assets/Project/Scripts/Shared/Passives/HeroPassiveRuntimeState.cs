@@ -1,3 +1,4 @@
+using System;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 
@@ -12,7 +13,7 @@ namespace Project.Scripts.Shared.Passives
         public bool IsActive { get; }
         public bool IsDisabled { get; }
         public int ActivationCount { get; }
-        public int ConditionProgress { get; }
+        public int ConditionCount => _conditionProgress?.Length ?? 0;
 
         public bool CanActivateAgain =>
             false == IsDisabled
@@ -29,7 +30,7 @@ namespace Project.Scripts.Shared.Passives
             bool isActive = false,
             bool isDisabled = false,
             int activationCount = 0,
-            int conditionProgress = 0)
+            int[] conditionProgress = null)
         {
             Side = side;
             SlotIndex = slotIndex;
@@ -38,11 +39,23 @@ namespace Project.Scripts.Shared.Passives
             IsActive = isActive;
             IsDisabled = isDisabled;
             ActivationCount = activationCount < 0 ? 0 : activationCount;
-            ConditionProgress = conditionProgress < 0 ? 0 : conditionProgress;
+            _conditionProgress = NormalizeProgress(definition, conditionProgress);
         }
 
-        public HeroPassiveRuntimeState WithProgress(int progress)
+        public int GetConditionProgress(int conditionIndex)
         {
+            if (_conditionProgress == null || conditionIndex < 0 || conditionIndex >= _conditionProgress.Length)
+                return 0;
+
+            return _conditionProgress[conditionIndex];
+        }
+
+        public HeroPassiveRuntimeState WithConditionProgress(int conditionIndex, int progress)
+        {
+            var nextProgress = CopyProgress();
+            if (conditionIndex >= 0 && conditionIndex < nextProgress.Length)
+                nextProgress[conditionIndex] = progress < 0 ? 0 : progress;
+
             return new HeroPassiveRuntimeState(
                 Side,
                 SlotIndex,
@@ -51,7 +64,7 @@ namespace Project.Scripts.Shared.Passives
                 IsActive,
                 IsDisabled,
                 ActivationCount,
-                progress);
+                nextProgress);
         }
 
         public HeroPassiveRuntimeState WithActivated()
@@ -64,7 +77,7 @@ namespace Project.Scripts.Shared.Passives
                 true,
                 IsDisabled,
                 ActivationCount + 1,
-                0);
+                CreateProgressArray(Definition));
         }
 
         public HeroPassiveRuntimeState WithDisabled()
@@ -77,12 +90,45 @@ namespace Project.Scripts.Shared.Passives
                 false,
                 true,
                 ActivationCount,
-                ConditionProgress);
+                CopyProgress());
         }
 
-        public HeroPassiveRuntimeState WithProgressReset()
+        public HeroPassiveRuntimeState WithConditionProgressReset(int conditionIndex)
         {
-            return WithProgress(0);
+            return WithConditionProgress(conditionIndex, 0);
+        }
+
+
+        private readonly int[] _conditionProgress;
+
+
+        private int[] CopyProgress()
+        {
+            if (_conditionProgress == null || _conditionProgress.Length == 0)
+                return Array.Empty<int>();
+
+            var result = new int[_conditionProgress.Length];
+            Array.Copy(_conditionProgress, result, _conditionProgress.Length);
+            return result;
+        }
+
+        private static int[] NormalizeProgress(HeroPassiveDefinition definition, int[] progress)
+        {
+            var result = CreateProgressArray(definition);
+            if (progress == null || progress.Length == 0)
+                return result;
+
+            var count = progress.Length < result.Length ? progress.Length : result.Length;
+            for (var i = 0; i < count; i++)
+                result[i] = progress[i] < 0 ? 0 : progress[i];
+
+            return result;
+        }
+
+        private static int[] CreateProgressArray(HeroPassiveDefinition definition)
+        {
+            var conditions = definition.ConditionGroup.Conditions;
+            return conditions.Count == 0 ? Array.Empty<int>() : new int[conditions.Count];
         }
     }
 }

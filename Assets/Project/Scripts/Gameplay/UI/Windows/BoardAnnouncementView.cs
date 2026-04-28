@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.UISystem;
 using TMPro;
 using UnityEngine;
@@ -47,6 +48,9 @@ namespace Project.Scripts.Gameplay.UI.Windows
             if (_canvasGroup)
                 _canvasGroup.alpha = 1f;
 
+            if (_textRect)
+                _textRect.localScale = Vector3.one;
+
             var startPos = WorldYToAnchored(ViewModel.WorldY);
 
             if (_textRect)
@@ -59,10 +63,22 @@ namespace Project.Scripts.Gameplay.UI.Windows
                 _sequence?.Kill();
                 _sequence = DOTween.Sequence();
 
-                if (_textRect)
-                    _sequence.Join(_textRect
-                        .DOAnchorPosY(startPos.y + ViewModel.FlyDistance, ViewModel.FadeOutDuration)
-                        .SetEase(ViewModel.FadeOutEase));
+                switch (ViewModel.Style)
+                {
+                    case AnnouncementStyle.FlyUp:
+                        if (_textRect)
+                            _sequence.Join(_textRect
+                                .DOAnchorPosY(startPos.y + ViewModel.FlyDistance, ViewModel.FadeOutDuration)
+                                .SetEase(ViewModel.FadeOutEase));
+                        break;
+
+                    case AnnouncementStyle.ScaleFade:
+                        if (_textRect)
+                            _sequence.Join(_textRect
+                                .DOScale(ViewModel.ScaleTarget, ViewModel.FadeOutDuration)
+                                .SetEase(ViewModel.FadeOutEase));
+                        break;
+                }
 
                 if (_canvasGroup)
                     _sequence.Join(_canvasGroup

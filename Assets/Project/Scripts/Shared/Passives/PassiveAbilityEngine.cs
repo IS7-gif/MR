@@ -52,15 +52,17 @@ namespace Project.Scripts.Shared.Passives
             for (var i = 0; i < _states.Length; i++)
             {
                 var state = _states[i];
-                if (false == CanReceiveProgress(state, conditionKind, side, slotIndex, slotKind))
+                if (state.Side != side || false == state.CanActivateAgain)
                     continue;
 
-                var nextProgress = state.ConditionProgress + amount;
-                _states[i] = nextProgress >= state.Definition.ConditionRequirement
-                    ? state.WithActivated()
-                    : state.WithProgress(nextProgress);
-
-                changed = true;
+                var nextState = AddProgressToMatchingConditions(state, conditionKind, amount, slotIndex, slotKind);
+                if (false == HasSameConditionProgress(state, nextState))
+                {
+                    _states[i] = IsConditionGroupSatisfied(nextState)
+                        ? nextState.WithActivated()
+                        : nextState;
+                    changed = true;
+                }
             }
 
             return changed;
@@ -75,10 +77,14 @@ namespace Project.Scripts.Shared.Passives
             for (var i = 0; i < _states.Length; i++)
             {
                 var state = _states[i];
-                if (state.Side != side || state.Definition.ConditionKind != conditionKind || state.ConditionProgress == 0)
+                if (state.Side != side)
                     continue;
 
-                _states[i] = state.WithProgressReset();
+                var nextState = ResetMatchingConditions(state, conditionKind);
+                if (HasSameConditionProgress(state, nextState))
+                    continue;
+
+                _states[i] = nextState;
                 changed = true;
             }
 
@@ -102,23 +108,81 @@ namespace Project.Scripts.Shared.Passives
         }
 
 
-        private static bool CanReceiveProgress(
+        private static HeroPassiveRuntimeState AddProgressToMatchingConditions(
             HeroPassiveRuntimeState state,
             PassiveConditionKind conditionKind,
-            BattleSide side,
+            int amount,
             int slotIndex,
             TileKind slotKind)
         {
-            if (state.Side != side || state.Definition.ConditionKind != conditionKind)
-                return false;
-
             if (slotIndex >= 0 && state.SlotIndex != slotIndex)
-                return false;
+                return state;
 
             if (slotKind != TileKind.None && state.SlotKind != slotKind)
+                return state;
+
+            var result = state;
+            var conditions = state.Definition.ConditionGroup.Conditions;
+            for (var i = 0; i < conditions.Count; i++)
+            {
+                if (conditions[i].Kind != conditionKind)
+                    continue;
+
+                result = result.WithConditionProgress(i, result.GetConditionProgress(i) + amount);
+            }
+
+            return result;
+        }
+
+        private static HeroPassiveRuntimeState ResetMatchingConditions(
+            HeroPassiveRuntimeState state,
+            PassiveConditionKind conditionKind)
+        {
+            var result = state;
+            var conditions = state.Definition.ConditionGroup.Conditions;
+            for (var i = 0; i < conditions.Count; i++)
+            {
+                if (conditions[i].Kind != conditionKind || result.GetConditionProgress(i) == 0)
+                    continue;
+
+                result = result.WithConditionProgressReset(i);
+            }
+
+            return result;
+        }
+
+        private static bool IsConditionGroupSatisfied(HeroPassiveRuntimeState state)
+        {
+            var conditions = state.Definition.ConditionGroup.Conditions;
+            if (conditions.Count == 0)
                 return false;
 
-            return state.CanActivateAgain;
+            if (state.Definition.ConditionGroup.Operator == PassiveConditionGroupOperator.Or)
+            {
+                for (var i = 0; i < conditions.Count; i++)
+                    if (state.GetConditionProgress(i) >= conditions[i].RequiredValue)
+                        return true;
+
+                return false;
+            }
+
+            for (var i = 0; i < conditions.Count; i++)
+                if (state.GetConditionProgress(i) < conditions[i].RequiredValue)
+                    return false;
+
+            return true;
+        }
+
+        private static bool HasSameConditionProgress(HeroPassiveRuntimeState left, HeroPassiveRuntimeState right)
+        {
+            if (left.ConditionCount != right.ConditionCount)
+                return false;
+
+            for (var i = 0; i < left.ConditionCount; i++)
+                if (left.GetConditionProgress(i) != right.GetConditionProgress(i))
+                    return false;
+
+            return true;
         }
     }
 }

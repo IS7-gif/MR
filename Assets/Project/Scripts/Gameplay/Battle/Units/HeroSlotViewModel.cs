@@ -18,10 +18,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public int SlotIndex { get; }
         public BattleSide Side { get; }
         public HeroActionType ActionType { get; }
-        public int ActivationEnergyCost { get; }
+        public int ActivationEnergyCost => ActivationEnergyCostChanged.Value;
         public bool IsPlayerSlot => Side == BattleSide.Player;
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
+        public ReactiveProperty<int> ActivationEnergyCostChanged { get; }
         public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new(false);
         public ReactiveProperty<bool> IsSlotKindPassiveActive { get; } = new(false);
         public ReactiveProperty<(float Remaining, float Duration)> CooldownProgress { get; } = new((0f, 0f));
@@ -40,6 +41,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private readonly CompositeDisposable _subscriptions = new();
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private int _prevHP;
+        private int _currentEnergy;
         private bool _hasSufficientEnergy;
         private bool _isOnCooldown;
 
@@ -58,7 +60,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             Side = side;
             IsAssigned = state.IsAssigned;
             ActionType = state.ActionType;
-            ActivationEnergyCost = state.ActivationEnergyCost;
+            ActivationEnergyCostChanged = new ReactiveProperty<int>(state.ActivationEnergyCost);
             SlotColor = color;
             Portrait = portrait;
             _battleActionRuntimeService = battleActionRuntimeService;
@@ -108,9 +110,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Heal, current, max));
             }
             else
-            {
                 _healthBarUpdated.OnNext(new HealthBarUpdate(fill, HealthBarUpdateMode.Snap, current, max));
-            }
 
             if (current <= 0)
                 IsDefeated.Value = true;
@@ -121,10 +121,18 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsSlotKindPassiveActive.Value = active;
         }
 
+        public void UpdateAbilityStats(int activationEnergyCost, int abilityPower)
+        {
+            ActivationEnergyCostChanged.Value = activationEnergyCost;
+            _hasSufficientEnergy = activationEnergyCost <= 0 || _currentEnergy >= activationEnergyCost;
+            RefreshActivatable();
+        }
+
         public void Dispose()
         {
             IsActivatable.Dispose();
             ActivationBlockReason.Dispose();
+            ActivationEnergyCostChanged.Dispose();
             IsAvailabilityDimmed.Dispose();
             IsSlotKindPassiveActive.Dispose();
             CooldownProgress.Dispose();
@@ -182,6 +190,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (e.Side != Side)
                 return;
 
+            _currentEnergy = e.Current;
             _hasSufficientEnergy = ActivationEnergyCost <= 0 || e.Current >= ActivationEnergyCost;
             RefreshActivatable();
         }

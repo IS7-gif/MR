@@ -11,7 +11,7 @@ using VContainer.Unity;
 
 namespace Project.Scripts.Services.Combat
 {
-    public class HeroPassiveService : IHeroPassiveService, IEnergyGainModifierService, IStartable, IDisposable
+    public class HeroPassiveService : IHeroPassiveService, IEnergyGainModifierService, IHeroAbilityModifierService, IStartable, IDisposable
     {
         private const int SlotCount = 4;
         
@@ -65,6 +65,16 @@ namespace Project.Scripts.Services.Combat
             return PassiveEnergyRules.SumMatchEnergyWithPassives(energyByKind, _engine.States, side);
         }
 
+        public int GetActivationEnergyCost(BattleSide side, int slotIndex, int baseCost)
+        {
+            return PassiveHeroAbilityRules.GetModifiedActivationEnergyCost(baseCost, _engine.States, side, slotIndex);
+        }
+
+        public int GetAbilityPower(BattleSide side, int slotIndex, int basePower)
+        {
+            return PassiveHeroAbilityRules.GetModifiedAbilityPower(basePower, _engine.States, side, slotIndex);
+        }
+
 
         private void InitializePassives()
         {
@@ -109,8 +119,7 @@ namespace Project.Scripts.Services.Combat
         {
             var slotKinds = _slotLayoutConfig.HeroSlotKinds;
             return slotKinds != null && slotIndex >= 0 && slotIndex < slotKinds.Length
-                ? slotKinds[slotIndex]
-                : TileKind.None;
+                ? slotKinds[slotIndex] : TileKind.None;
         }
 
         private void OnHeroDefeated(HeroDefeatedEvent e)
@@ -127,11 +136,7 @@ namespace Project.Scripts.Services.Combat
             if (_currentPhase != BattlePhaseKind.Hero)
                 return;
 
-            AddProgressAndPublishActivations(
-                PassiveConditionKind.HeroActivationsInHeroPhase,
-                e.Side,
-                1,
-                e.SlotIndex);
+            AddProgressAndPublishActivations(PassiveConditionKind.HeroActivationsInHeroPhase, e.Side, 1, e.SlotIndex);
         }
 
         private void OnAbilityExecuted(AbilityExecutedEvent e)
@@ -139,11 +144,7 @@ namespace Project.Scripts.Services.Combat
             if (_currentPhase != BattlePhaseKind.Hero || e.Source.Kind != UnitKind.Hero)
                 return;
 
-            AddProgressAndPublishActivations(
-                PassiveConditionKind.HeroActivationsInHeroPhase,
-                e.Source.Side,
-                1,
-                e.Source.SlotIndex);
+            AddProgressAndPublishActivations(PassiveConditionKind.HeroActivationsInHeroPhase, e.Source.Side, 1, e.Source.SlotIndex);
         }
 
         private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
@@ -157,11 +158,7 @@ namespace Project.Scripts.Services.Combat
             }
         }
 
-        private void AddProgressAndPublishActivations(
-            PassiveConditionKind conditionKind,
-            BattleSide side,
-            int amount,
-            int slotIndex)
+        private void AddProgressAndPublishActivations(PassiveConditionKind conditionKind, BattleSide side, int amount, int slotIndex)
         {
             var activationCounts = CaptureActivationCounts();
             if (false == _engine.AddConditionProgress(conditionKind, side, amount, slotIndex))
@@ -176,6 +173,7 @@ namespace Project.Scripts.Services.Combat
             var result = new int[states.Count];
             for (var i = 0; i < states.Count; i++)
                 result[i] = states[i].ActivationCount;
+            
             return result;
         }
 
@@ -188,8 +186,32 @@ namespace Project.Scripts.Services.Combat
                     continue;
 
                 _eventBus.Publish(new HeroPassiveActivatedEvent(states[i]));
+                PublishHeroAbilityStatsChanged(states[i].Side, states[i].SlotIndex);
                 RefreshSlotKindPassiveState(states[i].Side, states[i].SlotIndex);
             }
+        }
+
+        private void PublishHeroAbilityStatsChanged(BattleSide side, int slotIndex)
+        {
+            var heroConfig = GetHeroConfig(side, slotIndex);
+            if (!heroConfig)
+                return;
+
+            _eventBus.Publish(new HeroAbilityStatsChangedEvent(side, slotIndex,
+                GetActivationEnergyCost(side, slotIndex, heroConfig.ActivationEnergyCost),
+                GetAbilityPower(side, slotIndex, heroConfig.AbilityPower)));
+        }
+
+        private HeroConfig GetHeroConfig(BattleSide side, int slotIndex)
+        {
+            if (slotIndex is < 0 or >= SlotCount)
+                return null;
+
+            var heroes = side == BattleSide.Player
+                ? _levelConfig.PlayerHeroes
+                : _levelConfig.EnemyHeroes;
+
+            return heroes != null && slotIndex < heroes.Length ? heroes[slotIndex] : null;
         }
 
         private void RefreshSlotKindPassiveState(BattleSide side, int slotIndex)
@@ -218,7 +240,7 @@ namespace Project.Scripts.Services.Combat
                 if (false == state.IsActive || state.IsDisabled)
                     continue;
 
-                if (PassiveAbilityRules.IsSlotKindLinked(state.Definition.AbilityKind))
+                if (PassiveAbilityRules.HasSlotKindLinkedModifier(state.Definition))
                     return true;
             }
 

@@ -18,12 +18,19 @@ MonoBehaviour:
   _activationEnergyCost: 10
   _activationCooldownSeconds: 3
   _portrait: {fileID: 21300000, guid: d64c345563825e5468d81f94e7b15af5, type: 3}
-  _displayName: 
+  _displayName: Hero_Damager_1
   _passiveAbilities:
-  - _abilityKind: 1
-    _conditionKind: 1
-    _conditionRequirement: 1
-    _power: 50
+  - _displayName: Slot Energy Boost
+    _conditionGroup:
+      _operator: 0
+      _conditions:
+      - _kind: 1
+        _requiredValue: 1
+        _windowSeconds: 0
+    _modifierEffects:
+    - _target: 3
+      _operation: 2
+      _value: 50
+    _actionEffects: []
     _allowMultipleActivations: 0
-    _activationLimit: 0
-    _conditionWindowSeconds: 0
+    _activationLimit: 1

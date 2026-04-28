@@ -6,7 +6,9 @@ namespace Project.Scripts.Services.Board
         public float BoardHalfWidth { get; private set; }
         public float BoardCenterX { get; private set; }
         public float CellSize { get; private set; }
-        public float AnnouncementAnchorWorldY { get; private set; }
+        public float BattleFieldAnchorWorldY { get; private set; }
+        public float EnergyBarsAnchorWorldY { get; private set; }
+        public float BoardAnchorWorldY { get; private set; }
 
 
         public void SetBounds(float centerX, float topWorldY, float halfWidth, float cellSize)
@@ -17,9 +19,19 @@ namespace Project.Scripts.Services.Board
             CellSize = cellSize;
         }
 
-        public void SetAnnouncementAnchorY(float worldY)
+        public void SetBattleFieldAnchorY(float worldY)
         {
-            AnnouncementAnchorWorldY = worldY;
+            BattleFieldAnchorWorldY = worldY;
+        }
+
+        public void SetEnergyBarsAnchorY(float worldY)
+        {
+            EnergyBarsAnchorWorldY = worldY;
+        }
+
+        public void SetBoardAnchorY(float worldY)
+        {
+            BoardAnchorWorldY = worldY;
         }
     }
 }

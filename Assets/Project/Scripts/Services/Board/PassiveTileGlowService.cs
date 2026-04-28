@@ -85,10 +85,9 @@ namespace Project.Scripts.Services.Board
         private static bool IsActivePlayerMatchEnergyPassive(HeroPassiveRuntimeState state)
         {
             return state.Side == BattleSide.Player
-                   && state.IsActive
-                   && false == state.IsDisabled
+                   && state is { IsActive: true, IsDisabled: false }
                    && state.SlotKind.IsColor()
-                   && state.Definition.AbilityKind == PassiveAbilityKind.MatchEnergyBySlotKindPercent;
+                   && PassiveAbilityRules.HasSlotKindLinkedModifier(state.Definition);
         }
 
         private void ClearAll()

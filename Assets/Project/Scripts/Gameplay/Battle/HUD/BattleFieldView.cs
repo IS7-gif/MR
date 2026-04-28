@@ -5,7 +5,6 @@ using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.Battle.Targeting;
 using Project.Scripts.Gameplay.Battle.Units;
 using Project.Scripts.Gameplay.UI;
-using Project.Scripts.Services.Board;
 using Project.Scripts.Services.Input;
 using Project.Scripts.Services.UISystem;
 using Project.Scripts.Shared.Heroes;
@@ -44,9 +43,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         [Tooltip("Опциональный SpriteRenderer затемнения боевого поля; включается, когда боевые действия недоступны")]
         [SerializeField] private SpriteRenderer _phaseOverlay;
-
-        [Tooltip("Трансформ, задающий базовую позицию для объявлений на доске; Vertical World Offset из BoardAnnouncementConfig применяется относительно него")]
-        [SerializeField] private Transform _announcementAnchor;
 
         [Header("Layout Geometry")]
         [Tooltip("Высота визуальной области боевого поля в world units. Управляет Background, Floor, layout anchors и позициями panel rows.")]
@@ -95,7 +91,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
 
         private IInputService _inputService;
-        private IBoardBoundsProvider _boardBounds;
         private ObjectPool<FloatingDamageNumber> _floatingPool;
         private TileKindPaletteConfig _tileKindPalette;
         private Transform _playerEnergyAbsorbTarget;
@@ -106,7 +101,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             ApplyBattleFieldGeometry();
             BindSlots();
             BindGroupShields();
-            PublishAnnouncementAnchor();
             SetupTargeting();
             BindShieldPulse();
             SetupEnergyFX();
@@ -127,10 +121,9 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         }
 
 
-        public void SetDependencies(IInputService inputService, IBoardBoundsProvider boardBounds, TileKindPaletteConfig tileKindPalette, Transform playerEnergyAbsorbTarget)
+        public void SetDependencies(IInputService inputService, TileKindPaletteConfig tileKindPalette, Transform playerEnergyAbsorbTarget)
         {
             _inputService = inputService;
-            _boardBounds = boardBounds;
             _tileKindPalette = tileKindPalette;
             _playerEnergyAbsorbTarget = playerEnergyAbsorbTarget;
         }
@@ -150,7 +143,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public void RefreshPosition()
         {
             ApplyBattleFieldGeometry();
-            PublishAnnouncementAnchor();
         }
 
         public void SetLayoutBottomWorldY(float worldY)
@@ -286,14 +278,6 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
             var spriteHeight = targetRenderer.sprite.bounds.size.y;
             return spriteHeight > 0f ? height / spriteHeight : 1f;
-        }
-
-        private void PublishAnnouncementAnchor()
-        {
-            if (_boardBounds == null || false == _announcementAnchor)
-                return;
-
-            _boardBounds.SetAnnouncementAnchorY(_announcementAnchor.position.y);
         }
 
         private void BindSlots()

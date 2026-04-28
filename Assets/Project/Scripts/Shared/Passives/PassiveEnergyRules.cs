@@ -20,18 +20,19 @@ namespace Project.Scripts.Shared.Passives
                 if (pair.Value <= 0f)
                     continue;
 
-                total += pair.Value * GetMatchEnergyMultiplier(passives, side, pair.Key);
+                total += GetModifiedMatchEnergy(pair.Value, passives, side, pair.Key);
             }
 
             return total;
         }
 
-        public static float GetMatchEnergyMultiplier(
+        public static float GetModifiedMatchEnergy(
+            float baseEnergy,
             IReadOnlyList<HeroPassiveRuntimeState> passives,
             BattleSide side,
             TileKind tileKind)
         {
-            var percentBonus = 0;
+            var result = baseEnergy;
             if (null != passives)
             {
                 for (var i = 0; i < passives.Count; i++)
@@ -40,11 +41,17 @@ namespace Project.Scripts.Shared.Passives
                     if (false == IsMatchEnergyPassive(passive, side, tileKind))
                         continue;
 
-                    percentBonus += passive.Definition.Power * passive.ActivationCount;
+                    var effects = passive.Definition.ModifierEffects;
+                    for (var j = 0; j < effects.Count; j++)
+                    {
+                        var effect = effects[j];
+                        if (effect.Target == PassiveModifierTarget.MatchEnergyBySlotKind)
+                            result = PassiveModifierRules.Apply(result, effect, passive.ActivationCount);
+                    }
                 }
             }
 
-            return 1f + percentBonus / 100f;
+            return result < 0f ? 0f : result;
         }
 
         private static bool IsMatchEnergyPassive(
@@ -54,8 +61,7 @@ namespace Project.Scripts.Shared.Passives
         {
             return passive.Side == side
                    && passive is { IsActive: true, IsDisabled: false }
-                   && passive.SlotKind == tileKind
-                   && passive.Definition.AbilityKind == PassiveAbilityKind.MatchEnergyBySlotKindPercent;
+                   && passive.SlotKind == tileKind;
         }
     }
 }

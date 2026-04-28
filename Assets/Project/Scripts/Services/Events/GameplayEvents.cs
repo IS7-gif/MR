@@ -155,6 +155,23 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct HeroAbilityStatsChangedEvent
+    {
+        public BattleSide Side { get; }
+        public int SlotIndex { get; }
+        public int ActivationEnergyCost { get; }
+        public int AbilityPower { get; }
+
+
+        public HeroAbilityStatsChangedEvent(BattleSide side, int slotIndex, int activationEnergyCost, int abilityPower)
+        {
+            Side = side;
+            SlotIndex = slotIndex;
+            ActivationEnergyCost = activationEnergyCost;
+            AbilityPower = abilityPower;
+        }
+    }
+
     public readonly struct HeroCooldownChangedEvent
     {
         public BattleSide Side { get; }

@@ -43,7 +43,8 @@ namespace Project.Scripts.DI
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<HeroPassiveService>()
                 .As<IHeroPassiveService>()
-                .As<IEnergyGainModifierService>();
+                .As<IEnergyGainModifierService>()
+                .As<IHeroAbilityModifierService>();
             builder.RegisterEntryPoint<BattleSideEnergyService>().As<IBattleSideEnergyService>();
             builder.Register<IUnitActivationCooldownService, UnitActivationCooldownService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();

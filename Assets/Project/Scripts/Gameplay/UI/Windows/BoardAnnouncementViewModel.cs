@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.UISystem;
 using UnityEngine;
 
@@ -7,11 +8,13 @@ namespace Project.Scripts.Gameplay.UI.Windows
 {
     public class BoardAnnouncementViewModel : BaseViewModel
     {
+        public AnnouncementStyle Style { get; }
         public string Text { get; }
         public Color TextColor { get; }
         public float DisplayDuration { get; }
         public float FadeOutDuration { get; }
         public float FlyDistance { get; }
+        public float ScaleTarget { get; }
         public Ease FadeOutEase { get; }
         public float WorldY { get; }
 
@@ -20,19 +23,23 @@ namespace Project.Scripts.Gameplay.UI.Windows
 
 
         public BoardAnnouncementViewModel(
+            AnnouncementStyle style,
             string text,
             Color textColor,
             float displayDuration,
             float fadeOutDuration,
             float flyDistance,
+            float scaleTarget,
             Ease fadeOutEase,
             float worldY)
         {
+            Style = style;
             Text = text;
             TextColor = textColor;
             DisplayDuration = displayDuration;
             FadeOutDuration = fadeOutDuration;
             FlyDistance = flyDistance;
+            ScaleTarget = scaleTarget;
             FadeOutEase = fadeOutEase;
             WorldY = worldY;
         }

@@ -14,6 +14,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
+        private readonly IHeroAbilityModifierService _heroAbilityModifierService;
         private readonly EventBus _eventBus;
 
 
@@ -25,6 +26,7 @@ namespace Project.Scripts.Services.Combat
             IAvatarGroupDefenseService groupDefense,
             IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService,
+            IHeroAbilityModifierService heroAbilityModifierService,
             EventBus eventBus)
         {
             _playerAvatarCharge = playerAvatarCharge;
@@ -34,6 +36,7 @@ namespace Project.Scripts.Services.Combat
             _groupDefense = groupDefense;
             _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
+            _heroAbilityModifierService = heroAbilityModifierService;
             _eventBus = eventBus;
         }
 
@@ -138,7 +141,7 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             actionType = slot.ActionType;
-            actionValue = slot.ActionValue;
+            actionValue = _heroAbilityModifierService.GetAbilityPower(source.Side, source.SlotIndex, slot.ActionValue);
             
             return true;
         }
@@ -192,6 +195,7 @@ namespace Project.Scripts.Services.Combat
 
                 actionType = _playerAvatarCharge.AbilityType;
                 actionValue = _playerAvatarCharge.AbilityPower;
+                
                 return true;
             }
 

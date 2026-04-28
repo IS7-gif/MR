@@ -12,6 +12,7 @@ using Project.Scripts.Gameplay.Battle.Layout;
 using Project.Scripts.Gameplay.Results;
 using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Audio;
+using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Board;
 using Project.Scripts.Services.BattleFlow;
 using Project.Scripts.Services.Combat;
@@ -82,6 +83,7 @@ namespace Project.Scripts.Gameplay
         private HintService _hintService;
         private PassiveTileGlowService _passiveTileGlowService;
         private DebugConfig _debugConfig;
+        private IBoardAnnouncementService _boardAnnouncementService;
         private IDisposable _boardRuntimeSubscription;
         private IDisposable _gameStateSubscription;
         private IDisposable _battleFlowPhaseSubscription;
@@ -202,7 +204,8 @@ namespace Project.Scripts.Gameplay
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
             IHeroPassiveService heroPassiveService,
-            DebugConfig debugConfig)
+            DebugConfig debugConfig,
+            IBoardAnnouncementService boardAnnouncementService)
         {
             _eventBus = eventBus;
             _audioService = audioService;
@@ -235,6 +238,7 @@ namespace Project.Scripts.Gameplay
             _palette = palette;
             _heroPassiveService = heroPassiveService;
             _debugConfig = debugConfig;
+            _boardAnnouncementService = boardAnnouncementService;
         }
 
         private async UniTaskVoid InitAsync()
@@ -257,12 +261,11 @@ namespace Project.Scripts.Gameplay
             _battleFieldView = _battleWorldLayout.BattleFieldView;
             _battleFieldView.SetDependencies(
                 _inputService,
-                _boardBoundsProvider,
                 _palette,
                 _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyAbsorbTarget : null);
             await _battleFieldView.InitializeAsync(_battleFieldViewModel);
             await _battleFieldView.ShowAsync();
-            _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel);
+            _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel, _boardAnnouncementService);
 
             var worldLayout = ComputeGameplayWorldLayout();
             var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
@@ -279,6 +282,7 @@ namespace Project.Scripts.Gameplay
                 _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout.RefreshBindings();
+            _battleWorldLayout.PublishAnnouncementAnchors(_boardBoundsProvider);
 
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
@@ -447,6 +451,7 @@ namespace Project.Scripts.Gameplay
                 _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout?.RefreshBindings();
+            _battleWorldLayout?.PublishAnnouncementAnchors(_boardBoundsProvider);
             ApplyTopBarLayout();
         }
 #endif

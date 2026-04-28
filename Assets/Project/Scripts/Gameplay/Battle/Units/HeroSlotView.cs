@@ -112,7 +112,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindAvailabilityState(viewModel);
             BindCooldownSweep(viewModel);
             BindSlotKindPassiveState(viewModel);
-            GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
+            BindDebugEnergyCost(viewModel);
         }
 
         public bool IsValidTarget(UnitDescriptor source)
@@ -266,6 +266,18 @@ namespace Project.Scripts.Gameplay.Battle.Units
             ApplySlotKindPassiveObjectsState();
             viewModel.IsSlotKindPassiveActive
                 .Subscribe(_ => ApplySlotKindPassiveObjectsState())
+                .AddTo(_disposables);
+        }
+
+        private void BindDebugEnergyCost(HeroSlotViewModel viewModel)
+        {
+            var label = GetComponentInChildren<DebugEnergyCostLabel>();
+            if (!label)
+                return;
+
+            label.Show(viewModel.ActivationEnergyCost);
+            viewModel.ActivationEnergyCostChanged
+                .Subscribe(label.Show)
                 .AddTo(_disposables);
         }
 

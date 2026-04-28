@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared.BattleFlow;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Timer
@@ -32,14 +33,28 @@ namespace Project.Scripts.Services.Timer
         }
 
 
-        private void OnPrePhaseStarted(BattlePrePhaseStartedEvent _)
+        private void OnPrePhaseStarted(BattlePrePhaseStartedEvent e)
         {
-            _announcementService.Show("Get Ready!").Forget();
+            _announcementService.Show("Get Ready!", new BoardAnnouncementParams
+            {
+                Anchor = PhaseToAnchor(e.UpcomingPhase)
+            }).Forget();
         }
 
-        private void OnPrePhaseEnded(BattlePrePhaseEndedEvent _)
+        private void OnPrePhaseEnded(BattlePrePhaseEndedEvent e)
         {
-            _announcementService.Show("Go!").Forget();
+            _announcementService.Show("Go!", new BoardAnnouncementParams
+            {
+                Anchor = PhaseToAnchor(e.NextPhase)
+            }).Forget();
+        }
+
+
+        private static AnnouncementAnchorKind PhaseToAnchor(BattlePhaseKind phase)
+        {
+            return phase == BattlePhaseKind.Match
+                ? AnnouncementAnchorKind.Board
+                : AnnouncementAnchorKind.BattleField;
         }
     }
 }
