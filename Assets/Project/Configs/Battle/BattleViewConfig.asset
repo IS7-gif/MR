@@ -12,3 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e48eefc9e6ede43b6fa5a9fb420793, type: 3}
   m_Name: BattleViewConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleViewConfig
+  _gapBoardToPlayerEnergy: 0
+  _gapPlayerEnergyToEnemyEnergy: 0
+  _gapEnemyEnergyToBattleField: 0

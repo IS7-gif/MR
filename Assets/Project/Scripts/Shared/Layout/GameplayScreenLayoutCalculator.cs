@@ -12,9 +12,8 @@ namespace Project.Scripts.Shared.Layout
             float referenceResolutionWidth,
             float referenceResolutionHeight,
             float topBarHeight,
-            float topBarTopPadding,
             float topBarSidePadding,
-            float topBarToWorldGap,
+            float topBarBottomPadding,
             float worldBottomPadding,
             float worldSidePadding)
         {
@@ -27,21 +26,19 @@ namespace Project.Scripts.Shared.Layout
                 safeAreaPadding * pixelScale);
             var gameplayRect = FitAspect(paddedAvailableRect, gameplayAspect);
 
-            var scaledTopBarTopPadding = topBarTopPadding * pixelScale;
             var scaledTopBarHeight = topBarHeight * pixelScale;
             var scaledTopBarSidePadding = topBarSidePadding * pixelScale;
-            var scaledTopBarToWorldGap = topBarToWorldGap * pixelScale;
+            var scaledTopBarBottomPadding = topBarBottomPadding * pixelScale;
             var scaledWorldBottomPadding = worldBottomPadding * pixelScale;
             var scaledWorldSidePadding = worldSidePadding * pixelScale;
 
             var topBarAreaRect = useSafeArea ? paddedAvailableRect : gameplayRect;
             var topBarRect = ScreenLayoutRect.FromMinMax(
                 gameplayRect.XMin + scaledTopBarSidePadding,
-                topBarAreaRect.YMax - scaledTopBarTopPadding - scaledTopBarHeight,
+                topBarAreaRect.YMax - scaledTopBarHeight,
                 gameplayRect.XMax - scaledTopBarSidePadding,
-                topBarAreaRect.YMax - scaledTopBarTopPadding);
+                topBarAreaRect.YMax);
 
-            var worldTop = topBarRect.YMin - scaledTopBarToWorldGap;
             var worldBottomBase = worldExtendsIntoUnsafeBottomArea
                 ? Min(gameplayRect.YMin, screenRect.YMin)
                 : gameplayRect.YMin;
@@ -49,7 +46,7 @@ namespace Project.Scripts.Shared.Layout
                 gameplayRect.XMin + scaledWorldSidePadding,
                 worldBottomBase + scaledWorldBottomPadding,
                 gameplayRect.XMax - scaledWorldSidePadding,
-                worldTop);
+                topBarAreaRect.YMax - scaledTopBarHeight - scaledTopBarBottomPadding);
 
             return new GameplayScreenLayout(safeAreaRect, gameplayRect, topBarRect, worldRect, pixelScale);
         }
@@ -60,9 +57,7 @@ namespace Project.Scripts.Shared.Layout
             if (referenceWidth <= 0f || referenceHeight <= 0f)
                 return 1f;
 
-            var widthScale = screenWidth / referenceWidth;
-            var heightScale = screenHeight / referenceHeight;
-            return (widthScale + heightScale) * 0.5f;
+            return screenWidth / referenceWidth;
         }
 
 

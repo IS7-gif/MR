@@ -1,4 +1,8 @@
 using UnityEngine;
+using UnityEngine.Serialization;
+#if UNITY_EDITOR
+using System;
+#endif
 
 namespace Project.Scripts.Configs.Gameplay
 {
@@ -43,17 +47,14 @@ namespace Project.Scripts.Configs.Gameplay
         [Min(0f)]
         [SerializeField] private float _topBarHeight = 80f;
 
-        [Tooltip("Отступ TopBar от верхнего края gameplay-контейнера в reference pixels.")]
-        [Min(0f)]
-        [SerializeField] private float _topBarTopPadding = 20f;
-
         [Tooltip("Боковой отступ TopBar внутри gameplay-контейнера в reference pixels.")]
         [Min(0f)]
         [SerializeField] private float _topBarSidePadding = 140f;
 
-        [Tooltip("Зазор между нижним краем TopBar-зоны и верхом world-content зоны в reference pixels.")]
+        [Tooltip("Нижний отступ TopBar от верха BattleField в reference pixels.")]
         [Min(0f)]
-        [SerializeField] private float _topBarToWorldGap = 0f;
+        [FormerlySerializedAs("_topBarToWorldGap")]
+        [SerializeField] private float _topBarBottomPadding = 5f;
 
         [Header("World Content")]
         [Tooltip("Отступ world-content зоны от нижнего края gameplay-контейнера в reference pixels.")]
@@ -68,6 +69,79 @@ namespace Project.Scripts.Configs.Gameplay
         [Range(0f, 1f)]
         [SerializeField] private float _worldStackMinGapScale = 0.25f;
 
+#if UNITY_EDITOR
+        public static event Action LayoutChanged;
+        public static event Action TopBarLayoutChanged;
+
+        private bool _hasValidated;
+        private bool _lastUseSafeArea;
+        private bool _lastWorldExtendsIntoUnsafeBottomArea;
+        private float _lastReferenceResolutionWidth;
+        private float _lastReferenceResolutionHeight;
+        private float _lastGameplayAspectWidth;
+        private float _lastGameplayAspectHeight;
+        private float _lastSafeAreaPadding;
+        private float _lastTopBarHeight;
+        private float _lastTopBarSidePadding;
+        private float _lastTopBarBottomPadding;
+        private float _lastWorldBottomPadding;
+        private float _lastWorldSidePadding;
+
+
+        private void OnEnable()
+        {
+            CaptureValidatedValues();
+        }
+
+
+        private void OnValidate()
+        {
+            if (!_hasValidated)
+            {
+                CaptureValidatedValues();
+                return;
+            }
+
+            var topBarChanged = !Mathf.Approximately(_lastTopBarHeight, _topBarHeight)
+                                || !Mathf.Approximately(_lastTopBarSidePadding, _topBarSidePadding)
+                                || !Mathf.Approximately(_lastTopBarBottomPadding, _topBarBottomPadding);
+            var layoutChanged = _lastUseSafeArea != _useSafeArea
+                                || _lastWorldExtendsIntoUnsafeBottomArea != _worldExtendsIntoUnsafeBottomArea
+                                || !Mathf.Approximately(_lastReferenceResolutionWidth, _referenceResolutionWidth)
+                                || !Mathf.Approximately(_lastReferenceResolutionHeight, _referenceResolutionHeight)
+                                || !Mathf.Approximately(_lastGameplayAspectWidth, _gameplayAspectWidth)
+                                || !Mathf.Approximately(_lastGameplayAspectHeight, _gameplayAspectHeight)
+                                || !Mathf.Approximately(_lastSafeAreaPadding, _safeAreaPadding)
+                                || !Mathf.Approximately(_lastWorldBottomPadding, _worldBottomPadding)
+                                || !Mathf.Approximately(_lastWorldSidePadding, _worldSidePadding);
+
+            CaptureValidatedValues();
+
+            if (layoutChanged)
+                LayoutChanged?.Invoke();
+            else if (topBarChanged)
+                TopBarLayoutChanged?.Invoke();
+        }
+
+
+        private void CaptureValidatedValues()
+        {
+            _hasValidated = true;
+            _lastUseSafeArea = _useSafeArea;
+            _lastWorldExtendsIntoUnsafeBottomArea = _worldExtendsIntoUnsafeBottomArea;
+            _lastReferenceResolutionWidth = _referenceResolutionWidth;
+            _lastReferenceResolutionHeight = _referenceResolutionHeight;
+            _lastGameplayAspectWidth = _gameplayAspectWidth;
+            _lastGameplayAspectHeight = _gameplayAspectHeight;
+            _lastSafeAreaPadding = _safeAreaPadding;
+            _lastTopBarHeight = _topBarHeight;
+            _lastTopBarSidePadding = _topBarSidePadding;
+            _lastTopBarBottomPadding = _topBarBottomPadding;
+            _lastWorldBottomPadding = _worldBottomPadding;
+            _lastWorldSidePadding = _worldSidePadding;
+        }
+#endif
+
         public float ReferenceResolutionWidth => _referenceResolutionWidth;
         public float ReferenceResolutionHeight => _referenceResolutionHeight;
         public float GameplayAspect => _gameplayAspectWidth / _gameplayAspectHeight;
@@ -76,9 +150,8 @@ namespace Project.Scripts.Configs.Gameplay
         public bool WorldExtendsIntoUnsafeBottomArea => _worldExtendsIntoUnsafeBottomArea;
         public float SafeAreaPadding => _safeAreaPadding;
         public float TopBarHeight => _topBarHeight;
-        public float TopBarTopPadding => _topBarTopPadding;
         public float TopBarSidePadding => _topBarSidePadding;
-        public float TopBarToWorldGap => _topBarToWorldGap;
+        public float TopBarBottomPadding => _topBarBottomPadding;
         public float WorldBottomPadding => _worldBottomPadding;
         public float WorldSidePadding => _worldSidePadding;
         public float WorldStackMinGapScale => _worldStackMinGapScale;

@@ -169,6 +169,8 @@ namespace Project.Scripts.Gameplay
             BoardConfig.LayoutChanged -= OnLayoutChanged;
             BoardConfig.TileLayoutChanged -= OnTileLayoutChanged;
             BattleViewConfig.LayoutChanged -= OnBattleLayoutChanged;
+            GameplayScreenLayoutConfig.LayoutChanged -= OnScreenLayoutChanged;
+            GameplayScreenLayoutConfig.TopBarLayoutChanged -= OnTopBarLayoutChanged;
 #endif
         }
 
@@ -253,9 +255,6 @@ namespace Project.Scripts.Gameplay
             if (_moveBarService.IsEnabled)
                 await _uiService.Show<MoveBarView, MoveBarViewModel>(_moveBarViewModel);
 
-            _topBarView = await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
-            ApplyTopBarLayout();
-
             _inputService = new InputService(_inputConfig);
 
             _battleFieldView = _battleWorldLayout.BattleFieldView;
@@ -283,6 +282,8 @@ namespace Project.Scripts.Gameplay
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout.RefreshBindings();
             _battleWorldLayout.PublishAnnouncementAnchors(_boardBoundsProvider);
+            _topBarView = await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
+            _topBarView.gameObject.SetActive(false);
 
             _gameResultSequenceController.BindVisuals(_battleFieldView);
 
@@ -301,9 +302,12 @@ namespace Project.Scripts.Gameplay
             BoardConfig.LayoutChanged += OnLayoutChanged;
             BoardConfig.TileLayoutChanged += OnTileLayoutChanged;
             BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
+            GameplayScreenLayoutConfig.LayoutChanged += OnScreenLayoutChanged;
+            GameplayScreenLayoutConfig.TopBarLayoutChanged += OnTopBarLayoutChanged;
 #endif
 
             _battleWorldLayout.BoardView.Setup(worldLayout.FrameWidth, worldLayout.FrameHeight, worldLayout.TileCellSize, _boardConfig.MaskTopPadding);
+            await ApplyTopBarLayoutWhenReady();
 
             var gravityHandler = new GravityHandler(gridManager.State, gridManager, pool, _gridConfig, _boardRuntimeService);
 
@@ -371,19 +375,45 @@ namespace Project.Scripts.Gameplay
             await _orchestrator.StartGame();
         }
 
-        private void ApplyTopBarLayout()
+        private bool ApplyTopBarLayout(string reason)
         {
             if (!_topBarView || _gameplayScreenLayoutService == null)
-                return;
+                return false;
 
             var layout = _gameplayScreenLayoutService.Calculate();
-            _topBarView.ApplyScreenRect(_gameplayScreenLayoutService.ToUnityRect(layout.TopBarRect));
+            var cam = Camera.main;
+            if (!cam || !_battleFieldView)
+                return false;
+
+            var battleFieldTopScreenY = cam.WorldToScreenPoint(new Vector3(0f, _battleFieldView.LayoutTopWorldY, 0f)).y;
+            var applied = _topBarView.ApplyLayout(
+                _gameplayScreenLayoutService.ToUnityRect(layout.GameplayRect),
+                battleFieldTopScreenY,
+                _gameplayScreenLayoutConfig.TopBarSidePadding,
+                _gameplayScreenLayoutConfig.TopBarBottomPadding,
+                _gameplayScreenLayoutConfig.TopBarHeight);
+            return applied;
+        }
+
+        private async UniTask ApplyTopBarLayoutWhenReady()
+        {
+            _topBarView.gameObject.SetActive(false);
+
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+
+            if (ApplyTopBarLayout("startup after screen settled"))
+                _topBarView.gameObject.SetActive(true);
+            else
+                Debug.LogWarning("TopBar layout was not ready; keeping TopBar hidden to avoid showing prefab position.");
         }
 
 #if UNITY_EDITOR
         private void OnLayoutChanged()  => ApplyLiveLayout();
         private void OnTileLayoutChanged() => ApplyLiveTileLayout();
         private void OnBattleLayoutChanged() => ApplyLiveLayout();
+        private void OnScreenLayoutChanged() => ApplyLiveLayout();
+        private void OnTopBarLayoutChanged() => ApplyTopBarLayout("topbar config changed");
 
         private void ApplyLiveResize() => ApplyLiveLayout();
 
@@ -422,6 +452,7 @@ namespace Project.Scripts.Gameplay
             var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
             var boardHalfWidth = worldLayout.FrameWidth * 0.5f;
             _boardBoundsProvider.SetBounds(boardCenter.x, boardTopWorldY, boardHalfWidth, _cellSize);
+            ApplyTopBarLayout("tile layout changed");
         }
 
         private void ApplyLiveLayout()
@@ -452,7 +483,7 @@ namespace Project.Scripts.Gameplay
                 _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout?.RefreshBindings();
             _battleWorldLayout?.PublishAnnouncementAnchors(_boardBoundsProvider);
-            ApplyTopBarLayout();
+            ApplyTopBarLayout("full layout changed");
         }
 #endif
 

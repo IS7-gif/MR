@@ -101,9 +101,8 @@ namespace Project.Scripts.Gameplay.Battle.Board
                 _screenLayoutConfig.ReferenceResolutionWidth,
                 _screenLayoutConfig.ReferenceResolutionHeight,
                 _screenLayoutConfig.TopBarHeight,
-                _screenLayoutConfig.TopBarTopPadding,
                 _screenLayoutConfig.TopBarSidePadding,
-                _screenLayoutConfig.TopBarToWorldGap,
+                _screenLayoutConfig.TopBarBottomPadding,
                 _screenLayoutConfig.WorldBottomPadding,
                 _screenLayoutConfig.WorldSidePadding);
         }

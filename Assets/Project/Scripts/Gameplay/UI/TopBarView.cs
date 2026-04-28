@@ -16,23 +16,52 @@ namespace Project.Scripts.Gameplay.UI
         [SerializeField] private TMP_Text _timerTMP;
 
 
-        public void ApplyScreenRect(Rect screenRect)
+        public bool ApplyLayout(
+            Rect gameplayScreenRect,
+            float bottomScreenY,
+            float sidePadding,
+            float bottomPadding,
+            float height)
         {
             if (transform is not RectTransform rectTransform)
-                return;
+                return false;
 
-            if (Screen.width <= 0 || Screen.height <= 0)
-                return;
+            if (rectTransform.parent is not RectTransform parentRectTransform)
+                return false;
 
-            rectTransform.anchorMin = new Vector2(
-                screenRect.xMin / Screen.width,
-                screenRect.yMin / Screen.height);
-            rectTransform.anchorMax = new Vector2(
-                screenRect.xMax / Screen.width,
-                screenRect.yMax / Screen.height);
-            rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
+            if (Screen.width <= 0 || Screen.height <= 0 || gameplayScreenRect.width <= 0f || height <= 0f)
+                return false;
+
+            var canvas = GetComponentInParent<Canvas>();
+            var cameraForCanvas = canvas && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRectTransform,
+                new Vector2(gameplayScreenRect.xMin, bottomScreenY),
+                cameraForCanvas,
+                out var leftBottomLocal);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRectTransform,
+                new Vector2(gameplayScreenRect.xMax, bottomScreenY),
+                cameraForCanvas,
+                out var rightBottomLocal);
+
+            var parentRect = parentRectTransform.rect;
+            if (parentRect.width <= 0f || parentRect.height <= 0f)
+                return false;
+
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.zero;
+            rectTransform.pivot = Vector2.zero;
+            rectTransform.anchoredPosition = new Vector2(
+                leftBottomLocal.x - parentRect.xMin + sidePadding,
+                leftBottomLocal.y - parentRect.yMin + bottomPadding);
+            rectTransform.sizeDelta = new Vector2(
+                rightBottomLocal.x - leftBottomLocal.x - sidePadding * 2f,
+                height);
+            return true;
         }
 
 

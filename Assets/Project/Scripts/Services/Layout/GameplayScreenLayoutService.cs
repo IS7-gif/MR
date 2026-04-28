@@ -31,9 +31,8 @@ namespace Project.Scripts.Services.Layout
                 _config.ReferenceResolutionWidth,
                 _config.ReferenceResolutionHeight,
                 _config.TopBarHeight,
-                _config.TopBarTopPadding,
                 _config.TopBarSidePadding,
-                _config.TopBarToWorldGap,
+                _config.TopBarBottomPadding,
                 _config.WorldBottomPadding,
                 _config.WorldSidePadding);
         }

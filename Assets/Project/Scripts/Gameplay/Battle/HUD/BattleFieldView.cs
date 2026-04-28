@@ -96,6 +96,16 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private Transform _playerEnergyAbsorbTarget;
 
 
+        public float LayoutTopWorldY
+        {
+            get
+            {
+                ApplyBattleFieldGeometry();
+                return _layoutTopAnchor ? _layoutTopAnchor.position.y : transform.position.y + GetLayoutHeight() * 0.5f;
+            }
+        }
+
+
         protected override UniTask OnBindViewModel()
         {
             ApplyBattleFieldGeometry();
