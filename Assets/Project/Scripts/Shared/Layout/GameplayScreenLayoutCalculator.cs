@@ -91,9 +91,21 @@ namespace Project.Scripts.Shared.Layout
         public float FrameCellSize { get; }
         public float TileCellSize { get; }
         public float GapScale { get; }
+        public float DesiredStackHeight { get; }
+        public float AvailableStackHeight { get; }
+        public float FitScale { get; }
 
 
-        public GameplayWorldLayout(ScreenLayoutRect worldRect, float frameWidth, float frameHeight, float frameCellSize, float tileCellSize, float gapScale)
+        public GameplayWorldLayout(
+            ScreenLayoutRect worldRect,
+            float frameWidth,
+            float frameHeight,
+            float frameCellSize,
+            float tileCellSize,
+            float gapScale,
+            float desiredStackHeight = 0f,
+            float availableStackHeight = 0f,
+            float fitScale = 1f)
         {
             WorldRect = worldRect;
             FrameWidth = frameWidth;
@@ -101,6 +113,9 @@ namespace Project.Scripts.Shared.Layout
             FrameCellSize = frameCellSize;
             TileCellSize = tileCellSize;
             GapScale = gapScale;
+            DesiredStackHeight = desiredStackHeight;
+            AvailableStackHeight = availableStackHeight;
+            FitScale = fitScale;
         }
     }
 
@@ -123,58 +138,38 @@ namespace Project.Scripts.Shared.Layout
                 return new GameplayWorldLayout(worldRect, 0f, 0f, minCellSize, minCellSize, 1f);
 
             var safeMinCellSize = Max(0f, minCellSize);
-            var safeMinGapScale = Clamp01(minGapScale);
+            _ = minGapScale;
             var safeFramePadding = Clamp01(framePaddingPercent);
             var safeTilePadding = Clamp01(tilePaddingPercent);
 
-            var frameCellSizeByWidth = worldRect.Width * (1f - safeFramePadding) / gridWidth;
-            var tileCellSizeByWidth = worldRect.Width * (1f - safeTilePadding) / gridWidth;
-            var tileToFrameRatio = frameCellSizeByWidth > 0f
-                ? tileCellSizeByWidth / frameCellSizeByWidth
+            var designFrameCellSize = Max(safeMinCellSize, worldRect.Width * (1f - safeFramePadding) / gridWidth);
+            var designTileCellSize = Max(safeMinCellSize, worldRect.Width * (1f - safeTilePadding) / gridWidth);
+            var tileToFrameRatio = designFrameCellSize > 0f
+                ? designTileCellSize / designFrameCellSize
                 : 1f;
 
-            var frameCellSize = Max(safeMinCellSize, frameCellSizeByWidth);
-            var tileCellSize = Max(safeMinCellSize, tileCellSizeByWidth);
-            var frameHeight = gridHeight * frameCellSize + frameExtraHeight;
-            var gapScale = CalculateGapScale(
-                worldRect.Height,
-                frameHeight,
-                fixedContentHeight,
-                gapCellUnits,
-                frameCellSize,
-                safeMinGapScale);
+            var designFrameHeight = gridHeight * designFrameCellSize + frameExtraHeight;
+            var desiredStackHeight = StackHeight(designFrameHeight, fixedContentHeight, gapCellUnits, designFrameCellSize, 1f);
+            var fitScale = desiredStackHeight > 0f ? Min(1f, worldRect.Height / desiredStackHeight) : 1f;
 
-            if (gapScale <= safeMinGapScale && StackHeight(frameHeight, fixedContentHeight, gapCellUnits, frameCellSize, gapScale) > worldRect.Height)
-            {
-                var denominator = gridHeight + gapCellUnits * gapScale;
-                var heightFrameCellSize = denominator > 0f
-                    ? (worldRect.Height - fixedContentHeight - frameExtraHeight) / denominator
-                    : safeMinCellSize;
-
-                frameCellSize = Max(safeMinCellSize, Min(frameCellSizeByWidth, heightFrameCellSize));
-                tileCellSize = Max(safeMinCellSize, frameCellSize * tileToFrameRatio);
-                frameHeight = gridHeight * frameCellSize + frameExtraHeight;
-            }
+            var frameCellSize = Max(safeMinCellSize, designFrameCellSize * fitScale);
+            var tileCellSize = Max(safeMinCellSize, frameCellSize * tileToFrameRatio);
+            var frameHeight = (gridHeight * designFrameCellSize + frameExtraHeight) * fitScale;
 
             var frameWidth = gridWidth * frameCellSize;
 
-            return new GameplayWorldLayout(worldRect, frameWidth, frameHeight, frameCellSize, tileCellSize, gapScale);
+            return new GameplayWorldLayout(
+                worldRect,
+                frameWidth,
+                frameHeight,
+                frameCellSize,
+                tileCellSize,
+                1f,
+                desiredStackHeight,
+                worldRect.Height,
+                fitScale);
         }
 
-
-        private static float CalculateGapScale(float worldHeight, float frameHeight, float fixedContentHeight,
-            float gapCellUnits, float tileCellSize, float minGapScale)
-        {
-            if (gapCellUnits <= 0f || tileCellSize <= 0f)
-                return 1f;
-
-            var desiredGapHeight = gapCellUnits * tileCellSize;
-            var availableGapHeight = worldHeight - frameHeight - fixedContentHeight;
-            if (availableGapHeight >= desiredGapHeight)
-                return 1f;
-
-            return Max(minGapScale, availableGapHeight / desiredGapHeight);
-        }
 
         private static float StackHeight(float frameHeight, float fixedContentHeight, float gapCellUnits,
             float tileCellSize, float gapScale)

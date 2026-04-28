@@ -31,10 +31,12 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         [SerializeField] private Ease _animEase = Ease.OutQuad;
 
 
-        public float Height => _barHeight;
+        public float Height => _barHeight * _layoutScale;
+        public float BaseHeight => _barHeight;
 
 
         private float _displayedRatio;
+        private float _layoutScale = 1f;
         private Tween _fillTween;
 
 
@@ -79,6 +81,13 @@ namespace Project.Scripts.Gameplay.Battle.Layout
             transform.position = new Vector3(pos.x, worldY, pos.z);
         }
 
+        public void SetLayoutScale(float scale)
+        {
+            _layoutScale = Mathf.Max(0.01f, scale);
+            ApplyBackground();
+            ApplyFill(_displayedRatio);
+        }
+
         public void SetTextVisible(bool visible)
         {
             if (_valueText)
@@ -91,7 +100,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
             if (false == _background || false == _background.sprite)
                 return;
 
-            ApplySpriteSize(_background, _barWidth, _barHeight);
+            ApplySpriteSize(_background, _barWidth * _layoutScale, _barHeight * _layoutScale);
         }
 
         private void ApplyFill(float ratio)
@@ -99,11 +108,12 @@ namespace Project.Scripts.Gameplay.Battle.Layout
             if (false == _fill || false == _fill.sprite)
                 return;
 
-            var fillWidth = _barWidth * ratio;
-            ApplySpriteSize(_fill, fillWidth, _barHeight);
+            var barWidth = _barWidth * _layoutScale;
+            var fillWidth = barWidth * ratio;
+            ApplySpriteSize(_fill, fillWidth, _barHeight * _layoutScale);
 
             var local = _fill.transform.localPosition;
-            _fill.transform.localPosition = new Vector3(_barWidth * (ratio - 1f) * 0.5f, local.y, local.z);
+            _fill.transform.localPosition = new Vector3(barWidth * (ratio - 1f) * 0.5f, local.y, local.z);
         }
 
         private static void ApplySpriteSize(SpriteRenderer sr, float worldWidth, float worldHeight)

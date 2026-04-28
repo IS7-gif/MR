@@ -94,7 +94,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private ObjectPool<FloatingDamageNumber> _floatingPool;
         private TileKindPaletteConfig _tileKindPalette;
         private Transform _playerEnergyAbsorbTarget;
+        private float _layoutScale = 1f;
 
+
+        public float BaseLayoutHeight => Mathf.Max(0.01f, _layoutHeight);
 
         public float LayoutTopWorldY
         {
@@ -185,7 +188,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             ApplyBattleFieldGeometry();
 
             if (_layoutHeight > 0f)
-                return _layoutHeight;
+                return _layoutHeight * _layoutScale;
 
             var renderers = GetComponentsInChildren<SpriteRenderer>(false);
             if (renderers.Length == 0)
@@ -205,6 +208,12 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             return float.IsInfinity(minY) || float.IsInfinity(maxY) ? 0f : maxY - minY;
         }
 
+        public void SetLayoutScale(float scale)
+        {
+            _layoutScale = Mathf.Max(0.01f, scale);
+            ApplyBattleFieldGeometry();
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
@@ -214,9 +223,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
 
         private void ApplyBattleFieldGeometry()
         {
-            var safeHeight = Mathf.Max(0.01f, _layoutHeight);
-            if (false == Mathf.Approximately(_layoutHeight, safeHeight))
-                _layoutHeight = safeHeight;
+            var baseHeight = Mathf.Max(0.01f, _layoutHeight);
+            if (false == Mathf.Approximately(_layoutHeight, baseHeight))
+                _layoutHeight = baseHeight;
+
+            var safeHeight = baseHeight * _layoutScale;
 
             if (_backgroundRenderer)
             {
@@ -256,10 +267,10 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 SetLocalY(_layoutTopAnchor, halfHeight);
 
             if (_playerPanel)
-                SetLocalY(_playerPanel, -halfHeight + _playerPanelBottomPadding);
+                SetLocalY(_playerPanel, -halfHeight + _playerPanelBottomPadding * _layoutScale);
 
             if (_enemyPanel)
-                SetLocalY(_enemyPanel, halfHeight - _enemyPanelTopPadding);
+                SetLocalY(_enemyPanel, halfHeight - _enemyPanelTopPadding * _layoutScale);
         }
 
         private static void SetLocalY(Transform target, float y)

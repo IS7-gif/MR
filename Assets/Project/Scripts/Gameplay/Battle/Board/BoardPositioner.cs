@@ -46,6 +46,8 @@ namespace Project.Scripts.Gameplay.Battle.Board
             var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
             if (layout)
             {
+                layout.EnergyView?.SetLayoutScale(worldLayout.FitScale);
+                layout.BattleFieldView?.SetLayoutScale(worldLayout.FitScale);
                 layout.SetBoardWorldCenter(boardCenter);
 
                 var boardTopWorldY = boardCenter.y + worldLayout.FrameHeight * 0.5f;
@@ -131,9 +133,9 @@ namespace Project.Scripts.Gameplay.Battle.Board
             if (!layout)
                 return 0f;
 
-            var playerEnergyHeight = layout.EnergyView ? layout.EnergyView.PlayerEnergyHeight : 0f;
-            var enemyEnergyHeight = layout.EnergyView ? layout.EnergyView.EnemyEnergyHeight : 0f;
-            var battleFieldHeight = layout.BattleFieldView ? layout.BattleFieldView.GetLayoutHeight() : 0f;
+            var playerEnergyHeight = layout.EnergyView ? layout.EnergyView.PlayerEnergyBaseHeight : 0f;
+            var enemyEnergyHeight = layout.EnergyView ? layout.EnergyView.EnemyEnergyBaseHeight : 0f;
+            var battleFieldHeight = layout.BattleFieldView ? layout.BattleFieldView.BaseLayoutHeight : 0f;
             return playerEnergyHeight + enemyEnergyHeight + battleFieldHeight;
         }
 

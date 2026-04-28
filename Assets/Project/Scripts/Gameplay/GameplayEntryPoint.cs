@@ -267,6 +267,10 @@ namespace Project.Scripts.Gameplay
             _battleWorldLayout.EnergyView?.Bind(_battleFieldViewModel, _boardAnnouncementService);
 
             var worldLayout = ComputeGameplayWorldLayout();
+#if UNITY_EDITOR
+            LogWorldFit("startup", worldLayout);
+#endif
+            ApplyBattleWorldFitScale(worldLayout.FitScale);
             var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
             _battleWorldLayout.SetBoardWorldCenter(boardCenter);
 
@@ -415,6 +419,18 @@ namespace Project.Scripts.Gameplay
         private void OnScreenLayoutChanged() => ApplyLiveLayout();
         private void OnTopBarLayoutChanged() => ApplyTopBarLayout("topbar config changed");
 
+        private static void LogWorldFit(string reason, GameplayWorldLayout worldLayout)
+        {
+            Debug.Log(
+                $"Gameplay world fit [{reason}] " +
+                $"desired={worldLayout.DesiredStackHeight:0.###}, " +
+                $"available={worldLayout.AvailableStackHeight:0.###}, " +
+                $"fitScale={worldLayout.FitScale:0.###}, " +
+                $"currentGapScale={worldLayout.GapScale:0.###}, " +
+                $"frameCell={worldLayout.FrameCellSize:0.###}, " +
+                $"tileCell={worldLayout.TileCellSize:0.###}");
+        }
+
         private void ApplyLiveResize() => ApplyLiveLayout();
 
         private void ApplyLiveResizeIfNeeded()
@@ -438,6 +454,8 @@ namespace Project.Scripts.Gameplay
                 return;
 
             var worldLayout = ComputeGameplayWorldLayout();
+            LogWorldFit("tile layout changed", worldLayout);
+            ApplyBattleWorldFitScale(worldLayout.FitScale);
             _cellSize = worldLayout.TileCellSize;
             var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
 
@@ -458,6 +476,8 @@ namespace Project.Scripts.Gameplay
         private void ApplyLiveLayout()
         {
             var worldLayout = ComputeGameplayWorldLayout();
+            LogWorldFit("full layout changed", worldLayout);
+            ApplyBattleWorldFitScale(worldLayout.FitScale);
             _cellSize = worldLayout.TileCellSize;
             var boardCenter = ComputeBoardCenter(worldLayout.WorldRect, worldLayout.FrameHeight);
             _battleWorldLayout.SetBoardWorldCenter(boardCenter);
@@ -492,7 +512,7 @@ namespace Project.Scripts.Gameplay
             var cam = Camera.main;
             var layout = _gameplayScreenLayoutService.Calculate();
             var worldRect = _gameplayScreenLayoutService.ToWorldRect(cam, layout.WorldRect);
-            var fixedHeight = GetBattleWorldFixedHeight();
+            var fixedHeight = GetBattleWorldBaseFixedHeight();
             var gapCellUnits = GetBattleWorldGapCellUnits();
             return GameplayWorldLayoutCalculator.Calculate(
                 ToScreenLayoutRect(worldRect),
@@ -508,11 +528,17 @@ namespace Project.Scripts.Gameplay
                 MinLayoutCellSize);
         }
 
-        private float GetBattleWorldFixedHeight()
+        private void ApplyBattleWorldFitScale(float fitScale)
         {
-            var playerEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyHeight : 0f;
-            var enemyEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.EnemyEnergyHeight : 0f;
-            var battleFieldHeight = _battleFieldView ? _battleFieldView.GetLayoutHeight() : 0f;
+            _battleWorldLayout?.EnergyView?.SetLayoutScale(fitScale);
+            _battleFieldView?.SetLayoutScale(fitScale);
+        }
+
+        private float GetBattleWorldBaseFixedHeight()
+        {
+            var playerEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyBaseHeight : 0f;
+            var enemyEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.EnemyEnergyBaseHeight : 0f;
+            var battleFieldHeight = _battleFieldView ? _battleFieldView.BaseLayoutHeight : 0f;
             return playerEnergyHeight + enemyEnergyHeight + battleFieldHeight;
         }
 

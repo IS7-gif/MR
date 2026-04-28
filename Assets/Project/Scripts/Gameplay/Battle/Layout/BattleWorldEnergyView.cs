@@ -20,6 +20,8 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         public Transform PlayerEnergyAbsorbTarget => _playerEnergyAbsorbTarget ? _playerEnergyAbsorbTarget : _playerBar ? _playerBar.transform : null;
         public float PlayerEnergyHeight => _playerBar ? _playerBar.Height : 0f;
         public float EnemyEnergyHeight => _enemyBar ? _enemyBar.Height : 0f;
+        public float PlayerEnergyBaseHeight => _playerBar ? _playerBar.BaseHeight : 0f;
+        public float EnemyEnergyBaseHeight => _enemyBar ? _enemyBar.BaseHeight : 0f;
 
 
         private CompositeDisposable _disposables;
@@ -45,6 +47,12 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         public void SetEnemyEnergyWorldY(float worldCenterY)
         {
             _enemyBar?.SetWorldCenterY(worldCenterY);
+        }
+
+        public void SetLayoutScale(float scale)
+        {
+            _playerBar?.SetLayoutScale(scale);
+            _enemyBar?.SetLayoutScale(scale);
         }
 
         public void Bind(BattleFieldViewModel viewModel, IBoardAnnouncementService announcementService = null)
