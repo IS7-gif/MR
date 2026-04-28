@@ -54,7 +54,7 @@ namespace Project.Scripts.Gameplay
         private CascadeEnergyConfig _cascadeEnergyConfig;
         private SpecialTileConfig _specialTileConfig;
         private UIConfig _uiConfig;
-        private BattleViewConfig _battleViewConfig;
+        private BattleWorldLayoutConfig _battleWorldLayoutConfig;
         private GameplayScreenLayoutConfig _gameplayScreenLayoutConfig;
         private BattleFlowConfig _battleFlowConfig;
         private UIService _uiService;
@@ -96,6 +96,7 @@ namespace Project.Scripts.Gameplay
         private int _lastWidth;
         private int _lastHeight;
         private Rect _lastSafeArea;
+        private int _delayedTopBarLayoutVersion;
 #endif
 
         private void Start()
@@ -168,7 +169,7 @@ namespace Project.Scripts.Gameplay
 #if UNITY_EDITOR
             BoardConfig.LayoutChanged -= OnLayoutChanged;
             BoardConfig.TileLayoutChanged -= OnTileLayoutChanged;
-            BattleViewConfig.LayoutChanged -= OnBattleLayoutChanged;
+            BattleWorldLayoutConfig.LayoutChanged -= OnBattleLayoutChanged;
             GameplayScreenLayoutConfig.LayoutChanged -= OnScreenLayoutChanged;
             GameplayScreenLayoutConfig.TopBarLayoutChanged -= OnTopBarLayoutChanged;
 #endif
@@ -186,7 +187,7 @@ namespace Project.Scripts.Gameplay
             CascadeEnergyConfig cascadeEnergyConfig,
             SpecialTileConfig specialTileConfig,
             UIConfig uiConfig,
-            BattleViewConfig battleViewConfig,
+            BattleWorldLayoutConfig battleWorldLayoutConfig,
             GameplayScreenLayoutConfig gameplayScreenLayoutConfig,
             BattleFlowConfig battleFlowConfig,
             UIService uiService,
@@ -219,7 +220,7 @@ namespace Project.Scripts.Gameplay
             _cascadeEnergyConfig = cascadeEnergyConfig;
             _specialTileConfig = specialTileConfig;
             _uiConfig = uiConfig;
-            _battleViewConfig = battleViewConfig;
+            _battleWorldLayoutConfig = battleWorldLayoutConfig;
             _gameplayScreenLayoutConfig = gameplayScreenLayoutConfig;
             _battleFlowConfig = battleFlowConfig;
             _uiService = uiService;
@@ -281,9 +282,9 @@ namespace Project.Scripts.Gameplay
             _battleWorldLayout.SetVerticalLayout(
                 boardTopWorldY,
                 worldLayout.FrameCellSize,
-                _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
-                _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
-                _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
+                _battleWorldLayoutConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                _battleWorldLayoutConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                _battleWorldLayoutConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout.RefreshBindings();
             _battleWorldLayout.PublishAnnouncementAnchors(_boardBoundsProvider);
             _topBarView = await _uiService.Show<TopBarView, BattleFieldViewModel>(_battleFieldViewModel);
@@ -305,7 +306,7 @@ namespace Project.Scripts.Gameplay
             _lastSafeArea = Screen.safeArea;
             BoardConfig.LayoutChanged += OnLayoutChanged;
             BoardConfig.TileLayoutChanged += OnTileLayoutChanged;
-            BattleViewConfig.LayoutChanged += OnBattleLayoutChanged;
+            BattleWorldLayoutConfig.LayoutChanged += OnBattleLayoutChanged;
             GameplayScreenLayoutConfig.LayoutChanged += OnScreenLayoutChanged;
             GameplayScreenLayoutConfig.TopBarLayoutChanged += OnTopBarLayoutChanged;
 #endif
@@ -431,7 +432,22 @@ namespace Project.Scripts.Gameplay
                 $"tileCell={worldLayout.TileCellSize:0.###}");
         }
 
-        private void ApplyLiveResize() => ApplyLiveLayout();
+        private void ApplyLiveResize()
+        {
+            ApplyLiveLayout();
+            ApplyTopBarLayoutAfterResizeAsync(++_delayedTopBarLayoutVersion).Forget();
+        }
+
+        private async UniTaskVoid ApplyTopBarLayoutAfterResizeAsync(int version)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+
+            if (version != _delayedTopBarLayoutVersion)
+                return;
+
+            ApplyTopBarLayout("delayed resize");
+        }
 
         private void ApplyLiveResizeIfNeeded()
         {
@@ -498,9 +514,9 @@ namespace Project.Scripts.Gameplay
             _battleWorldLayout?.SetVerticalLayout(
                 boardTopWorldY,
                 worldLayout.FrameCellSize,
-                _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
-                _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
-                _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
+                _battleWorldLayoutConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                _battleWorldLayoutConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                _battleWorldLayoutConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
             _battleWorldLayout?.RefreshBindings();
             _battleWorldLayout?.PublishAnnouncementAnchors(_boardBoundsProvider);
             ApplyTopBarLayout("full layout changed");
@@ -544,9 +560,9 @@ namespace Project.Scripts.Gameplay
 
         private float GetBattleWorldGapCellUnits()
         {
-            return _battleViewConfig.GapBoardToPlayerEnergy
-                   + _battleViewConfig.GapPlayerEnergyToEnemyEnergy
-                   + _battleViewConfig.GapEnemyEnergyToBattleField;
+            return _battleWorldLayoutConfig.GapBoardToPlayerEnergy
+                   + _battleWorldLayoutConfig.GapPlayerEnergyToEnemyEnergy
+                   + _battleWorldLayoutConfig.GapEnemyEnergyToBattleField;
         }
 
         private Vector3 ComputeBoardCenter(ScreenLayoutRect worldRect, float frameHeight)

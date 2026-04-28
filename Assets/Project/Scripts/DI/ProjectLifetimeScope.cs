@@ -29,7 +29,7 @@ namespace Project.Scripts.DI
             builder.RegisterInstance(_mainConfig.UIConfig);
             builder.RegisterInstance(_mainConfig.BoardAnnouncementConfig);
             builder.RegisterInstance(_mainConfig.MoveBarConfig);
-            builder.RegisterInstance(_mainConfig.BattleViewConfig);
+            builder.RegisterInstance(_mainConfig.BattleWorldLayoutConfig);
             builder.RegisterInstance(_mainConfig.GameplayScreenLayoutConfig);
             builder.RegisterInstance(_mainConfig.TileKindPaletteConfig);
             builder.RegisterInstance(_mainConfig.SlotLayoutConfig);

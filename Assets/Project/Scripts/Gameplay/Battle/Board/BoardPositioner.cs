@@ -12,7 +12,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
     public class BoardPositioner : MonoBehaviour
     {
         [SerializeField] private BoardConfig _boardConfig;
-        [SerializeField] private BattleViewConfig _battleViewConfig;
+        [SerializeField] private BattleWorldLayoutConfig _battleWorldLayoutConfig;
         [SerializeField] private GridConfig _gridConfig;
         [SerializeField] private GameplayScreenLayoutConfig _screenLayoutConfig;
 
@@ -30,7 +30,7 @@ namespace Project.Scripts.Gameplay.Battle.Board
         public void Apply(float tileCellSize = -1f)
         {
             var cam = Camera.main;
-            if (!cam || !_boardConfig || !_battleViewConfig || !_gridConfig || !_screenLayoutConfig)
+            if (!cam || !_boardConfig || !_battleWorldLayoutConfig || !_gridConfig || !_screenLayoutConfig)
                 return;
 
             var layout = GetComponentInParent<BattleWorldLayout>();
@@ -54,9 +54,9 @@ namespace Project.Scripts.Gameplay.Battle.Board
                 layout.SetVerticalLayout(
                     boardTopWorldY,
                     worldLayout.FrameCellSize,
-                    _battleViewConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
-                    _battleViewConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
-                    _battleViewConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
+                    _battleWorldLayoutConfig.GapBoardToPlayerEnergy * worldLayout.GapScale,
+                    _battleWorldLayoutConfig.GapPlayerEnergyToEnemyEnergy * worldLayout.GapScale,
+                    _battleWorldLayoutConfig.GapEnemyEnergyToBattleField * worldLayout.GapScale);
                 layout.RefreshBindings();
                 return;
             }
@@ -141,9 +141,9 @@ namespace Project.Scripts.Gameplay.Battle.Board
 
         private float GetBattleWorldGapCellUnits()
         {
-            return _battleViewConfig.GapBoardToPlayerEnergy
-                   + _battleViewConfig.GapPlayerEnergyToEnemyEnergy
-                   + _battleViewConfig.GapEnemyEnergyToBattleField;
+            return _battleWorldLayoutConfig.GapBoardToPlayerEnergy
+                   + _battleWorldLayoutConfig.GapPlayerEnergyToEnemyEnergy
+                   + _battleWorldLayoutConfig.GapEnemyEnergyToBattleField;
         }
 
         private static Vector3 ComputeBoardCenter(ScreenLayoutRect worldRect, float frameHeight)

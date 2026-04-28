@@ -21,8 +21,8 @@ MonoBehaviour:
   _worldExtendsIntoUnsafeBottomArea: 1
   _safeAreaPadding: 0
   _topBarHeight: 80
-  _topBarSidePadding: 187
-  _topBarBottomPadding: -0
+  _topBarSidePadding: 92
+  _topBarBottomPadding: 8
   _worldBottomPadding: 8
   _worldSidePadding: 0
   _worldStackMinGapScale: 0.25

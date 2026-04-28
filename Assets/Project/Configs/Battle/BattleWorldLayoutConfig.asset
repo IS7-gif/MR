@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83e48eefc9e6ede43b6fa5a9fb420793, type: 3}
-  m_Name: BattleViewConfig
-  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleViewConfig
+  m_Name: BattleWorldLayoutConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.BattleWorldLayoutConfig
   _gapBoardToPlayerEnergy: 0
-  _gapPlayerEnergyToEnemyEnergy: 0
+  _gapPlayerEnergyToEnemyEnergy: 0.05
   _gapEnemyEnergyToBattleField: 0

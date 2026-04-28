@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Gameplay.Battle.Board.BoardPositioner
   _boardConfig: {fileID: 11400000, guid: be905cc36eebaa048b09269c08009310, type: 2}
-  _battleViewConfig: {fileID: 11400000, guid: 0d769511b02f54e4a8d7f8b556769b48, type: 2}
+  _battleWorldLayoutConfig: {fileID: 11400000, guid: 0d769511b02f54e4a8d7f8b556769b48, type: 2}
   _gridConfig: {fileID: 11400000, guid: 6a3f0d9e8c7b4a1290fedcba98765432, type: 2}
   _screenLayoutConfig: {fileID: 11400000, guid: 9cc56ddf724448ee90f369e1bb8f4308, type: 2}
 --- !u!1 &3227692425085856103

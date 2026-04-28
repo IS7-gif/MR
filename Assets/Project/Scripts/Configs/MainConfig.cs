@@ -55,7 +55,7 @@ namespace Project.Scripts.Configs
         [SerializeField] private MoveBarConfig _moveBarConfig;
 
         [Tooltip("Визуальные параметры боя: позиции и размеры слотов аватаров и героев")]
-        [SerializeField] private BattleViewConfig _battleViewConfig;
+        [SerializeField] private BattleWorldLayoutConfig _battleWorldLayoutConfig;
 
         [Tooltip("Единые настройки экранной компоновки Gameplay: aspect, safe area, камера, зоны UI и world-content")]
         [SerializeField] private GameplayScreenLayoutConfig _gameplayScreenLayoutConfig;
@@ -102,7 +102,7 @@ namespace Project.Scripts.Configs
         public UIConfig UIConfig => _uiConfig;
         public BoardAnnouncementConfig BoardAnnouncementConfig => _boardAnnouncementConfig;
         public MoveBarConfig MoveBarConfig => _moveBarConfig;
-        public BattleViewConfig BattleViewConfig => _battleViewConfig;
+        public BattleWorldLayoutConfig BattleWorldLayoutConfig => _battleWorldLayoutConfig;
         public GameplayScreenLayoutConfig GameplayScreenLayoutConfig => _gameplayScreenLayoutConfig;
         public TileKindPaletteConfig TileKindPaletteConfig => _tileKindPaletteConfig;
         public SlotLayoutConfig SlotLayoutConfig => _slotLayoutConfig;
