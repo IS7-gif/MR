@@ -10,7 +10,6 @@ using Project.Scripts.Services.Game;
 using Project.Scripts.Shared.BattleFlow;
 using Project.Scripts.Shared.Bot;
 using Project.Scripts.Shared.Heroes;
-using Project.Scripts.Shared.Tiles;
 using R3;
 using UnityEngine;
 using VContainer.Unity;
@@ -28,6 +27,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly IBattleEconomyModifierService _battleEconomyModifier;
+        private readonly IPendingAttackBonusService _pendingAttackBonusService;
         private readonly BotConfig _botConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
 
@@ -49,6 +49,7 @@ namespace Project.Scripts.Services.Bot
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
             IBattleEconomyModifierService battleEconomyModifier,
+            IPendingAttackBonusService pendingAttackBonusService,
             BotConfig botConfig,
             SlotLayoutConfig slotLayoutConfig)
         {
@@ -61,6 +62,7 @@ namespace Project.Scripts.Services.Bot
             _enemyState = enemyState;
             _groupDefense = groupDefense;
             _battleEconomyModifier = battleEconomyModifier;
+            _pendingAttackBonusService = pendingAttackBonusService;
             _botConfig = botConfig;
             _slotLayoutConfig = slotLayoutConfig;
         }
@@ -131,6 +133,7 @@ namespace Project.Scripts.Services.Bot
                 return _botConfig.GreatCascadeMultiplier;
             if (roll < _botConfig.GoodCascadeChance)
                 return _botConfig.GoodCascadeMultiplier;
+            
             return 1f;
         }
 
@@ -138,6 +141,7 @@ namespace Project.Scripts.Services.Bot
         {
             var variation = 1f + UnityEngine.Random.Range(-_botConfig.CascadeVariation, _botConfig.CascadeVariation);
             var baseEnergy = _botConfig.BaseMatchEnergyPerTick * variation * RollCascadeMultiplier();
+            
             return Mathf.Max(1, Mathf.RoundToInt(baseEnergy));
         }
 
@@ -175,6 +179,7 @@ namespace Project.Scripts.Services.Bot
                     if (!_enemyChargeService.TryRelease())
                         return;
 
+                    abilityPower = GetAvatarActionValueWithPendingAttackBonus(abilityPower);
                     _heroService.ApplyDamageToHero(BattleSide.Player, targetIdx, abilityPower);
 
                     var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.DealDamage);
@@ -187,9 +192,7 @@ namespace Project.Scripts.Services.Bot
                 }
             }
             else
-            {
                 DischargeAvatarHeal(abilityPower);
-            }
         }
 
         private void DischargeAvatarHeal(int abilityPower)
@@ -216,7 +219,7 @@ namespace Project.Scripts.Services.Bot
             }
             else if (_enemyState.CurrentHP < _enemyState.MaxHP)
             {
-                if (!_enemyChargeService.TryRelease())
+                if (false == _enemyChargeService.TryRelease())
                     return;
 
                 _enemyState.ApplyHeal(abilityPower);
@@ -232,7 +235,7 @@ namespace Project.Scripts.Services.Bot
                 if (targetIdx < 0)
                     return;
 
-                if (!_enemyChargeService.TryRelease())
+                if (false == _enemyChargeService.TryRelease())
                     return;
 
                 _heroService.ApplyHealToHero(BattleSide.Enemy, targetIdx, abilityPower);
@@ -323,13 +326,9 @@ namespace Project.Scripts.Services.Bot
                 return;
 
             if (slot.ActionType == HeroActionType.DealDamage)
-            {
                 ActivateHeroDamage(slotIndex, enemySlots);
-            }
             else
-            {
                 ActivateHeroHeal(slotIndex, enemySlots);
-            }
         }
 
         private void ActivateHeroDamage(int slotIndex, IReadOnlyList<HeroSlotState> enemySlots)
@@ -355,9 +354,7 @@ namespace Project.Scripts.Services.Bot
                 _eventBus.Publish(new AbilityExecutedEvent(source, target, HeroActionType.DealDamage, damageValue));
             }
             else
-            {
                 _heroService.TryActivate(BattleSide.Enemy, slotIndex);
-            }
         }
 
         private void ActivateHeroHeal(int slotIndex, IReadOnlyList<HeroSlotState> enemySlots)
@@ -448,6 +445,16 @@ namespace Project.Scripts.Services.Bot
         {
             Array.Clear(_heroActivationPending, 0, _heroActivationPending.Length);
             _dischargeScheduled = false;
+        }
+
+        private int GetAvatarActionValueWithPendingAttackBonus(int baseActionValue)
+        {
+            if (_enemyChargeService.AbilityType != HeroActionType.DealDamage)
+                return baseActionValue;
+
+            var source = UnitDescriptor.Avatar(BattleSide.Enemy, _enemyChargeService.AbilityType);
+            
+            return baseActionValue + _pendingAttackBonusService.Consume(source);
         }
     }
 }

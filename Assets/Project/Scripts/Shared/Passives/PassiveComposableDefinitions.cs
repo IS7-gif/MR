@@ -140,7 +140,8 @@ namespace Project.Scripts.Shared.Passives
         RepeatAbilityOnSameTarget,
         RepeatLineSpecialOnAdjacentLines,
         ResurrectOnDeath,
-        GrantTeamAbilityPowerUntilNextActivation
+        GrantTeamAbilityPowerUntilNextActivation,
+        GrantAttackBonusUntilNextAttack
     }
 
     public readonly struct PassiveActionEffectDefinition
@@ -148,15 +149,19 @@ namespace Project.Scripts.Shared.Passives
         public PassiveActionEffectKind Kind { get; }
         public float Value { get; }
         public int Count { get; }
+        public PassiveUnitTargetDefinition Target { get; }
 
-        public bool IsConfigured => Kind != PassiveActionEffectKind.None;
+        public bool IsConfigured => Kind != PassiveActionEffectKind.None
+                                    && Target.IsConfigured;
 
 
-        public PassiveActionEffectDefinition(PassiveActionEffectKind kind, float value, int count)
+        public PassiveActionEffectDefinition(PassiveActionEffectKind kind, float value, int count,
+            PassiveUnitTargetDefinition target)
         {
             Kind = kind;
             Value = value;
             Count = count < 0 ? 0 : count;
+            Target = target;
         }
     }
 }

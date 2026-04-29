@@ -22,6 +22,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
         private readonly IHeroAbilityModifierService _heroAbilityModifierService;
+        private readonly IPendingAttackBonusService _pendingAttackBonusService;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
 
@@ -29,7 +30,7 @@ namespace Project.Scripts.Services.Combat
         public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
             IPlayerStateService playerState, IEnemyStateService enemyState, IBattleSideEnergyService battleSideEnergyService,
             IBattleActionRuntimeService battleActionRuntimeService, IUnitActivationCooldownService unitActivationCooldownService,
-            IHeroAbilityModifierService heroAbilityModifierService)
+            IHeroAbilityModifierService heroAbilityModifierService, IPendingAttackBonusService pendingAttackBonusService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
@@ -38,6 +39,7 @@ namespace Project.Scripts.Services.Combat
             _battleActionRuntimeService = battleActionRuntimeService;
             _unitActivationCooldownService = unitActivationCooldownService;
             _heroAbilityModifierService = heroAbilityModifierService;
+            _pendingAttackBonusService = pendingAttackBonusService;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes, slotLayoutConfig.HeroSlotKinds);
             InitSlots(_enemySlots, levelConfig.EnemyHeroes, slotLayoutConfig.HeroSlotKinds);
@@ -107,12 +109,13 @@ namespace Project.Scripts.Services.Combat
 
             var activationEnergyCost = GetActivationEnergyCost(side, slotIndex, slot);
             actionType = slot.ActionType;
-            actionValue = GetAbilityPower(side, slotIndex, slot);
+            var baseActionValue = GetAbilityPower(side, slotIndex, slot);
 
             if (false == _battleSideEnergyService.TrySpend(side, activationEnergyCost))
                 return false;
 
             _unitActivationCooldownService.StartHeroCooldown(side, slotIndex);
+            actionValue = GetActionValueWithPendingAttackBonus(side, slotIndex, actionType, baseActionValue);
             
             return true;
         }
@@ -175,7 +178,12 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             _unitActivationCooldownService.StartHeroCooldown(side, slotIndex);
-            _eventBus.Publish(new HeroActivatedEvent(side, slotIndex, slot.ActionType, GetAbilityPower(side, slotIndex, slot)));
+            var actionValue = GetActionValueWithPendingAttackBonus(
+                side,
+                slotIndex,
+                slot.ActionType,
+                GetAbilityPower(side, slotIndex, slot));
+            _eventBus.Publish(new HeroActivatedEvent(side, slotIndex, slot.ActionType, actionValue));
         }
 
         private int GetActivationEnergyCost(BattleSide side, int slotIndex, HeroSlotState slot)
@@ -186,6 +194,19 @@ namespace Project.Scripts.Services.Combat
         private int GetAbilityPower(BattleSide side, int slotIndex, HeroSlotState slot)
         {
             return _heroAbilityModifierService.GetAbilityPower(side, slotIndex, slot.ActionValue);
+        }
+
+        private int GetActionValueWithPendingAttackBonus(
+            BattleSide side,
+            int slotIndex,
+            HeroActionType actionType,
+            int baseActionValue)
+        {
+            if (actionType != HeroActionType.DealDamage)
+                return baseActionValue;
+
+            var source = UnitDescriptor.Hero(side, slotIndex, actionType);
+            return baseActionValue + _pendingAttackBonusService.Consume(source);
         }
 
         private void ApplyHPChange(ref HeroSlotState slot, BattleSide side, int slotIndex, int delta, bool silent = false)

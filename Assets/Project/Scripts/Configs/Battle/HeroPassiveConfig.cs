@@ -90,6 +90,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Тип action-эффекта")]
         [SerializeField] private PassiveActionEffectKind _kind;
 
+        [Tooltip("Кого выбирает action-эффект")]
+        [SerializeField] private HeroPassiveActionTargetConfig _target;
+
         [Tooltip("Числовое значение action-эффекта")]
         [SerializeField] private float _value;
 
@@ -98,13 +101,50 @@ namespace Project.Scripts.Configs.Battle
 
 
         public PassiveActionEffectKind Kind => _kind;
+        public HeroPassiveActionTargetConfig Target => _target;
         public float Value => _value;
         public int Count => _count;
 
 
         public PassiveActionEffectDefinition ToDefinition()
         {
-            return new PassiveActionEffectDefinition(_kind, _value, _count);
+            return new PassiveActionEffectDefinition(
+                _kind,
+                _value,
+                _count,
+                _target != null ? _target.ToDefinition() : default);
+        }
+    }
+
+    [Serializable]
+    public class HeroPassiveActionTargetConfig
+    {
+        [Tooltip("Относительно владельца пассивки: союзники, враги или обе стороны")]
+        [SerializeField] private PassiveUnitTargetTeam _team;
+
+        [Tooltip("Какие типы юнитов участвуют в выборе")]
+        [SerializeField] private PassiveUnitTargetKind _unitKind;
+
+        [Tooltip("Как выбрать цели из подходящего пула")]
+        [SerializeField] private PassiveUnitSelectionMode _selectionMode;
+
+        [Tooltip("Количество целей для RandomCount")]
+        [SerializeField] private int _count;
+
+        [Tooltip("Исключать владельца пассивки из пула целей")]
+        [SerializeField] private bool _excludeOwner;
+
+
+        public PassiveUnitTargetTeam Team => _team;
+        public PassiveUnitTargetKind UnitKind => _unitKind;
+        public PassiveUnitSelectionMode SelectionMode => _selectionMode;
+        public int Count => _count;
+        public bool ExcludeOwner => _excludeOwner;
+
+
+        public PassiveUnitTargetDefinition ToDefinition()
+        {
+            return new PassiveUnitTargetDefinition(_team, _unitKind, _selectionMode, _count, _excludeOwner);
         }
     }
 
