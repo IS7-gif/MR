@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0fa01e6fe69cb04688357a1ad1cd52a, type: 3}
   m_Name: AvatarConfig_Damager
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.Battle.AvatarConfig
-  _maxHP: 300
-  _activationEnergyCost: 50
+  _maxHP: 100
+  _activationEnergyCost: 10
   _abilityType: 0
-  _abilityPower: 80
+  _abilityPower: 10
   _portrait: {fileID: 21300000, guid: 9d15217da4c9fae4eb2403f184431d76, type: 3}
-  _activationCooldownSeconds: 3
+  _activationCooldownSeconds: 10

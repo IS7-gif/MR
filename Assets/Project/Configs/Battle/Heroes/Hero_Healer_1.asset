@@ -12,31 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fea825070002c449f9d0545ccf77bb, type: 3}
   m_Name: Hero_Healer_1
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.HeroConfig
-  _maxHP: 175
+  _maxHP: 50
   _abilityType: 1
-  _abilityPower: 30
-  _activationEnergyCost: 10
-  _activationCooldownSeconds: 3
+  _abilityPower: 20
+  _activationEnergyCost: 20
+  _activationCooldownSeconds: 10
   _portrait: {fileID: 21300000, guid: ed3505a1d6ffbda408fab5732ee4a51a, type: 3}
   _displayName: 
   _passiveAbilities:
-  - _displayName: Allied Attack Boost
+  - _displayName: Slot Energy Boost
     _conditionGroup:
       _operator: 0
       _conditions:
       - _kind: 1
         _requiredValue: 1
         _windowSeconds: 0
-    _modifierEffects: []
-    _actionEffects:
-    - _kind: 6
-      _target:
-        _team: 1
-        _unitKind: 1
-        _selectionMode: 1
-        _count: 0
-        _excludeOwner: 1
-      _value: 3
-      _count: 0
-    _allowMultipleActivations: 1
-    _activationLimit: 0
+    _modifierEffects:
+    - _target: 3
+      _operation: 2
+      _value: 25
+    _actionEffects: []
+    _allowMultipleActivations: 0
+    _activationLimit: 1
