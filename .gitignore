@@ -23,6 +23,7 @@ TestResults.xml
 .vs/
 .idea/
 .cursor/
+.vsconfig
 *.csproj
 *.unityproj
 *.sln
@@ -35,6 +36,7 @@ TestResults.xml
 *.svd
 *.pdb
 *.mdb
+*.mdb.meta
 *.opendb
 *.VC.db
 
