@@ -19,4 +19,24 @@ MonoBehaviour:
   _activationCooldownSeconds: 10
   _portrait: {fileID: 21300000, guid: 27e02dbeb09a77c46944c9428156ae3d, type: 3}
   _displayName: 
-  _passiveAbilities: []
+  _passiveAbilities:
+  - _displayName: Allies Attack Boost
+    _conditionGroup:
+      _operator: 0
+      _conditions:
+      - _kind: 1
+        _requiredValue: 1
+        _windowSeconds: 0
+    _modifierEffects: []
+    _actionEffects:
+    - _kind: 6
+      _target:
+        _team: 1
+        _unitKind: 1
+        _selectionMode: 1
+        _count: 0
+        _excludeOwner: 1
+      _value: 3
+      _count: 0
+    _allowMultipleActivations: 1
+    _activationLimit: 0
