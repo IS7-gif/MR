@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fea825070002c449f9d0545ccf77bb, type: 3}
   m_Name: Hero_Damager_1
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.HeroConfig
-  _maxHP: 155
+  _maxHP: 50
   _abilityType: 0
-  _abilityPower: 50
-  _activationEnergyCost: 10
-  _activationCooldownSeconds: 3
+  _abilityPower: 20
+  _activationEnergyCost: 20
+  _activationCooldownSeconds: 8
   _portrait: {fileID: 21300000, guid: d64c345563825e5468d81f94e7b15af5, type: 3}
   _displayName: Hero_Damager_1
   _passiveAbilities:
@@ -30,7 +30,7 @@ MonoBehaviour:
     _modifierEffects:
     - _target: 3
       _operation: 2
-      _value: 50
+      _value: 25
     _actionEffects: []
     _allowMultipleActivations: 0
     _activationLimit: 1
