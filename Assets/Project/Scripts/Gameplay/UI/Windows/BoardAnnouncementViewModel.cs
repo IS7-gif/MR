@@ -14,7 +14,8 @@ namespace Project.Scripts.Gameplay.UI.Windows
         public float DisplayDuration { get; }
         public float FadeOutDuration { get; }
         public float FlyDistance { get; }
-        public float ScaleTarget { get; }
+        public float BaseScale { get; }
+        public float ScaleMultiplier { get; }
         public Ease FadeOutEase { get; }
         public float WorldY { get; }
 
@@ -29,7 +30,8 @@ namespace Project.Scripts.Gameplay.UI.Windows
             float displayDuration,
             float fadeOutDuration,
             float flyDistance,
-            float scaleTarget,
+            float baseScale,
+            float scaleMultiplier,
             Ease fadeOutEase,
             float worldY)
         {
@@ -39,7 +41,8 @@ namespace Project.Scripts.Gameplay.UI.Windows
             DisplayDuration = displayDuration;
             FadeOutDuration = fadeOutDuration;
             FlyDistance = flyDistance;
-            ScaleTarget = scaleTarget;
+            BaseScale = baseScale;
+            ScaleMultiplier = scaleMultiplier;
             FadeOutEase = fadeOutEase;
             WorldY = worldY;
         }

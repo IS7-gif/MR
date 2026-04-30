@@ -39,6 +39,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public float BoardHalfWidth => _boardBounds.BoardHalfWidth;
         public float BoardCenterX => _boardBounds.BoardCenterX;
         public ReadOnlyReactiveProperty<int> TimerSeconds => _timerSeconds;
+        public ReadOnlyReactiveProperty<int> CurrentRound => _currentRound;
         public ReadOnlyReactiveProperty<bool> IsInteractionOverlayVisible => _isInteractionOverlayVisible;
         public ReadOnlyReactiveProperty<int> PlayerEnergy => _playerEnergy;
         public ReadOnlyReactiveProperty<int> EnemyEnergy => _enemyEnergy;
@@ -63,6 +64,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private HeroSlotViewModel[] _playerHeroSlots;
         private HeroSlotViewModel[] _enemyHeroSlots;
         private readonly ReactiveProperty<int> _timerSeconds;
+        private readonly ReactiveProperty<int> _currentRound;
         private readonly ReactiveProperty<bool> _isInteractionOverlayVisible;
         private readonly ReactiveProperty<int> _playerEnergy;
         private readonly ReactiveProperty<int> _enemyEnergy;
@@ -110,6 +112,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _unitDeathConfig = unitDeathConfig;
 
             _timerSeconds = new ReactiveProperty<int>((int)battleFlowConfig.MatchPhaseDuration);
+            _currentRound = new ReactiveProperty<int>(battleFlowService.Snapshot.CurrentRound);
             _isInteractionOverlayVisible = new ReactiveProperty<bool>(gameStateService.State.CurrentValue == GameState.Playing
                                                                       && false == battleActionRuntimeService.CanAcceptNormalActions);
             _playerEnergy = new ReactiveProperty<int>(battleSideEnergyService.GetDisplayEnergy(BattleSide.Player));
@@ -165,6 +168,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             Disposables.Add(_eventBus.Subscribe<HeroAbilityStatsChangedEvent>(OnHeroAbilityStatsChanged));
             Disposables.Add(_eventBus.Subscribe<BattleFlowPhaseChangedEvent>(_ => RefreshInteractionOverlay()));
             Disposables.Add(_eventBus.Subscribe<BattleFlowTimerChangedEvent>(OnBattleFlowTimerChanged));
+            Disposables.Add(_eventBus.Subscribe<BattleFlowRoundChangedEvent>(OnBattleFlowRoundChanged));
             Disposables.Add(_eventBus.Subscribe<BattleSideEnergyChangedEvent>(OnBattleSideEnergyChanged));
             Disposables.Add(_battleActionRuntimeService.State.Subscribe(_ => RefreshInteractionOverlay()));
             Disposables.Add(_gameStateService.State.Subscribe(_ => RefreshInteractionOverlay()));
@@ -176,6 +180,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         protected override void OnCleanup()
         {
             _timerSeconds.Dispose();
+            _currentRound.Dispose();
             _isInteractionOverlayVisible.Dispose();
             _playerEnergy.Dispose();
             _enemyEnergy.Dispose();
@@ -227,6 +232,11 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private void OnBattleFlowTimerChanged(BattleFlowTimerChangedEvent e)
         {
             _timerSeconds.Value = (int)e.TimeRemaining;
+        }
+
+        private void OnBattleFlowRoundChanged(BattleFlowRoundChangedEvent e)
+        {
+            _currentRound.Value = e.CurrentRound;
         }
 
         private void OnBattleSideEnergyChanged(BattleSideEnergyChangedEvent e)

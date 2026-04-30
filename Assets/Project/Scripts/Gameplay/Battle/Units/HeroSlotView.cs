@@ -43,7 +43,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         [Tooltip("Лаг-полоса HP позади основной полосы - опустошается с задержкой после получения урона")]
         [SerializeField] private BarRenderer _hpLagBar;
 
-        [Tooltip("Текст HP в формате 'Current / Max' - скрывается при MaxHP = 0 (бессмертный юнит)")]
+        [Tooltip("Текст HP (только текущее значение) - скрывается при MaxHP = 0 (бессмертный юнит)")]
         [SerializeField] private TMP_Text _hpText;
 
         [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
@@ -358,7 +358,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             if (false == _hpText)
                 return;
 
-            _hpText.text = maxHP > 0 ? $"{currentHP} / {maxHP}" : string.Empty;
+            _hpText.text = maxHP > 0 ? $"{currentHP}" : string.Empty;
         }
 
         private void PlayHitFlash()

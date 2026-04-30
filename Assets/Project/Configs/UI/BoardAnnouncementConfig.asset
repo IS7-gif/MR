@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: BoardAnnouncementConfig
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Configs.UI.BoardAnnouncementConfig
   _viewPrefab: {fileID: 264388365034592773, guid: 6763c80f2731bb241b6a8333aeab469a, type: 3}
-  _textColor: {r: 1, g: 1, b: 1, a: 1}
+  _textColor: {r: 1, g: 1, b: 1, a: 0.69803923}
   _displayDuration: 1
   _fadeOutDuration: 0.6
   _flyDistance: 100
   _fadeOutEase: 5
   _verticalWorldOffset: 0
-  _countdownTextColor: {r: 1, g: 0, b: 0, a: 1}
-  _countdownDisplayDuration: 0.5
-  _countdownFadeOutDuration: 0.25
-  _countdownFlyDistance: 60
-  _countdownFadeOutEase: 5
+  _style: 0
+  _scaleMultiplier: 2
+  _defaultAnchor: 0
+  _hideEnergyText: 0
+  _countdownTextColor: {r: 1, g: 1, b: 1, a: 0.6509804}
+  _countdownDisplayDuration: 0.4
+  _countdownStyle: 1
+  _countdownBaseScale: 1.5
+  _countdownScaleMultiplier: 2

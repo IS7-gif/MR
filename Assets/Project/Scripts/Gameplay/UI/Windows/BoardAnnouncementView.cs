@@ -49,7 +49,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
                 _canvasGroup.alpha = 1f;
 
             if (_textRect)
-                _textRect.localScale = Vector3.one;
+                _textRect.localScale = Vector3.one * ViewModel.BaseScale;
 
             var startPos = WorldYToAnchored(ViewModel.WorldY);
 
@@ -75,7 +75,7 @@ namespace Project.Scripts.Gameplay.UI.Windows
                     case AnnouncementStyle.ScaleFade:
                         if (_textRect)
                             _sequence.Join(_textRect
-                                .DOScale(ViewModel.ScaleTarget, ViewModel.FadeOutDuration)
+                                .DOScale(ViewModel.BaseScale * ViewModel.ScaleMultiplier, ViewModel.FadeOutDuration)
                                 .SetEase(ViewModel.FadeOutEase));
                         break;
                 }

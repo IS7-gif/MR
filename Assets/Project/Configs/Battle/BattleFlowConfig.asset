@@ -16,7 +16,7 @@ MonoBehaviour:
   _matchPhaseDuration: 30
   _heroPhaseDuration: 30
   _energyCarryoverMode: 0
-  _prePhaseDuration: 4
+  _prePhaseDuration: 2
   _dimCurrentPhaseDuringPrePhase: 1
   _enablePrePhaseOnBattleStart: 1
   _countdownThreshold: 5

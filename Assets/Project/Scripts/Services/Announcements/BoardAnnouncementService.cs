@@ -92,7 +92,8 @@ namespace Project.Scripts.Services.Announcements
             var displayDuration = @params?.DisplayDuration ?? _config.DisplayDuration;
             var fadeOutDuration = @params?.FadeOutDuration ?? _config.FadeOutDuration;
             var flyDistance = @params?.FlyDistance ?? _config.FlyDistance;
-            var scaleTarget = @params?.ScaleTarget ?? _config.ScaleTarget;
+            var baseScale = @params?.BaseScale ?? 1f;
+            var scaleMultiplier = @params?.ScaleMultiplier ?? _config.ScaleMultiplier;
             var fadeOutEase = @params?.FadeOutEase ?? _config.FadeOutEase;
             var worldY = GetAnchorWorldY(anchor) + _config.VerticalWorldOffset;
 
@@ -103,7 +104,8 @@ namespace Project.Scripts.Services.Announcements
                 displayDuration,
                 fadeOutDuration,
                 flyDistance,
-                scaleTarget,
+                baseScale,
+                scaleMultiplier,
                 fadeOutEase,
                 worldY);
         }

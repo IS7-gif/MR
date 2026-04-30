@@ -12,7 +12,8 @@ namespace Project.Scripts.Services.Announcements
         public float? DisplayDuration { get; set; }
         public float? FadeOutDuration { get; set; }
         public float? FlyDistance { get; set; }
-        public float? ScaleTarget { get; set; }
+        public float? BaseScale { get; set; }
+        public float? ScaleMultiplier { get; set; }
         public Ease? FadeOutEase { get; set; }
     }
 }

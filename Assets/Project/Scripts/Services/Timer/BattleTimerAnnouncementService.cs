@@ -4,6 +4,7 @@ using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Services.Announcements;
 using Project.Scripts.Services.Events;
+using Project.Scripts.Shared.BattleFlow;
 using VContainer.Unity;
 
 namespace Project.Scripts.Services.Timer
@@ -52,11 +53,13 @@ namespace Project.Scripts.Services.Timer
 
             var countdownParams = new BoardAnnouncementParams
             {
+                Anchor = e.Phase == BattlePhaseKind.Match ? AnnouncementAnchorKind.Board : AnnouncementAnchorKind.BattleField,
+                Style = _announcementConfig.CountdownStyle,
                 TextColor = _announcementConfig.CountdownTextColor,
                 DisplayDuration = _announcementConfig.CountdownDisplayDuration,
+                BaseScale = _announcementConfig.CountdownBaseScale,
                 FadeOutDuration = _announcementConfig.CountdownFadeOutDuration,
-                FlyDistance = _announcementConfig.CountdownFlyDistance,
-                FadeOutEase = _announcementConfig.CountdownFadeOutEase
+                ScaleMultiplier = _announcementConfig.CountdownScaleMultiplier,
             };
 
             _announcementService.Show(secondsLeft.ToString(), countdownParams).Forget();

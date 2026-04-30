@@ -15,6 +15,9 @@ namespace Project.Scripts.Gameplay.UI
         [Tooltip("Таймер боя")]
         [SerializeField] private TMP_Text _timerTMP;
 
+        [Tooltip("Текущий раунд в формате 'R1', 'R2' и т.д.")]
+        [SerializeField] private TMP_Text _roundTMP;
+
 
         public bool ApplyLayout(
             Rect gameplayScreenRect,
@@ -71,6 +74,7 @@ namespace Project.Scripts.Gameplay.UI
                 _enemyNameTMP.text = ViewModel.EnemyName;
 
             Disposables.Add(ViewModel.TimerSeconds.Subscribe(OnTimerSecondsChanged));
+            Disposables.Add(ViewModel.CurrentRound.Subscribe(OnCurrentRoundChanged));
 
             return UniTask.CompletedTask;
         }
@@ -84,6 +88,14 @@ namespace Project.Scripts.Gameplay.UI
             var minutes = totalSeconds / 60;
             var seconds = totalSeconds % 60;
             _timerTMP.text = $"{minutes:00}:{seconds:00}";
+        }
+
+        private void OnCurrentRoundChanged(int round)
+        {
+            if (false == _roundTMP)
+                return;
+
+            _roundTMP.text = $"R{round}";
         }
     }
 }
