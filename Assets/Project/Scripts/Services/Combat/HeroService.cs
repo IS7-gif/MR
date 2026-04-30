@@ -22,7 +22,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
         private readonly IHeroAbilityModifierService _heroAbilityModifierService;
-        private readonly IPendingAttackBonusService _pendingAttackBonusService;
+        private readonly INextAttackBuffService _nextAttackBuffService;
         private readonly HeroSlotState[] _playerSlots = new HeroSlotState[SlotCount];
         private readonly HeroSlotState[] _enemySlots = new HeroSlotState[SlotCount];
 
@@ -30,7 +30,7 @@ namespace Project.Scripts.Services.Combat
         public HeroService(EventBus eventBus, LevelConfig levelConfig, SlotLayoutConfig slotLayoutConfig,
             IPlayerStateService playerState, IEnemyStateService enemyState, IBattleSideEnergyService battleSideEnergyService,
             IBattleActionRuntimeService battleActionRuntimeService, IUnitActivationCooldownService unitActivationCooldownService,
-            IHeroAbilityModifierService heroAbilityModifierService, IPendingAttackBonusService pendingAttackBonusService)
+            IHeroAbilityModifierService heroAbilityModifierService, INextAttackBuffService nextAttackBuffService)
         {
             _eventBus = eventBus;
             _playerState = playerState;
@@ -39,7 +39,7 @@ namespace Project.Scripts.Services.Combat
             _battleActionRuntimeService = battleActionRuntimeService;
             _unitActivationCooldownService = unitActivationCooldownService;
             _heroAbilityModifierService = heroAbilityModifierService;
-            _pendingAttackBonusService = pendingAttackBonusService;
+            _nextAttackBuffService = nextAttackBuffService;
 
             InitSlots(_playerSlots, levelConfig.PlayerHeroes, slotLayoutConfig.HeroSlotKinds);
             InitSlots(_enemySlots, levelConfig.EnemyHeroes, slotLayoutConfig.HeroSlotKinds);
@@ -115,7 +115,7 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             _unitActivationCooldownService.StartHeroCooldown(side, slotIndex);
-            actionValue = GetActionValueWithPendingAttackBonus(side, slotIndex, actionType, baseActionValue);
+            actionValue = GetActionValueWithNextAttackBuff(side, slotIndex, actionType, baseActionValue);
             
             return true;
         }
@@ -178,7 +178,7 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             _unitActivationCooldownService.StartHeroCooldown(side, slotIndex);
-            var actionValue = GetActionValueWithPendingAttackBonus(
+            var actionValue = GetActionValueWithNextAttackBuff(
                 side,
                 slotIndex,
                 slot.ActionType,
@@ -196,7 +196,7 @@ namespace Project.Scripts.Services.Combat
             return _heroAbilityModifierService.GetAbilityPower(side, slotIndex, slot.ActionValue);
         }
 
-        private int GetActionValueWithPendingAttackBonus(
+        private int GetActionValueWithNextAttackBuff(
             BattleSide side,
             int slotIndex,
             HeroActionType actionType,
@@ -206,7 +206,7 @@ namespace Project.Scripts.Services.Combat
                 return baseActionValue;
 
             var source = UnitDescriptor.Hero(side, slotIndex, actionType);
-            return baseActionValue + _pendingAttackBonusService.Consume(source);
+            return baseActionValue + _nextAttackBuffService.Consume(source);
         }
 
         private void ApplyHPChange(ref HeroSlotState slot, BattleSide side, int slotIndex, int delta, bool silent = false)

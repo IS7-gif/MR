@@ -140,6 +140,17 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct HeroPassiveExpiredEvent
+    {
+        public HeroPassiveRuntimeState State { get; }
+
+
+        public HeroPassiveExpiredEvent(HeroPassiveRuntimeState state)
+        {
+            State = state;
+        }
+    }
+
     public readonly struct HeroSlotKindPassiveStateChangedEvent
     {
         public BattleSide Side { get; }

@@ -21,12 +21,8 @@ MonoBehaviour:
   _displayName: Hero_Damager_2
   _passiveAbilities:
   - _displayName: Rising Power Cost
-    _conditionGroup:
-      _operator: 0
-      _conditions:
-      - _kind: 1
-        _requiredValue: 1
-        _windowSeconds: 0
+    _triggerKind: 1
+    _requiredTriggerCount: 1
     _modifierEffects:
     - _target: 2
       _operation: 1
@@ -35,5 +31,6 @@ MonoBehaviour:
       _operation: 1
       _value: 5
     _actionEffects: []
-    _allowMultipleActivations: 1
-    _activationLimit: 0
+    _canActivateWhileActive: 1
+    _maxActivations: 0
+    _activeDurationRounds: 0

@@ -45,7 +45,7 @@ namespace Project.Scripts.DI
                 .As<IHeroPassiveService>()
                 .As<IEnergyGainModifierService>()
                 .As<IHeroAbilityModifierService>();
-            builder.Register<IPendingAttackBonusService, PendingAttackBonusService>(Lifetime.Singleton);
+            builder.Register<INextAttackBuffService, NextAttackBuffService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PassiveActionEffectService>();
             builder.RegisterEntryPoint<BattleSideEnergyService>().As<IBattleSideEnergyService>();
             builder.Register<IUnitActivationCooldownService, UnitActivationCooldownService>(Lifetime.Singleton);

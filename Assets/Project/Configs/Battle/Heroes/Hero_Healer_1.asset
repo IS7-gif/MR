@@ -21,16 +21,13 @@ MonoBehaviour:
   _displayName: 
   _passiveAbilities:
   - _displayName: Slot Energy Boost
-    _conditionGroup:
-      _operator: 0
-      _conditions:
-      - _kind: 1
-        _requiredValue: 1
-        _windowSeconds: 0
+    _triggerKind: 1
+    _requiredTriggerCount: 1
     _modifierEffects:
     - _target: 3
       _operation: 2
       _value: 25
     _actionEffects: []
-    _allowMultipleActivations: 0
-    _activationLimit: 1
+    _canActivateWhileActive: 0
+    _maxActivations: 1
+    _activeDurationRounds: 0

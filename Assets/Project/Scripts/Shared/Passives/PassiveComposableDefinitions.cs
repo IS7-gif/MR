@@ -1,79 +1,5 @@
-using System;
-using System.Collections.Generic;
-
 namespace Project.Scripts.Shared.Passives
 {
-    public enum PassiveConditionGroupOperator
-    {
-        And,
-        Or
-    }
-
-    public readonly struct PassiveConditionDefinition
-    {
-        public PassiveConditionKind Kind { get; }
-        public int RequiredValue { get; }
-        public float WindowSeconds { get; }
-
-        public bool IsConfigured => Kind != PassiveConditionKind.None;
-
-
-        public PassiveConditionDefinition(PassiveConditionKind kind, int requiredValue, float windowSeconds)
-        {
-            Kind = kind;
-            RequiredValue = requiredValue < 1 ? 1 : requiredValue;
-            WindowSeconds = windowSeconds < 0f ? 0f : windowSeconds;
-        }
-    }
-
-    public readonly struct PassiveConditionGroupDefinition
-    {
-        public PassiveConditionGroupOperator Operator { get; }
-        public IReadOnlyList<PassiveConditionDefinition> Conditions => _conditions ?? Array.Empty<PassiveConditionDefinition>();
-
-        public bool IsConfigured => HasConfiguredConditions();
-
-
-        private readonly PassiveConditionDefinition[] _conditions;
-
-
-        public PassiveConditionGroupDefinition(
-            PassiveConditionGroupOperator operatorKind,
-            IReadOnlyList<PassiveConditionDefinition> conditions)
-        {
-            Operator = operatorKind;
-            _conditions = CopyConfiguredConditions(conditions);
-        }
-
-        private bool HasConfiguredConditions()
-        {
-            if (_conditions == null)
-                return false;
-
-            for (var i = 0; i < _conditions.Length; i++)
-                if (_conditions[i].IsConfigured)
-                    return true;
-
-            return false;
-        }
-
-        private static PassiveConditionDefinition[] CopyConfiguredConditions(IReadOnlyList<PassiveConditionDefinition> conditions)
-        {
-            if (conditions == null || conditions.Count == 0)
-                return Array.Empty<PassiveConditionDefinition>();
-
-            var result = new List<PassiveConditionDefinition>(conditions.Count);
-            for (var i = 0; i < conditions.Count; i++)
-            {
-                var condition = conditions[i];
-                if (condition.IsConfigured)
-                    result.Add(condition);
-            }
-
-            return result.ToArray();
-        }
-    }
-
     public enum PassiveModifierTarget
     {
         None,
@@ -86,8 +12,7 @@ namespace Project.Scripts.Shared.Passives
     {
         None,
         AddFlat,
-        AddPercent,
-        Multiply
+        AddPercent
     }
 
     public readonly struct PassiveModifierEffectDefinition
@@ -113,20 +38,18 @@ namespace Project.Scripts.Shared.Passives
 
     public static class PassiveModifierRules
     {
-        public static float Apply(float currentValue, PassiveModifierEffectDefinition effect, int activationCount)
+        public static float Apply(float currentValue, PassiveModifierEffectDefinition effect, int activeStackCount)
         {
-            if (activationCount <= 0 || false == effect.IsConfigured)
+            if (activeStackCount <= 0 || false == effect.IsConfigured)
                 return currentValue;
 
             var result = currentValue;
-            for (var i = 0; i < activationCount; i++)
+            for (var i = 0; i < activeStackCount; i++)
             {
                 if (effect.Operation == PassiveModifierOperation.AddFlat)
                     result += effect.Value;
                 else if (effect.Operation == PassiveModifierOperation.AddPercent)
                     result *= 1f + effect.Value / 100f;
-                else if (effect.Operation == PassiveModifierOperation.Multiply)
-                    result *= effect.Value;
             }
 
             return result;
@@ -136,12 +59,7 @@ namespace Project.Scripts.Shared.Passives
     public enum PassiveActionEffectKind
     {
         None,
-        RepeatAbilityOnAdditionalTargets,
-        RepeatAbilityOnSameTarget,
-        RepeatLineSpecialOnAdjacentLines,
-        ResurrectOnDeath,
-        GrantTeamAbilityPowerUntilNextActivation,
-        GrantAttackBonusUntilNextAttack
+        GrantNextAttackBuff
     }
 
     public readonly struct PassiveActionEffectDefinition

@@ -5,62 +5,6 @@ using UnityEngine;
 namespace Project.Scripts.Configs.Battle
 {
     [Serializable]
-    public class HeroPassiveConditionConfig
-    {
-        [Tooltip("Тип атомарного условия")]
-        [SerializeField] private PassiveConditionKind _kind;
-
-        [Tooltip("Сколько прогресса требуется для выполнения условия")]
-        [SerializeField] private int _requiredValue = 1;
-
-        [Tooltip("Окно условия в секундах. Ноль означает, что условие не использует временное окно")]
-        [SerializeField] private float _windowSeconds;
-
-
-        public PassiveConditionKind Kind => _kind;
-        public int RequiredValue => _requiredValue;
-        public float WindowSeconds => _windowSeconds;
-
-
-        public PassiveConditionDefinition ToDefinition()
-        {
-            return new PassiveConditionDefinition(_kind, _requiredValue, _windowSeconds);
-        }
-    }
-
-    [Serializable]
-    public class HeroPassiveConditionGroupConfig
-    {
-        [Tooltip("Как объединять атомарные условия")]
-        [SerializeField] private PassiveConditionGroupOperator _operator;
-
-        [Tooltip("Атомарные условия пассивной способности")]
-        [SerializeField] private HeroPassiveConditionConfig[] _conditions;
-
-
-        public PassiveConditionGroupOperator Operator => _operator;
-        public HeroPassiveConditionConfig[] Conditions => _conditions;
-
-
-        public PassiveConditionGroupDefinition ToDefinition()
-        {
-            return new PassiveConditionGroupDefinition(_operator, ToConditionDefinitions());
-        }
-
-        private PassiveConditionDefinition[] ToConditionDefinitions()
-        {
-            if (_conditions == null || _conditions.Length == 0)
-                return Array.Empty<PassiveConditionDefinition>();
-
-            var result = new PassiveConditionDefinition[_conditions.Length];
-            for (var i = 0; i < _conditions.Length; i++)
-                result[i] = _conditions[i] != null ? _conditions[i].ToDefinition() : default;
-
-            return result;
-        }
-    }
-
-    [Serializable]
     public class HeroPassiveModifierEffectConfig
     {
         [Tooltip("Какой числовой параметр меняет эффект")]
@@ -128,7 +72,7 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Как выбрать цели из подходящего пула")]
         [SerializeField] private PassiveUnitSelectionMode _selectionMode;
 
-        [Tooltip("Количество целей для RandomCount")]
+        [Tooltip("Зарезервированное числовое поле для action-эффекта")]
         [SerializeField] private int _count;
 
         [Tooltip("Исключать владельца пассивки из пула целей")]
@@ -154,8 +98,11 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Отображаемое имя пассивной способности")]
         [SerializeField] private string _displayName;
 
-        [Tooltip("Группа условий активации пассивной способности")]
-        [SerializeField] private HeroPassiveConditionGroupConfig _conditionGroup;
+        [Tooltip("Событие, которое двигает пассивку к активации")]
+        [SerializeField] private PassiveTriggerKind _triggerKind = PassiveTriggerKind.OwnerActivatedInHeroPhase;
+
+        [Tooltip("Сколько раз должен случиться триггер для активации")]
+        [SerializeField] private int _requiredTriggerCount = 1;
 
         [Tooltip("Числовые модификаторы, которые включаются после активации пассивной способности")]
         [SerializeField] private HeroPassiveModifierEffectConfig[] _modifierEffects;
@@ -163,30 +110,37 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Action-эффекты, которые будут исполняться после активации пассивной способности")]
         [SerializeField] private HeroPassiveActionEffectConfig[] _actionEffects;
 
-        [Tooltip("Может ли пассивная способность активироваться повторно")]
-        [SerializeField] private bool _allowMultipleActivations;
+        [Tooltip("Может ли пассивная способность активироваться повторно, пока ее эффект уже активен")]
+        [SerializeField] private bool _canActivateWhileActive;
 
-        [Tooltip("Максимум повторных активаций. Ноль означает без ограничений")]
-        [SerializeField] private int _activationLimit;
+        [Tooltip("Максимум активаций за бой. Ноль означает без ограничений")]
+        [SerializeField] private int _maxActivations;
+
+        [Tooltip("Сколько раундов действует активный эффект. Ноль означает до конца боя")]
+        [SerializeField] private int _activeDurationRounds;
 
 
         public string DisplayName => _displayName;
-        public HeroPassiveConditionGroupConfig ConditionGroup => _conditionGroup;
+        public PassiveTriggerKind TriggerKind => _triggerKind;
+        public int RequiredTriggerCount => _requiredTriggerCount;
         public HeroPassiveModifierEffectConfig[] ModifierEffects => _modifierEffects;
         public HeroPassiveActionEffectConfig[] ActionEffects => _actionEffects;
-        public bool AllowMultipleActivations => _allowMultipleActivations;
-        public int ActivationLimit => _activationLimit;
+        public bool CanActivateWhileActive => _canActivateWhileActive;
+        public int MaxActivations => _maxActivations;
+        public int ActiveDurationRounds => _activeDurationRounds;
 
 
         public HeroPassiveDefinition ToDefinition()
         {
             return new HeroPassiveDefinition(
                 _displayName,
-                _conditionGroup != null ? _conditionGroup.ToDefinition() : default,
+                _triggerKind,
+                _requiredTriggerCount,
                 ToModifierEffectDefinitions(),
                 ToActionEffectDefinitions(),
-                _allowMultipleActivations,
-                _activationLimit);
+                _canActivateWhileActive,
+                _maxActivations,
+                _activeDurationRounds);
         }
 
         private PassiveModifierEffectDefinition[] ToModifierEffectDefinitions()

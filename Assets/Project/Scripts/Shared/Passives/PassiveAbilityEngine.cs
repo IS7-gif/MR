@@ -38,14 +38,15 @@ namespace Project.Scripts.Shared.Passives
             _states = states.ToArray();
         }
 
-        public bool AddConditionProgress(
-            PassiveConditionKind conditionKind,
+        public bool AddTriggerProgress(
+            PassiveTriggerKind triggerKind,
             BattleSide side,
+            int slotIndex,
+            int currentRound,
             int amount = 1,
-            int slotIndex = -1,
             TileKind slotKind = TileKind.None)
         {
-            if (amount <= 0 || conditionKind == PassiveConditionKind.None)
+            if (amount <= 0 || triggerKind == PassiveTriggerKind.None)
                 return false;
 
             var changed = false;
@@ -55,22 +56,28 @@ namespace Project.Scripts.Shared.Passives
                 if (state.Side != side || false == state.CanActivateAgain)
                     continue;
 
-                var nextState = AddProgressToMatchingConditions(state, conditionKind, amount, slotIndex, slotKind);
-                if (false == HasSameConditionProgress(state, nextState))
-                {
-                    _states[i] = IsConditionGroupSatisfied(nextState)
-                        ? nextState.WithActivated()
-                        : nextState;
-                    changed = true;
-                }
+                if (state.Definition.TriggerKind != triggerKind)
+                    continue;
+
+                if (slotIndex >= 0 && state.SlotIndex != slotIndex)
+                    continue;
+
+                if (slotKind != TileKind.None && state.SlotKind != slotKind)
+                    continue;
+
+                var nextState = state.WithTriggerProgress(state.TriggerProgress + amount);
+                _states[i] = nextState.TriggerProgress >= nextState.Definition.RequiredTriggerCount
+                    ? nextState.WithActivated(currentRound)
+                    : nextState;
+                changed = true;
             }
 
             return changed;
         }
 
-        public bool ResetConditionProgress(PassiveConditionKind conditionKind, BattleSide side)
+        public bool ResetTriggerProgress(PassiveTriggerKind triggerKind, BattleSide side)
         {
-            if (conditionKind == PassiveConditionKind.None)
+            if (triggerKind == PassiveTriggerKind.None)
                 return false;
 
             var changed = false;
@@ -80,11 +87,10 @@ namespace Project.Scripts.Shared.Passives
                 if (state.Side != side)
                     continue;
 
-                var nextState = ResetMatchingConditions(state, conditionKind);
-                if (HasSameConditionProgress(state, nextState))
+                if (state.Definition.TriggerKind != triggerKind || state.TriggerProgress == 0)
                     continue;
 
-                _states[i] = nextState;
+                _states[i] = state.WithTriggerProgress(0);
                 changed = true;
             }
 
@@ -107,82 +113,24 @@ namespace Project.Scripts.Shared.Passives
             return changed;
         }
 
-
-        private static HeroPassiveRuntimeState AddProgressToMatchingConditions(
-            HeroPassiveRuntimeState state,
-            PassiveConditionKind conditionKind,
-            int amount,
-            int slotIndex,
-            TileKind slotKind)
+        public bool ExpireRoundLimitedPassives(int currentRound)
         {
-            if (slotIndex >= 0 && state.SlotIndex != slotIndex)
-                return state;
-
-            if (slotKind != TileKind.None && state.SlotKind != slotKind)
-                return state;
-
-            var result = state;
-            var conditions = state.Definition.ConditionGroup.Conditions;
-            for (var i = 0; i < conditions.Count; i++)
+            var changed = false;
+            for (var i = 0; i < _states.Length; i++)
             {
-                if (conditions[i].Kind != conditionKind)
+                var state = _states[i];
+                if (state.IsDisabled || false == state.IsActive || state.ExpiresAtRound <= 0)
                     continue;
 
-                result = result.WithConditionProgress(i, result.GetConditionProgress(i) + amount);
-            }
-
-            return result;
-        }
-
-        private static HeroPassiveRuntimeState ResetMatchingConditions(
-            HeroPassiveRuntimeState state,
-            PassiveConditionKind conditionKind)
-        {
-            var result = state;
-            var conditions = state.Definition.ConditionGroup.Conditions;
-            for (var i = 0; i < conditions.Count; i++)
-            {
-                if (conditions[i].Kind != conditionKind || result.GetConditionProgress(i) == 0)
+                if (currentRound < state.ExpiresAtRound)
                     continue;
 
-                result = result.WithConditionProgressReset(i);
+                _states[i] = state.WithExpired();
+                changed = true;
             }
 
-            return result;
+            return changed;
         }
 
-        private static bool IsConditionGroupSatisfied(HeroPassiveRuntimeState state)
-        {
-            var conditions = state.Definition.ConditionGroup.Conditions;
-            if (conditions.Count == 0)
-                return false;
-
-            if (state.Definition.ConditionGroup.Operator == PassiveConditionGroupOperator.Or)
-            {
-                for (var i = 0; i < conditions.Count; i++)
-                    if (state.GetConditionProgress(i) >= conditions[i].RequiredValue)
-                        return true;
-
-                return false;
-            }
-
-            for (var i = 0; i < conditions.Count; i++)
-                if (state.GetConditionProgress(i) < conditions[i].RequiredValue)
-                    return false;
-
-            return true;
-        }
-
-        private static bool HasSameConditionProgress(HeroPassiveRuntimeState left, HeroPassiveRuntimeState right)
-        {
-            if (left.ConditionCount != right.ConditionCount)
-                return false;
-
-            for (var i = 0; i < left.ConditionCount; i++)
-                if (left.GetConditionProgress(i) != right.GetConditionProgress(i))
-                    return false;
-
-            return true;
-        }
     }
 }

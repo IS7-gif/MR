@@ -21,7 +21,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IBattleSideEnergyService _battleSideEnergyService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
-        private readonly IPendingAttackBonusService _pendingAttackBonusService;
+        private readonly INextAttackBuffService _nextAttackBuffService;
 
         public EnemyAvatarChargeService(
             EventBus eventBus,
@@ -29,13 +29,13 @@ namespace Project.Scripts.Services.Combat
             IBattleSideEnergyService battleSideEnergyService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IUnitActivationCooldownService unitActivationCooldownService,
-            IPendingAttackBonusService pendingAttackBonusService)
+            INextAttackBuffService nextAttackBuffService)
         {
             _eventBus = eventBus;
             _battleSideEnergyService = battleSideEnergyService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _unitActivationCooldownService = unitActivationCooldownService;
-            _pendingAttackBonusService = pendingAttackBonusService;
+            _nextAttackBuffService = nextAttackBuffService;
             var config = levelConfig.EnemyAvatarConfig;
             ActivationEnergyCost = config.ActivationEnergyCost;
             AbilityType = config.AbilityType;
@@ -84,17 +84,17 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             _unitActivationCooldownService.StartAvatarCooldown(BattleSide.Enemy);
-            _eventBus.Publish(new EnemyAvatarActivatedEvent(AbilityType, GetActionValueWithPendingAttackBonus()));
+            _eventBus.Publish(new EnemyAvatarActivatedEvent(AbilityType, GetActionValueWithNextAttackBuff()));
         }
 
-        private int GetActionValueWithPendingAttackBonus()
+        private int GetActionValueWithNextAttackBuff()
         {
             if (AbilityType != HeroActionType.DealDamage)
                 return AbilityPower;
 
             var source = UnitDescriptor.Avatar(BattleSide.Enemy, AbilityType);
             
-            return AbilityPower + _pendingAttackBonusService.Consume(source);
+            return AbilityPower + _nextAttackBuffService.Consume(source);
         }
     }
 }

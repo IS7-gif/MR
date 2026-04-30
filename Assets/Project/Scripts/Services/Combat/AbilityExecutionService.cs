@@ -15,7 +15,7 @@ namespace Project.Scripts.Services.Combat
         private readonly IGameStateService _gameStateService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IHeroAbilityModifierService _heroAbilityModifierService;
-        private readonly IPendingAttackBonusService _pendingAttackBonusService;
+        private readonly INextAttackBuffService _nextAttackBuffService;
         private readonly EventBus _eventBus;
 
 
@@ -28,7 +28,7 @@ namespace Project.Scripts.Services.Combat
             IGameStateService gameStateService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IHeroAbilityModifierService heroAbilityModifierService,
-            IPendingAttackBonusService pendingAttackBonusService,
+            INextAttackBuffService nextAttackBuffService,
             EventBus eventBus)
         {
             _playerAvatarCharge = playerAvatarCharge;
@@ -39,7 +39,7 @@ namespace Project.Scripts.Services.Combat
             _gameStateService = gameStateService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _heroAbilityModifierService = heroAbilityModifierService;
-            _pendingAttackBonusService = pendingAttackBonusService;
+            _nextAttackBuffService = nextAttackBuffService;
             _eventBus = eventBus;
         }
 
@@ -130,7 +130,7 @@ namespace Project.Scripts.Services.Combat
                     return false;
 
                 actionType = _playerAvatarCharge.AbilityType;
-                actionValue = GetActionValueWithPendingAttackBonusPreview(source, actionType, _playerAvatarCharge.AbilityPower);
+                actionValue = GetActionValueWithNextAttackBuffPreview(source, actionType, _playerAvatarCharge.AbilityPower);
                 return true;
             }
 
@@ -144,7 +144,7 @@ namespace Project.Scripts.Services.Combat
                 return false;
 
             actionType = slot.ActionType;
-            actionValue = GetActionValueWithPendingAttackBonusPreview(
+            actionValue = GetActionValueWithNextAttackBuffPreview(
                 source,
                 actionType,
                 _heroAbilityModifierService.GetAbilityPower(source.Side, source.SlotIndex, slot.ActionValue));
@@ -200,7 +200,7 @@ namespace Project.Scripts.Services.Combat
                     return false;
 
                 actionType = _playerAvatarCharge.AbilityType;
-                actionValue = GetActionValueWithPendingAttackBonus(source, actionType, _playerAvatarCharge.AbilityPower);
+                actionValue = GetActionValueWithNextAttackBuff(source, actionType, _playerAvatarCharge.AbilityPower);
                 
                 return true;
             }
@@ -208,7 +208,7 @@ namespace Project.Scripts.Services.Combat
             return _heroService.TryDischargeHero(source.Side, source.SlotIndex, out actionType, out actionValue);
         }
 
-        private int GetActionValueWithPendingAttackBonusPreview(
+        private int GetActionValueWithNextAttackBuffPreview(
             UnitDescriptor source,
             HeroActionType actionType,
             int baseActionValue)
@@ -216,10 +216,10 @@ namespace Project.Scripts.Services.Combat
             if (actionType != HeroActionType.DealDamage)
                 return baseActionValue;
 
-            return baseActionValue + _pendingAttackBonusService.Get(source);
+            return baseActionValue + _nextAttackBuffService.Get(source);
         }
 
-        private int GetActionValueWithPendingAttackBonus(
+        private int GetActionValueWithNextAttackBuff(
             UnitDescriptor source,
             HeroActionType actionType,
             int baseActionValue)
@@ -227,7 +227,7 @@ namespace Project.Scripts.Services.Combat
             if (actionType != HeroActionType.DealDamage)
                 return baseActionValue;
 
-            return baseActionValue + _pendingAttackBonusService.Consume(source);
+            return baseActionValue + _nextAttackBuffService.Consume(source);
         }
     }
 }

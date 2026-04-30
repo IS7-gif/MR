@@ -1,4 +1,3 @@
-using System;
 using Project.Scripts.Shared.Heroes;
 using Project.Scripts.Shared.Tiles;
 
@@ -10,16 +9,18 @@ namespace Project.Scripts.Shared.Passives
         public int SlotIndex { get; }
         public TileKind SlotKind { get; }
         public HeroPassiveDefinition Definition { get; }
-        public bool IsActive { get; }
+        public bool IsActive => ActiveStackCount > 0;
         public bool IsDisabled { get; }
-        public int ActivationCount { get; }
-        public int ConditionCount => _conditionProgress?.Length ?? 0;
+        public int TotalActivationCount { get; }
+        public int ActiveStackCount { get; }
+        public int TriggerProgress { get; }
+        public int ExpiresAtRound { get; }
 
         public bool CanActivateAgain =>
             false == IsDisabled
             && Definition.IsConfigured
-            && (false == IsActive || Definition.AllowMultipleActivations)
-            && (Definition.ActivationLimit == 0 || ActivationCount < Definition.ActivationLimit);
+            && (false == IsActive || Definition.CanActivateWhileActive)
+            && (Definition.MaxActivations == 0 || TotalActivationCount < Definition.MaxActivations);
 
 
         public HeroPassiveRuntimeState(
@@ -27,57 +28,53 @@ namespace Project.Scripts.Shared.Passives
             int slotIndex,
             TileKind slotKind,
             HeroPassiveDefinition definition,
-            bool isActive = false,
             bool isDisabled = false,
-            int activationCount = 0,
-            int[] conditionProgress = null)
+            int totalActivationCount = 0,
+            int activeStackCount = 0,
+            int triggerProgress = 0,
+            int expiresAtRound = 0)
         {
             Side = side;
             SlotIndex = slotIndex;
             SlotKind = slotKind;
             Definition = definition;
-            IsActive = isActive;
             IsDisabled = isDisabled;
-            ActivationCount = activationCount < 0 ? 0 : activationCount;
-            _conditionProgress = NormalizeProgress(definition, conditionProgress);
+            TotalActivationCount = totalActivationCount < 0 ? 0 : totalActivationCount;
+            ActiveStackCount = activeStackCount < 0 ? 0 : activeStackCount;
+            TriggerProgress = triggerProgress < 0 ? 0 : triggerProgress;
+            ExpiresAtRound = expiresAtRound < 0 ? 0 : expiresAtRound;
         }
 
-        public int GetConditionProgress(int conditionIndex)
-        {
-            if (_conditionProgress == null || conditionIndex < 0 || conditionIndex >= _conditionProgress.Length)
-                return 0;
-
-            return _conditionProgress[conditionIndex];
-        }
-
-        public HeroPassiveRuntimeState WithConditionProgress(int conditionIndex, int progress)
-        {
-            var nextProgress = CopyProgress();
-            if (conditionIndex >= 0 && conditionIndex < nextProgress.Length)
-                nextProgress[conditionIndex] = progress < 0 ? 0 : progress;
-
-            return new HeroPassiveRuntimeState(
-                Side,
-                SlotIndex,
-                SlotKind,
-                Definition,
-                IsActive,
-                IsDisabled,
-                ActivationCount,
-                nextProgress);
-        }
-
-        public HeroPassiveRuntimeState WithActivated()
+        public HeroPassiveRuntimeState WithTriggerProgress(int progress)
         {
             return new HeroPassiveRuntimeState(
                 Side,
                 SlotIndex,
                 SlotKind,
                 Definition,
-                true,
                 IsDisabled,
-                ActivationCount + 1,
-                CreateProgressArray(Definition));
+                TotalActivationCount,
+                ActiveStackCount,
+                progress,
+                ExpiresAtRound);
+        }
+
+        public HeroPassiveRuntimeState WithActivated(int currentRound)
+        {
+            var expiresAtRound = Definition.ActiveDurationRounds > 0
+                ? currentRound + Definition.ActiveDurationRounds
+                : 0;
+
+            return new HeroPassiveRuntimeState(
+                Side,
+                SlotIndex,
+                SlotKind,
+                Definition,
+                IsDisabled,
+                TotalActivationCount + 1,
+                ActiveStackCount + 1,
+                0,
+                expiresAtRound);
         }
 
         public HeroPassiveRuntimeState WithDisabled()
@@ -87,48 +84,25 @@ namespace Project.Scripts.Shared.Passives
                 SlotIndex,
                 SlotKind,
                 Definition,
-                false,
                 true,
-                ActivationCount,
-                CopyProgress());
+                TotalActivationCount,
+                0,
+                TriggerProgress,
+                0);
         }
 
-        public HeroPassiveRuntimeState WithConditionProgressReset(int conditionIndex)
+        public HeroPassiveRuntimeState WithExpired()
         {
-            return WithConditionProgress(conditionIndex, 0);
-        }
-
-
-        private readonly int[] _conditionProgress;
-
-
-        private int[] CopyProgress()
-        {
-            if (_conditionProgress == null || _conditionProgress.Length == 0)
-                return Array.Empty<int>();
-
-            var result = new int[_conditionProgress.Length];
-            Array.Copy(_conditionProgress, result, _conditionProgress.Length);
-            return result;
-        }
-
-        private static int[] NormalizeProgress(HeroPassiveDefinition definition, int[] progress)
-        {
-            var result = CreateProgressArray(definition);
-            if (progress == null || progress.Length == 0)
-                return result;
-
-            var count = progress.Length < result.Length ? progress.Length : result.Length;
-            for (var i = 0; i < count; i++)
-                result[i] = progress[i] < 0 ? 0 : progress[i];
-
-            return result;
-        }
-
-        private static int[] CreateProgressArray(HeroPassiveDefinition definition)
-        {
-            var conditions = definition.ConditionGroup.Conditions;
-            return conditions.Count == 0 ? Array.Empty<int>() : new int[conditions.Count];
+            return new HeroPassiveRuntimeState(
+                Side,
+                SlotIndex,
+                SlotKind,
+                Definition,
+                IsDisabled,
+                TotalActivationCount,
+                0,
+                TriggerProgress,
+                0);
         }
     }
 }

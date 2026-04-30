@@ -53,7 +53,7 @@ namespace Project.Scripts.Shared.Passives
                 {
                     var effect = effects[j];
                     if (effect.Target == target)
-                        result = PassiveModifierRules.Apply(result, effect, passive.ActivationCount);
+                        result = PassiveModifierRules.Apply(result, effect, passive.ActiveStackCount);
                 }
             }
 

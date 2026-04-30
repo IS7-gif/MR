@@ -5,26 +5,19 @@ namespace Project.Scripts.Shared.Passives
     public enum PassiveUnitTargetTeam
     {
         None,
-        Allies,
-        Enemies,
-        Both
+        Allies
     }
 
     public enum PassiveUnitTargetKind
     {
         None,
-        Units,
-        Heroes,
-        Avatar
+        Units
     }
 
     public enum PassiveUnitSelectionMode
     {
         None,
-        All,
-        RandomOne,
-        RandomCount,
-        MostWounded
+        All
     }
 
     public readonly struct PassiveUnitTargetDefinition

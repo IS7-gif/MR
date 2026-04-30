@@ -27,7 +27,7 @@ namespace Project.Scripts.Services.Bot
         private readonly IEnemyStateService _enemyState;
         private readonly IAvatarGroupDefenseService _groupDefense;
         private readonly IBattleEconomyModifierService _battleEconomyModifier;
-        private readonly IPendingAttackBonusService _pendingAttackBonusService;
+        private readonly INextAttackBuffService _nextAttackBuffService;
         private readonly BotConfig _botConfig;
         private readonly SlotLayoutConfig _slotLayoutConfig;
 
@@ -49,7 +49,7 @@ namespace Project.Scripts.Services.Bot
             IEnemyStateService enemyState,
             IAvatarGroupDefenseService groupDefense,
             IBattleEconomyModifierService battleEconomyModifier,
-            IPendingAttackBonusService pendingAttackBonusService,
+            INextAttackBuffService nextAttackBuffService,
             BotConfig botConfig,
             SlotLayoutConfig slotLayoutConfig)
         {
@@ -62,7 +62,7 @@ namespace Project.Scripts.Services.Bot
             _enemyState = enemyState;
             _groupDefense = groupDefense;
             _battleEconomyModifier = battleEconomyModifier;
-            _pendingAttackBonusService = pendingAttackBonusService;
+            _nextAttackBuffService = nextAttackBuffService;
             _botConfig = botConfig;
             _slotLayoutConfig = slotLayoutConfig;
         }
@@ -179,7 +179,7 @@ namespace Project.Scripts.Services.Bot
                     if (!_enemyChargeService.TryRelease())
                         return;
 
-                    abilityPower = GetAvatarActionValueWithPendingAttackBonus(abilityPower);
+                    abilityPower = GetAvatarActionValueWithNextAttackBuff(abilityPower);
                     _heroService.ApplyDamageToHero(BattleSide.Player, targetIdx, abilityPower);
 
                     var source = UnitDescriptor.Avatar(BattleSide.Enemy, HeroActionType.DealDamage);
@@ -447,14 +447,14 @@ namespace Project.Scripts.Services.Bot
             _dischargeScheduled = false;
         }
 
-        private int GetAvatarActionValueWithPendingAttackBonus(int baseActionValue)
+        private int GetAvatarActionValueWithNextAttackBuff(int baseActionValue)
         {
             if (_enemyChargeService.AbilityType != HeroActionType.DealDamage)
                 return baseActionValue;
 
             var source = UnitDescriptor.Avatar(BattleSide.Enemy, _enemyChargeService.AbilityType);
             
-            return baseActionValue + _pendingAttackBonusService.Consume(source);
+            return baseActionValue + _nextAttackBuffService.Consume(source);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Project.Scripts.Services.Board
         private readonly TileKindPaletteConfig _palette;
         private readonly IDisposable _passiveActivatedSubscription;
         private readonly IDisposable _passiveDisabledSubscription;
+        private readonly IDisposable _passiveExpiredSubscription;
         private readonly IDisposable _moveUsedSubscription;
 
 
@@ -38,6 +39,7 @@ namespace Project.Scripts.Services.Board
 
             _passiveActivatedSubscription = eventBus.Subscribe<HeroPassiveActivatedEvent>(_ => Refresh());
             _passiveDisabledSubscription = eventBus.Subscribe<HeroPassiveDisabledEvent>(_ => Refresh());
+            _passiveExpiredSubscription = eventBus.Subscribe<HeroPassiveExpiredEvent>(_ => Refresh());
             _moveUsedSubscription = eventBus.Subscribe<MoveUsedEvent>(_ => Refresh());
         }
 
@@ -46,6 +48,7 @@ namespace Project.Scripts.Services.Board
             ClearAll();
             _passiveActivatedSubscription.Dispose();
             _passiveDisabledSubscription.Dispose();
+            _passiveExpiredSubscription.Dispose();
             _moveUsedSubscription.Dispose();
         }
 

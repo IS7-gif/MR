@@ -21,15 +21,11 @@ MonoBehaviour:
   _displayName: 
   _passiveAbilities:
   - _displayName: Allies Attack Boost
-    _conditionGroup:
-      _operator: 0
-      _conditions:
-      - _kind: 1
-        _requiredValue: 1
-        _windowSeconds: 0
+    _triggerKind: 1
+    _requiredTriggerCount: 1
     _modifierEffects: []
     _actionEffects:
-    - _kind: 6
+    - _kind: 1
       _target:
         _team: 1
         _unitKind: 1
@@ -38,5 +34,6 @@ MonoBehaviour:
         _excludeOwner: 1
       _value: 3
       _count: 0
-    _allowMultipleActivations: 1
-    _activationLimit: 0
+    _canActivateWhileActive: 1
+    _maxActivations: 0
+    _activeDurationRounds: 0

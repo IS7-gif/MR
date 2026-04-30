@@ -27,7 +27,9 @@ namespace Project.Scripts.Services.Combat
         private IDisposable _heroActivatedSubscription;
         private IDisposable _abilityExecutedSubscription;
         private IDisposable _phaseChangedSubscription;
+        private IDisposable _roundChangedSubscription;
         private BattlePhaseKind _currentPhase = BattlePhaseKind.Match;
+        private int _currentRound = 1;
         private readonly bool[,] _slotKindPassiveStates = new bool[2, SlotCount];
 
 
@@ -46,6 +48,7 @@ namespace Project.Scripts.Services.Combat
             _heroActivatedSubscription = _eventBus.Subscribe<HeroActivatedEvent>(OnHeroActivated);
             _abilityExecutedSubscription = _eventBus.Subscribe<AbilityExecutedEvent>(OnAbilityExecuted);
             _phaseChangedSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged);
+            _roundChangedSubscription = _eventBus.Subscribe<BattleFlowRoundChangedEvent>(OnBattleFlowRoundChanged);
         }
 
         public void Dispose()
@@ -58,6 +61,8 @@ namespace Project.Scripts.Services.Combat
             _abilityExecutedSubscription = null;
             _phaseChangedSubscription?.Dispose();
             _phaseChangedSubscription = null;
+            _roundChangedSubscription?.Dispose();
+            _roundChangedSubscription = null;
         }
 
         public float CalculateMatchEnergy(BattleSide side, IReadOnlyDictionary<TileKind, float> energyByKind)
@@ -136,7 +141,7 @@ namespace Project.Scripts.Services.Combat
             if (_currentPhase != BattlePhaseKind.Hero)
                 return;
 
-            AddProgressAndPublishActivations(PassiveConditionKind.HeroActivationsInHeroPhase, e.Side, 1, e.SlotIndex);
+            AddProgressAndPublishActivations(PassiveTriggerKind.OwnerActivatedInHeroPhase, e.Side, 1, e.SlotIndex);
         }
 
         private void OnAbilityExecuted(AbilityExecutedEvent e)
@@ -144,7 +149,7 @@ namespace Project.Scripts.Services.Combat
             if (_currentPhase != BattlePhaseKind.Hero || e.Source.Kind != UnitKind.Hero)
                 return;
 
-            AddProgressAndPublishActivations(PassiveConditionKind.HeroActivationsInHeroPhase, e.Source.Side, 1, e.Source.SlotIndex);
+            AddProgressAndPublishActivations(PassiveTriggerKind.OwnerActivatedInHeroPhase, e.Source.Side, 1, e.Source.SlotIndex);
         }
 
         private void OnBattleFlowPhaseChanged(BattleFlowPhaseChangedEvent e)
@@ -153,15 +158,25 @@ namespace Project.Scripts.Services.Combat
 
             if (e.Phase == BattlePhaseKind.Hero)
             {
-                _engine.ResetConditionProgress(PassiveConditionKind.HeroActivationsInHeroPhase, BattleSide.Player);
-                _engine.ResetConditionProgress(PassiveConditionKind.HeroActivationsInHeroPhase, BattleSide.Enemy);
+                _engine.ResetTriggerProgress(PassiveTriggerKind.OwnerActivatedInHeroPhase, BattleSide.Player);
+                _engine.ResetTriggerProgress(PassiveTriggerKind.OwnerActivatedInHeroPhase, BattleSide.Enemy);
             }
         }
 
-        private void AddProgressAndPublishActivations(PassiveConditionKind conditionKind, BattleSide side, int amount, int slotIndex)
+        private void OnBattleFlowRoundChanged(BattleFlowRoundChangedEvent e)
+        {
+            _currentRound = e.CurrentRound;
+            var activeStackCounts = CaptureActiveStackCounts();
+            if (false == _engine.ExpireRoundLimitedPassives(_currentRound))
+                return;
+
+            PublishActiveEffectChanges(activeStackCounts);
+        }
+
+        private void AddProgressAndPublishActivations(PassiveTriggerKind triggerKind, BattleSide side, int amount, int slotIndex)
         {
             var activationCounts = CaptureActivationCounts();
-            if (false == _engine.AddConditionProgress(conditionKind, side, amount, slotIndex))
+            if (false == _engine.AddTriggerProgress(triggerKind, side, slotIndex, _currentRound, amount))
                 return;
 
             PublishNewActivations(activationCounts);
@@ -172,8 +187,18 @@ namespace Project.Scripts.Services.Combat
             var states = _engine.States;
             var result = new int[states.Count];
             for (var i = 0; i < states.Count; i++)
-                result[i] = states[i].ActivationCount;
+                result[i] = states[i].TotalActivationCount;
             
+            return result;
+        }
+
+        private int[] CaptureActiveStackCounts()
+        {
+            var states = _engine.States;
+            var result = new int[states.Count];
+            for (var i = 0; i < states.Count; i++)
+                result[i] = states[i].ActiveStackCount;
+
             return result;
         }
 
@@ -182,10 +207,24 @@ namespace Project.Scripts.Services.Combat
             var states = _engine.States;
             for (var i = 0; i < states.Count && i < previousActivationCounts.Length; i++)
             {
-                if (states[i].ActivationCount <= previousActivationCounts[i])
+                if (states[i].TotalActivationCount <= previousActivationCounts[i])
                     continue;
 
                 _eventBus.Publish(new HeroPassiveActivatedEvent(states[i]));
+                PublishHeroAbilityStatsChanged(states[i].Side, states[i].SlotIndex);
+                RefreshSlotKindPassiveState(states[i].Side, states[i].SlotIndex);
+            }
+        }
+
+        private void PublishActiveEffectChanges(int[] previousActiveStackCounts)
+        {
+            var states = _engine.States;
+            for (var i = 0; i < states.Count && i < previousActiveStackCounts.Length; i++)
+            {
+                if (states[i].ActiveStackCount == previousActiveStackCounts[i])
+                    continue;
+
+                _eventBus.Publish(new HeroPassiveExpiredEvent(states[i]));
                 PublishHeroAbilityStatsChanged(states[i].Side, states[i].SlotIndex);
                 RefreshSlotKindPassiveState(states[i].Side, states[i].SlotIndex);
             }

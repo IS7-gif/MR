@@ -46,7 +46,7 @@ namespace Project.Scripts.Shared.Passives
                     {
                         var effect = effects[j];
                         if (effect.Target == PassiveModifierTarget.MatchEnergyBySlotKind)
-                            result = PassiveModifierRules.Apply(result, effect, passive.ActivationCount);
+                            result = PassiveModifierRules.Apply(result, effect, passive.ActiveStackCount);
                     }
                 }
             }

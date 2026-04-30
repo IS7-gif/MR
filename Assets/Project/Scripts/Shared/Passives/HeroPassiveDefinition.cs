@@ -6,15 +6,17 @@ namespace Project.Scripts.Shared.Passives
     public readonly struct HeroPassiveDefinition
     {
         public string DisplayName { get; }
-        public PassiveConditionGroupDefinition ConditionGroup { get; }
+        public PassiveTriggerKind TriggerKind { get; }
+        public int RequiredTriggerCount { get; }
         public IReadOnlyList<PassiveModifierEffectDefinition> ModifierEffects =>
             _modifierEffects ?? Array.Empty<PassiveModifierEffectDefinition>();
         public IReadOnlyList<PassiveActionEffectDefinition> ActionEffects =>
             _actionEffects ?? Array.Empty<PassiveActionEffectDefinition>();
-        public bool AllowMultipleActivations { get; }
-        public int ActivationLimit { get; }
+        public bool CanActivateWhileActive { get; }
+        public int MaxActivations { get; }
+        public int ActiveDurationRounds { get; }
 
-        public bool IsConfigured => ConditionGroup.IsConfigured && HasConfiguredEffects();
+        public bool IsConfigured => TriggerKind != PassiveTriggerKind.None && HasConfiguredEffects();
 
 
         private readonly PassiveModifierEffectDefinition[] _modifierEffects;
@@ -23,18 +25,22 @@ namespace Project.Scripts.Shared.Passives
 
         public HeroPassiveDefinition(
             string displayName,
-            PassiveConditionGroupDefinition conditionGroup,
+            PassiveTriggerKind triggerKind,
+            int requiredTriggerCount,
             IReadOnlyList<PassiveModifierEffectDefinition> modifierEffects,
             IReadOnlyList<PassiveActionEffectDefinition> actionEffects,
-            bool allowMultipleActivations,
-            int activationLimit)
+            bool canActivateWhileActive,
+            int maxActivations,
+            int activeDurationRounds)
         {
             DisplayName = displayName ?? string.Empty;
-            ConditionGroup = conditionGroup;
+            TriggerKind = triggerKind;
+            RequiredTriggerCount = requiredTriggerCount < 1 ? 1 : requiredTriggerCount;
             _modifierEffects = CopyConfiguredModifiers(modifierEffects);
             _actionEffects = CopyConfiguredActions(actionEffects);
-            AllowMultipleActivations = allowMultipleActivations;
-            ActivationLimit = activationLimit < 0 ? 0 : activationLimit;
+            CanActivateWhileActive = canActivateWhileActive;
+            MaxActivations = maxActivations < 0 ? 0 : maxActivations;
+            ActiveDurationRounds = activeDurationRounds < 0 ? 0 : activeDurationRounds;
         }
 
         private bool HasConfiguredEffects()
