@@ -5,14 +5,14 @@ namespace Project.Scripts.Shared
 {
     public class GridState : IGridState
     {
-        private readonly TileKind[,] _kinds;
-        private readonly HashSet<GridPoint> _scheduledRemovals = new();
-
         public int Width { get; }
         public int Height { get; }
-
         public IReadOnlyCollection<GridPoint> ScheduledRemovals => _scheduledRemovals;
         public void ClearScheduledRemovals() => _scheduledRemovals.Clear();
+        
+        
+        private readonly TileKind[,] _kinds;
+        private readonly HashSet<GridPoint> _scheduledRemovals = new();
 
 
         public GridState(int width, int height)
@@ -23,14 +23,25 @@ namespace Project.Scripts.Shared
         }
 
 
-        public bool IsValidPosition(GridPoint pos) =>
-            pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
+        public bool IsValidPosition(GridPoint pos)
+        {
+            return pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
+        }
 
-        public TileKind GetKind(GridPoint pos) => _kinds[pos.X, pos.Y];
+        public TileKind GetKind(GridPoint pos)
+        {
+            return _kinds[pos.X, pos.Y];
+        }
 
-        public void SetKind(GridPoint pos, TileKind kind) => _kinds[pos.X, pos.Y] = kind;
+        public void SetKind(GridPoint pos, TileKind kind)
+        {
+            _kinds[pos.X, pos.Y] = kind;
+        }
 
-        public void ClearCell(GridPoint pos) => _kinds[pos.X, pos.Y] = TileKind.None;
+        public void ClearCell(GridPoint pos)
+        {
+            _kinds[pos.X, pos.Y] = TileKind.None;
+        }
 
         public TileKind[,] GetGridState()
         {
@@ -38,6 +49,7 @@ namespace Project.Scripts.Shared
             for (var x = 0; x < Width; x++)
                 for (var y = 0; y < Height; y++)
                     copy[x, y] = _kinds[x, y];
+            
             return copy;
         }
 
@@ -63,6 +75,7 @@ namespace Project.Scripts.Shared
             var result = new List<GridPoint>(Width);
             for (var x = 0; x < Width; x++)
                 result.Add(new GridPoint(x, y));
+            
             return result;
         }
 
@@ -71,6 +84,7 @@ namespace Project.Scripts.Shared
             var result = new List<GridPoint>(Height);
             for (var y = 0; y < Height; y++)
                 result.Add(new GridPoint(x, y));
+            
             return result;
         }
 
@@ -81,6 +95,7 @@ namespace Project.Scripts.Shared
                 for (var y = 0; y < Height; y++)
                     if (_kinds[x, y] == kind)
                         result.Add(new GridPoint(x, y));
+            
             return result;
         }
 
@@ -91,6 +106,7 @@ namespace Project.Scripts.Shared
                 for (var y = 0; y < Height; y++)
                     if (_kinds[x, y] != TileKind.None)
                         result.Add(new GridPoint(x, y));
+            
             return result;
         }
 

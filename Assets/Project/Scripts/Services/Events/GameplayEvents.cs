@@ -151,6 +151,10 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct BuffsChangedEvent
+    {
+    }
+
     public readonly struct HeroSlotKindPassiveStateChangedEvent
     {
         public BattleSide Side { get; }

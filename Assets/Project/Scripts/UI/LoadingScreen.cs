@@ -16,6 +16,12 @@ namespace Project.Scripts.UI
 
         private IDisposable _subscription;
 
+        
+        private void OnDestroy()
+        {
+            _subscription?.Dispose();
+        }
+        
 
         public void SubscribeToProgress(Observable<float> progressObservable)
         {
@@ -39,12 +45,6 @@ namespace Project.Scripts.UI
         public void Hide()
         {
             _loadingPanel.SetActive(false);
-        }
-
-
-        private void OnDestroy()
-        {
-            _subscription?.Dispose();
         }
     }
 }

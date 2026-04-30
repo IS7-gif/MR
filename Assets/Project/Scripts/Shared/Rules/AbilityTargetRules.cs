@@ -4,13 +4,8 @@ namespace Project.Scripts.Shared.Rules
 {
     public static class AbilityTargetRules
     {
-        public static bool IsTargetValid(
-            UnitDescriptor source,
-            UnitDescriptor target,
-            HeroActionType actionType,
-            bool isSourceAlive,
-            bool isTargetAlive,
-            bool isTargetHpFull,
+        public static bool IsTargetValid(UnitDescriptor source, UnitDescriptor target,
+            HeroActionType actionType, bool isSourceAlive, bool isTargetAlive, bool isTargetHpFull,
             bool isTargetExposed)
         {
             if (false == isSourceAlive || false == isTargetAlive)

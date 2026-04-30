@@ -71,6 +71,7 @@ namespace Project.Scripts.Shared.Layout
             {
                 var width = rect.Height * aspect;
                 var x = rect.X + (rect.Width - width) * 0.5f;
+                
                 return new ScreenLayoutRect(x, rect.Y, width, rect.Height);
             }
 

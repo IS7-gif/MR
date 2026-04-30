@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using Project.Scripts.Configs;
 using Project.Scripts.Configs.Board;
 using UnityEditor;
 using UnityEngine;

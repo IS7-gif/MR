@@ -7,7 +7,10 @@ namespace Project.Scripts.Utils
     [RequireComponent(typeof(Image), typeof(AspectRatioFitter))]
     public class SpriteAspectBinder : MonoBehaviour
     {
-        private void Awake() => Apply();
+        private void Awake()
+        {
+            Apply();
+        }
 
         private void Apply()
         {

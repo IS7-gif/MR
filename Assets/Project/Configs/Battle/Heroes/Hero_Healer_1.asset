@@ -18,16 +18,6 @@ MonoBehaviour:
   _activationEnergyCost: 20
   _activationCooldownSeconds: 10
   _portrait: {fileID: 21300000, guid: ed3505a1d6ffbda408fab5732ee4a51a, type: 3}
-  _displayName: 
+  _displayName: Hero_Healer_1
   _passiveAbilities:
-  - _displayName: Slot Energy Boost
-    _triggerKind: 1
-    _requiredTriggerCount: 1
-    _modifierEffects:
-    - _target: 3
-      _operation: 2
-      _value: 25
-    _actionEffects: []
-    _canActivateWhileActive: 0
-    _maxActivations: 1
-    _activeDurationRounds: 0
+  - {fileID: 11400000, guid: a1b8a647c9024d8bbcae735106a0a401, type: 2}

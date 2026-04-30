@@ -6,8 +6,6 @@ using Project.Scripts.Services.Combat;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Services.Grid;
 using Project.Scripts.Shared;
-using Project.Scripts.Shared.Heroes;
-using Project.Scripts.Shared.Passives;
 using Project.Scripts.Shared.Tiles;
 using UnityEngine;
 
@@ -17,29 +15,25 @@ namespace Project.Scripts.Services.Board
     {
         private readonly IGridView _gridView;
         private readonly GridConfig _gridConfig;
-        private readonly IHeroPassiveService _heroPassiveService;
+        private readonly IBuffService _buffService;
         private readonly TileKindPaletteConfig _palette;
         private readonly IDisposable _passiveActivatedSubscription;
         private readonly IDisposable _passiveDisabledSubscription;
-        private readonly IDisposable _passiveExpiredSubscription;
+        private readonly IDisposable _buffsChangedSubscription;
         private readonly IDisposable _moveUsedSubscription;
 
 
-        public PassiveTileGlowService(
-            EventBus eventBus,
-            IGridView gridView,
-            GridConfig gridConfig,
-            IHeroPassiveService heroPassiveService,
-            TileKindPaletteConfig palette)
+        public PassiveTileGlowService(EventBus eventBus, IGridView gridView, GridConfig gridConfig,
+            IBuffService buffService, TileKindPaletteConfig palette)
         {
             _gridView = gridView;
             _gridConfig = gridConfig;
-            _heroPassiveService = heroPassiveService;
+            _buffService = buffService;
             _palette = palette;
 
             _passiveActivatedSubscription = eventBus.Subscribe<HeroPassiveActivatedEvent>(_ => Refresh());
             _passiveDisabledSubscription = eventBus.Subscribe<HeroPassiveDisabledEvent>(_ => Refresh());
-            _passiveExpiredSubscription = eventBus.Subscribe<HeroPassiveExpiredEvent>(_ => Refresh());
+            _buffsChangedSubscription = eventBus.Subscribe<BuffsChangedEvent>(_ => Refresh());
             _moveUsedSubscription = eventBus.Subscribe<MoveUsedEvent>(_ => Refresh());
         }
 
@@ -48,7 +42,7 @@ namespace Project.Scripts.Services.Board
             ClearAll();
             _passiveActivatedSubscription.Dispose();
             _passiveDisabledSubscription.Dispose();
-            _passiveExpiredSubscription.Dispose();
+            _buffsChangedSubscription.Dispose();
             _moveUsedSubscription.Dispose();
         }
 
@@ -72,25 +66,16 @@ namespace Project.Scripts.Services.Board
         private HashSet<TileKind> CollectActiveBoostedKinds()
         {
             var result = new HashSet<TileKind>();
-            var states = _heroPassiveService.States;
-            for (var i = 0; i < states.Count; i++)
+            foreach (TileKind kind in Enum.GetValues(typeof(TileKind)))
             {
-                var state = states[i];
-                if (false == IsActivePlayerMatchEnergyPassive(state))
+                if (false == kind.IsColor())
                     continue;
 
-                result.Add(state.SlotKind);
+                if (_buffService.HasMatchEnergyBuff(Project.Scripts.Shared.Heroes.BattleSide.Player, kind))
+                    result.Add(kind);
             }
 
             return result;
-        }
-
-        private static bool IsActivePlayerMatchEnergyPassive(HeroPassiveRuntimeState state)
-        {
-            return state.Side == BattleSide.Player
-                   && state is { IsActive: true, IsDisabled: false }
-                   && state.SlotKind.IsColor()
-                   && PassiveAbilityRules.HasSlotKindLinkedModifier(state.Definition);
         }
 
         private void ClearAll()

@@ -15,7 +15,7 @@ namespace Project.Scripts.Shared.Passives
         
         public void Initialize(IReadOnlyList<HeroPassiveSetup> setups)
         {
-            if (setups == null || setups.Count == 0)
+            if (null == setups || setups.Count == 0)
             {
                 _states = Array.Empty<HeroPassiveRuntimeState>();
                 return;
@@ -38,46 +38,34 @@ namespace Project.Scripts.Shared.Passives
             _states = states.ToArray();
         }
 
-        public bool AddTriggerProgress(
-            PassiveTriggerKind triggerKind,
-            BattleSide side,
-            int slotIndex,
-            int currentRound,
-            int amount = 1,
-            TileKind slotKind = TileKind.None)
+        public bool ProcessActivationConditionEvent(ActivationConditionEvent e, bool sourceHasActiveBuff = false)
         {
-            if (amount <= 0 || triggerKind == PassiveTriggerKind.None)
+            if (e.Kind == ActivationConditionKind.None || e.Amount <= 0)
                 return false;
 
             var changed = false;
             for (var i = 0; i < _states.Length; i++)
             {
                 var state = _states[i];
-                if (state.Side != side || false == state.CanActivateAgain)
+                if (false == state.CanActivateAgain)
                     continue;
 
-                if (state.Definition.TriggerKind != triggerKind)
+                if (sourceHasActiveBuff && false == state.Definition.CanActivateWhileActive)
                     continue;
 
-                if (slotIndex >= 0 && state.SlotIndex != slotIndex)
+                if (false == TryAddConditionProgress(state, e, out var nextState))
                     continue;
 
-                if (slotKind != TileKind.None && state.SlotKind != slotKind)
-                    continue;
-
-                var nextState = state.WithTriggerProgress(state.TriggerProgress + amount);
-                _states[i] = nextState.TriggerProgress >= nextState.Definition.RequiredTriggerCount
-                    ? nextState.WithActivated(currentRound)
-                    : nextState;
+                _states[i] = IsConditionGroupSatisfied(nextState) ? nextState.WithActivated() : nextState;
                 changed = true;
             }
 
             return changed;
         }
 
-        public bool ResetTriggerProgress(PassiveTriggerKind triggerKind, BattleSide side)
+        public bool ResetActivationConditionProgress(ActivationConditionKind kind, BattleSide side)
         {
-            if (triggerKind == PassiveTriggerKind.None)
+            if (kind == ActivationConditionKind.None)
                 return false;
 
             var changed = false;
@@ -87,14 +75,60 @@ namespace Project.Scripts.Shared.Passives
                 if (state.Side != side)
                     continue;
 
-                if (state.Definition.TriggerKind != triggerKind || state.TriggerProgress == 0)
+                var conditions = state.Definition.ActivationConditions.Conditions;
+                for (var conditionIndex = 0; conditionIndex < conditions.Count; conditionIndex++)
+                {
+                    if (conditions[conditionIndex].Kind != kind || state.GetConditionProgress(conditionIndex) == 0)
+                        continue;
+
+                    state = state.WithConditionProgress(conditionIndex, 0);
+                    changed = true;
+                }
+
+                _states[i] = state;
+            }
+
+            return changed;
+        }
+
+        private static bool TryAddConditionProgress(HeroPassiveRuntimeState state, ActivationConditionEvent e,
+            out HeroPassiveRuntimeState nextState)
+        {
+            nextState = state;
+            var changed = false;
+            var conditions = state.Definition.ActivationConditions.Conditions;
+            for (var conditionIndex = 0; conditionIndex < conditions.Count; conditionIndex++)
+            {
+                var condition = conditions[conditionIndex];
+                if (false == ActivationConditionRules.Matches(condition, e, state.Side, state.SlotIndex))
                     continue;
 
-                _states[i] = state.WithTriggerProgress(0);
+                nextState = nextState.WithConditionProgress(conditionIndex,
+                    nextState.GetConditionProgress(conditionIndex) + e.Amount);
                 changed = true;
             }
 
             return changed;
+        }
+
+        private static bool IsConditionGroupSatisfied(HeroPassiveRuntimeState state)
+        {
+            var group = state.Definition.ActivationConditions;
+            var conditions = group.Conditions;
+            if (conditions.Count == 0)
+                return false;
+
+            for (var i = 0; i < conditions.Count; i++)
+            {
+                var satisfied = state.GetConditionProgress(i) >= conditions[i].RequiredCount;
+                if (group.Operator == ActivationConditionGroupOperator.Any && satisfied)
+                    return true;
+
+                if (group.Operator == ActivationConditionGroupOperator.All && false == satisfied)
+                    return false;
+            }
+
+            return group.Operator == ActivationConditionGroupOperator.All;
         }
 
         public bool DisableOwner(BattleSide side, int slotIndex)
@@ -107,25 +141,6 @@ namespace Project.Scripts.Shared.Passives
                     continue;
 
                 _states[i] = state.WithDisabled();
-                changed = true;
-            }
-
-            return changed;
-        }
-
-        public bool ExpireRoundLimitedPassives(int currentRound)
-        {
-            var changed = false;
-            for (var i = 0; i < _states.Length; i++)
-            {
-                var state = _states[i];
-                if (state.IsDisabled || false == state.IsActive || state.ExpiresAtRound <= 0)
-                    continue;
-
-                if (currentRound < state.ExpiresAtRound)
-                    continue;
-
-                _states[i] = state.WithExpired();
                 changed = true;
             }
 

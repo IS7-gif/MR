@@ -41,12 +41,12 @@ namespace Project.Scripts.DI
             builder.Register<ILevelProgressionService, LevelProgressionService>(Lifetime.Singleton);
             builder.Register<IMoveBarService, MoveBarService>(Lifetime.Singleton);
             builder.Register<IHeroService, HeroService>(Lifetime.Singleton);
-            builder.RegisterEntryPoint<HeroPassiveService>()
-                .As<IHeroPassiveService>()
+            builder.Register<HeroBuffService>(Lifetime.Singleton)
+                .As<IBuffService>()
                 .As<IEnergyGainModifierService>()
-                .As<IHeroAbilityModifierService>();
-            builder.Register<INextAttackBuffService, NextAttackBuffService>(Lifetime.Singleton);
-            builder.RegisterEntryPoint<PassiveActionEffectService>();
+                .As<IHeroAbilityModifierService>()
+                .As<INextAttackBuffService>();
+            builder.RegisterEntryPoint<HeroPassiveService>().As<IHeroPassiveService>();
             builder.RegisterEntryPoint<BattleSideEnergyService>().As<IBattleSideEnergyService>();
             builder.Register<IUnitActivationCooldownService, UnitActivationCooldownService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerAvatarChargeService>().As<IPlayerAvatarChargeService>();

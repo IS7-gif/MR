@@ -39,6 +39,7 @@ namespace Project.Scripts.Utils
         private static float GetAspect(Camera cam)
         {
             var h = UnityEngine.Device.Screen.height;
+            
             return h > 0 ? (float)UnityEngine.Device.Screen.width / h : cam.aspect;
         }
 

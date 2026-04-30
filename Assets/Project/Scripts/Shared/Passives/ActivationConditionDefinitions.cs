@@ -1,0 +1,92 @@
+using System;
+using System.Collections.Generic;
+using Project.Scripts.Shared.Heroes;
+
+namespace Project.Scripts.Shared.Passives
+{
+    public readonly struct ActivationConditionDefinition
+    {
+        public ActivationConditionKind Kind { get; }
+        public ActivationConditionSubject Subject { get; }
+        public int RequiredCount { get; }
+        public bool IsConfigured => Kind != ActivationConditionKind.None;
+
+
+        public ActivationConditionDefinition(ActivationConditionKind kind, ActivationConditionSubject subject,
+            int requiredCount)
+        {
+            Kind = kind;
+            Subject = subject;
+            RequiredCount = requiredCount < 1 ? 1 : requiredCount;
+        }
+    }
+
+    public readonly struct ActivationConditionGroupDefinition
+    {
+        public ActivationConditionGroupOperator Operator { get; }
+        public IReadOnlyList<ActivationConditionDefinition> Conditions =>
+            _conditions ?? Array.Empty<ActivationConditionDefinition>();
+        public bool IsConfigured => Conditions.Count > 0;
+
+
+        private readonly ActivationConditionDefinition[] _conditions;
+
+
+        public ActivationConditionGroupDefinition(ActivationConditionGroupOperator @operator,
+            IReadOnlyList<ActivationConditionDefinition> conditions)
+        {
+            Operator = @operator;
+            _conditions = CopyConfiguredConditions(conditions);
+        }
+
+        private static ActivationConditionDefinition[] CopyConfiguredConditions(
+            IReadOnlyList<ActivationConditionDefinition> conditions)
+        {
+            if (null == conditions || conditions.Count == 0)
+                return Array.Empty<ActivationConditionDefinition>();
+
+            var result = new List<ActivationConditionDefinition>(conditions.Count);
+            for (var i = 0; i < conditions.Count; i++)
+            {
+                var condition = conditions[i];
+                if (condition.IsConfigured)
+                    result.Add(condition);
+            }
+
+            return result.ToArray();
+        }
+    }
+
+    public readonly struct ActivationConditionEvent
+    {
+        public ActivationConditionKind Kind { get; }
+        public UnitDescriptor Source { get; }
+        public int Amount { get; }
+
+
+        public ActivationConditionEvent(ActivationConditionKind kind, UnitDescriptor source, int amount = 1)
+        {
+            Kind = kind;
+            Source = source;
+            Amount = amount < 1 ? 1 : amount;
+        }
+    }
+    
+    
+    public enum ActivationConditionKind
+    {
+        None,
+        AbilityActivated
+    }
+
+    public enum ActivationConditionSubject
+    {
+        Owner
+    }
+
+    public enum ActivationConditionGroupOperator
+    {
+        All,
+        Any
+    }
+}

@@ -18,22 +18,6 @@ MonoBehaviour:
   _activationEnergyCost: 15
   _activationCooldownSeconds: 10
   _portrait: {fileID: 21300000, guid: 27e02dbeb09a77c46944c9428156ae3d, type: 3}
-  _displayName: 
+  _displayName: Hero_Healer_2
   _passiveAbilities:
-  - _displayName: Allies Attack Boost
-    _triggerKind: 1
-    _requiredTriggerCount: 1
-    _modifierEffects: []
-    _actionEffects:
-    - _kind: 1
-      _target:
-        _team: 1
-        _unitKind: 1
-        _selectionMode: 1
-        _count: 0
-        _excludeOwner: 1
-      _value: 3
-      _count: 0
-    _canActivateWhileActive: 1
-    _maxActivations: 0
-    _activeDurationRounds: 0
+  - {fileID: 11400000, guid: c38f02f191c64c53a56d8e4a62a2a3e9, type: 2}

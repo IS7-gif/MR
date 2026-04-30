@@ -39,10 +39,12 @@ namespace Project.Scripts.Gameplay
 {
     public class GameplayEntryPoint : MonoBehaviour
     {
+        private const float MinLayoutCellSize = 0.01f;
+        
+        
         [Tooltip("Родительский Transform для всех инстанцируемых объектов тайлов")]
         [SerializeField] private BattleWorldLayout _battleWorldLayout;
 
-        private const float MinLayoutCellSize = 0.01f;
 
         private EventBus _eventBus;
         private AudioService _audioService;
@@ -80,6 +82,7 @@ namespace Project.Scripts.Gameplay
         private HintConfig _hintConfig;
         private TileKindPaletteConfig _palette;
         private IHeroPassiveService _heroPassiveService;
+        private IBuffService _buffService;
         private HintService _hintService;
         private PassiveTileGlowService _passiveTileGlowService;
         private DebugConfig _debugConfig;
@@ -207,6 +210,7 @@ namespace Project.Scripts.Gameplay
             HintConfig hintConfig,
             TileKindPaletteConfig palette,
             IHeroPassiveService heroPassiveService,
+            IBuffService buffService,
             DebugConfig debugConfig,
             IBoardAnnouncementService boardAnnouncementService)
         {
@@ -240,6 +244,7 @@ namespace Project.Scripts.Gameplay
             _hintConfig = hintConfig;
             _palette = palette;
             _heroPassiveService = heroPassiveService;
+            _buffService = buffService;
             _debugConfig = debugConfig;
             _boardAnnouncementService = boardAnnouncementService;
         }
@@ -341,12 +346,9 @@ namespace Project.Scripts.Gameplay
 
             _hintService = new HintService(_hintConfig, gridManager.State, gridManager, matchFinder,
                 _gridConfig, _gameStateService, _boardRuntimeService, _eventBus);
-            _passiveTileGlowService = new PassiveTileGlowService(
-                _eventBus,
-                gridManager,
-                _gridConfig,
-                _heroPassiveService,
-                _palette);
+            
+            _passiveTileGlowService = new PassiveTileGlowService(_eventBus, gridManager, _gridConfig,
+                _buffService, _palette);
 
             _gameAudioController = new GameAudioController(_audioService, _eventBus, _gameStateService);
             _gameAudioController.StartMusic();
@@ -382,7 +384,7 @@ namespace Project.Scripts.Gameplay
 
         private bool ApplyTopBarLayout(string reason)
         {
-            if (!_topBarView || _gameplayScreenLayoutService == null)
+            if (!_topBarView || null == _gameplayScreenLayoutService)
                 return false;
 
             var layout = _gameplayScreenLayoutService.Calculate();
@@ -397,6 +399,7 @@ namespace Project.Scripts.Gameplay
                 _gameplayScreenLayoutConfig.TopBarSidePadding,
                 _gameplayScreenLayoutConfig.TopBarBottomPadding,
                 _gameplayScreenLayoutConfig.TopBarHeight);
+            
             return applied;
         }
 
@@ -530,6 +533,7 @@ namespace Project.Scripts.Gameplay
             var worldRect = _gameplayScreenLayoutService.ToWorldRect(cam, layout.WorldRect);
             var fixedHeight = GetBattleWorldBaseFixedHeight();
             var gapCellUnits = GetBattleWorldGapCellUnits();
+            
             return GameplayWorldLayoutCalculator.Calculate(
                 ToScreenLayoutRect(worldRect),
                 _boardConfig.MaxAspectRatio,
@@ -555,6 +559,7 @@ namespace Project.Scripts.Gameplay
             var playerEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.PlayerEnergyBaseHeight : 0f;
             var enemyEnergyHeight = _battleWorldLayout.EnergyView ? _battleWorldLayout.EnergyView.EnemyEnergyBaseHeight : 0f;
             var battleFieldHeight = _battleFieldView ? _battleFieldView.BaseLayoutHeight : 0f;
+            
             return playerEnergyHeight + enemyEnergyHeight + battleFieldHeight;
         }
 

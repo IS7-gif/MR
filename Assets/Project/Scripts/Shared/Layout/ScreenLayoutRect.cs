@@ -6,7 +6,6 @@ namespace Project.Scripts.Shared.Layout
         public float Y { get; }
         public float Width { get; }
         public float Height { get; }
-
         public float XMin => X;
         public float XMax => X + Width;
         public float YMin => Y;

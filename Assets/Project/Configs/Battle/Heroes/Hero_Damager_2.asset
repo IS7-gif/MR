@@ -20,17 +20,4 @@ MonoBehaviour:
   _portrait: {fileID: 21300000, guid: 7aa2f66b0d575ae48a9d71a2cf7377d6, type: 3}
   _displayName: Hero_Damager_2
   _passiveAbilities:
-  - _displayName: Rising Power Cost
-    _triggerKind: 1
-    _requiredTriggerCount: 1
-    _modifierEffects:
-    - _target: 2
-      _operation: 1
-      _value: 5
-    - _target: 1
-      _operation: 1
-      _value: 5
-    _actionEffects: []
-    _canActivateWhileActive: 1
-    _maxActivations: 0
-    _activeDurationRounds: 0
+  - {fileID: 11400000, guid: b2cda9edc5f34676a6148af5986bb7d2, type: 2}

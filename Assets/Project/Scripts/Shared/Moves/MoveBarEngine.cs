@@ -19,9 +19,7 @@ namespace Project.Scripts.Shared.Moves
 
                 float fillProgress;
                 if (isAtMax)
-                {
                     fillProgress = 1f;
-                }
                 else if (_settings is { MaxMoves: > 0, SecondsPerMove: > 0f })
                 {
                     var partial = _accumulatedTime / _settings.SecondsPerMove;
