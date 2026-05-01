@@ -226,12 +226,14 @@ namespace Project.Scripts.Services.Events
     {
         public BattleSide Side { get; }
         public int Current { get; }
+        public int EnergyCap { get; }
 
 
-        public BattleSideEnergyChangedEvent(BattleSide side, int current)
+        public BattleSideEnergyChangedEvent(BattleSide side, int current, int energyCap)
         {
             Side = side;
             Current = current;
+            EnergyCap = energyCap;
         }
     }
 

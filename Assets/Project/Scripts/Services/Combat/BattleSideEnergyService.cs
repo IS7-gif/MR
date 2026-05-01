@@ -16,10 +16,13 @@ namespace Project.Scripts.Services.Combat
         private readonly BattleFlowConfig _battleFlowConfig;
         private readonly IBattleEconomyModifierService _battleEconomyModifier;
         private readonly IEnergyGainModifierService _energyGainModifier;
-        private readonly SideEnergyPoolEngine _playerPool = new SideEnergyPoolEngine();
-        private readonly SideEnergyPoolEngine _enemyPool = new SideEnergyPoolEngine();
+        private readonly SideEnergyPoolEngine _playerPool;
+        private readonly SideEnergyPoolEngine _enemyPool;
         private IDisposable _energyGeneratedSubscription;
         private IDisposable _roundChangedSubscription;
+
+
+        public int EnergyCap => _battleFlowConfig.EnergyCap;
 
 
         public BattleSideEnergyService(
@@ -34,6 +37,8 @@ namespace Project.Scripts.Services.Combat
             _battleFlowConfig = battleFlowConfig;
             _battleEconomyModifier = battleEconomyModifier;
             _energyGainModifier = energyGainModifier;
+            _playerPool = new SideEnergyPoolEngine(battleFlowConfig.EnergyCap);
+            _enemyPool = new SideEnergyPoolEngine(battleFlowConfig.EnergyCap);
         }
 
 
@@ -117,7 +122,7 @@ namespace Project.Scripts.Services.Combat
 
         private void PublishEnergyChanged(BattleSide side)
         {
-            _eventBus.Publish(new BattleSideEnergyChangedEvent(side, GetDisplayEnergy(side)));
+            _eventBus.Publish(new BattleSideEnergyChangedEvent(side, GetDisplayEnergy(side), EnergyCap));
         }
 
         private SideEnergyPoolEngine GetPool(BattleSide side)

@@ -4,6 +4,7 @@ namespace Project.Scripts.Services.Combat
 {
     public interface IBattleSideEnergyService
     {
+        int EnergyCap { get; }
         int GetDisplayEnergy(BattleSide side);
         bool CanSpend(BattleSide side, int amount);
         bool TrySpend(BattleSide side, int amount);

@@ -43,6 +43,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         public ReadOnlyReactiveProperty<bool> IsInteractionOverlayVisible => _isInteractionOverlayVisible;
         public ReadOnlyReactiveProperty<int> PlayerEnergy => _playerEnergy;
         public ReadOnlyReactiveProperty<int> EnemyEnergy => _enemyEnergy;
+        public int EnergyCap => _battleSideEnergyService.EnergyCap;
 
 
         private readonly EventBus _eventBus;

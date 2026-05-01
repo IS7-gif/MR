@@ -19,6 +19,9 @@ namespace Project.Scripts.Configs.Battle
         [Tooltip("Правило переноса остатка энергии между раундами")]
         [SerializeField] private EnergyCarryoverMode _energyCarryoverMode = EnergyCarryoverMode.CarryOverBetweenRounds;
 
+        [Tooltip("Максимальный запас энергии для каждой стороны боя")]
+        [SerializeField] private int _energyCap = 250;
+
         [Header("PrePhase settings")]
         [Tooltip("Длительность подготовительной паузы перед фазой в секундах")]
         [SerializeField] private int _prePhaseDuration = 5;
@@ -42,5 +45,6 @@ namespace Project.Scripts.Configs.Battle
         public bool EnablePrePhaseOnBattleStart => _enablePrePhaseOnBattleStart;
         public int CountdownThreshold => _countdownThreshold;
         public EnergyCarryoverMode EnergyCarryoverMode => _energyCarryoverMode;
+        public int EnergyCap => Mathf.Max(1, _energyCap);
     }
 }

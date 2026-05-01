@@ -63,6 +63,8 @@ namespace Project.Scripts.Gameplay.Battle.Layout
             if (viewModel == null)
                 return;
 
+            _playerBar?.SetMaxValue(viewModel.EnergyCap);
+            _enemyBar?.SetMaxValue(viewModel.EnergyCap);
             _playerBar?.SetValue(viewModel.PlayerEnergy.CurrentValue, false);
             _enemyBar?.SetValue(viewModel.EnemyEnergy.CurrentValue, false);
 

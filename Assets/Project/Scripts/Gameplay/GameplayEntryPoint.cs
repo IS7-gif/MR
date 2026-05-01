@@ -425,14 +425,14 @@ namespace Project.Scripts.Gameplay
 
         private static void LogWorldFit(string reason, GameplayWorldLayout worldLayout)
         {
-            Debug.Log(
-                $"Gameplay world fit [{reason}] " +
-                $"desired={worldLayout.DesiredStackHeight:0.###}, " +
-                $"available={worldLayout.AvailableStackHeight:0.###}, " +
-                $"fitScale={worldLayout.FitScale:0.###}, " +
-                $"currentGapScale={worldLayout.GapScale:0.###}, " +
-                $"frameCell={worldLayout.FrameCellSize:0.###}, " +
-                $"tileCell={worldLayout.TileCellSize:0.###}");
+            // Debug.Log(
+            //     $"Gameplay world fit [{reason}] " +
+            //     $"desired={worldLayout.DesiredStackHeight:0.###}, " +
+            //     $"available={worldLayout.AvailableStackHeight:0.###}, " +
+            //     $"fitScale={worldLayout.FitScale:0.###}, " +
+            //     $"currentGapScale={worldLayout.GapScale:0.###}, " +
+            //     $"frameCell={worldLayout.FrameCellSize:0.###}, " +
+            //     $"tileCell={worldLayout.TileCellSize:0.###}");
         }
 
         private void ApplyLiveResize()

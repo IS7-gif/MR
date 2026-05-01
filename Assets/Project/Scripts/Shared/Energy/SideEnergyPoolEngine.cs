@@ -2,20 +2,30 @@ namespace Project.Scripts.Shared.Energy
 {
     public class SideEnergyPoolEngine
     {
-        public SideEnergyPoolSnapshot Snapshot => new(_currentEnergy);
+        public SideEnergyPoolSnapshot Snapshot => new(_currentEnergy, _energyCap);
+        public float EnergyCap => _energyCap;
 
 
+        private readonly float _energyCap;
         private float _currentEnergy;
 
+
+        public SideEnergyPoolEngine(float energyCap)
+        {
+            _energyCap = energyCap < 0f ? 0f : energyCap;
+        }
 
         public float AddEnergy(float amount)
         {
             if (amount <= 0f)
                 return 0f;
 
+            var before = _currentEnergy;
             _currentEnergy += amount;
+            if (_energyCap > 0f && _currentEnergy > _energyCap)
+                _currentEnergy = _energyCap;
             
-            return amount;
+            return _currentEnergy - before;
         }
 
         public bool CanSpend(int amount)

@@ -7,9 +7,6 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 {
     public class EnergyBarView : MonoBehaviour
     {
-        private const int VisualMax = 250;
-
-
         [Tooltip("SpriteRenderer фона бара (полная ширина)")]
         [SerializeField] private SpriteRenderer _background;
 
@@ -38,6 +35,8 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 
         private float _displayedRatio;
         private float _layoutScale = 1f;
+        private int _maxValue = 1;
+        private int _currentValue;
         private Tween _fillTween;
         private AnimatedIntegerText _valueTextTween;
 
@@ -63,8 +62,15 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 #endif
 
 
+        public void SetMaxValue(int maxValue)
+        {
+            _maxValue = Mathf.Max(1, maxValue);
+            ApplyFill(GetRatio(_currentValue));
+        }
+
         public void SetValue(int value, bool animate = true)
         {
+            _currentValue = value;
             if (_valueText)
             {
                 _valueTextTween ??= new AnimatedIntegerText(_valueText);
@@ -74,7 +80,7 @@ namespace Project.Scripts.Gameplay.Battle.Layout
                     _valueTextTween.SetInstant(value);
             }
 
-            var targetRatio = Mathf.Clamp01(value / (float)VisualMax);
+            var targetRatio = GetRatio(value);
             _fillTween?.Kill();
             if (false == animate)
             {
@@ -130,6 +136,11 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 
             var local = _fill.transform.localPosition;
             _fill.transform.localPosition = new Vector3(barWidth * (ratio - 1f) * 0.5f, local.y, local.z);
+        }
+
+        private float GetRatio(int value)
+        {
+            return Mathf.Clamp01(value / (float)_maxValue);
         }
 
         private static void ApplySpriteSize(SpriteRenderer sr, float worldWidth, float worldHeight)
