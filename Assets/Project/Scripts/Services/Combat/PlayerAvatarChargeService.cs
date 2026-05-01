@@ -13,28 +13,34 @@ namespace Project.Scripts.Services.Combat
         public bool IsReady => _battleSideEnergyService.CanSpend(BattleSide.Player, ActivationEnergyCost)
                                && false == _unitActivationCooldownService.IsAvatarOnCooldown(BattleSide.Player);
         public HeroActionType AbilityType { get; }
-        public int AbilityPower { get; }
+        public int AbilityPower => _abilityPowerModifierService.GetAbilityPower(
+            UnitDescriptor.Avatar(BattleSide.Player, AbilityType),
+            _baseAbilityPower);
 
         
         private readonly IBattleSideEnergyService _battleSideEnergyService;
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
+        private readonly IAbilityPowerModifierService _abilityPowerModifierService;
+        private readonly int _baseAbilityPower;
 
         
         public PlayerAvatarChargeService(
             LevelConfig levelConfig,
             IBattleSideEnergyService battleSideEnergyService,
             IBattleActionRuntimeService battleActionRuntimeService,
-            IUnitActivationCooldownService unitActivationCooldownService)
+            IUnitActivationCooldownService unitActivationCooldownService,
+            IAbilityPowerModifierService abilityPowerModifierService)
         {
             _battleSideEnergyService = battleSideEnergyService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _unitActivationCooldownService = unitActivationCooldownService;
+            _abilityPowerModifierService = abilityPowerModifierService;
             var config = levelConfig.PlayerAvatarConfig;
 
             ActivationEnergyCost = config.ActivationEnergyCost;
             AbilityType = config.AbilityType;
-            AbilityPower = config.AbilityPower;
+            _baseAbilityPower = config.AbilityPower;
         }
 
         public void Start()

@@ -72,7 +72,12 @@ namespace Project.Scripts.Shared.Passives
 
         public float GetModifiedAbilityPower(float basePower, BattleSide side, int slotIndex)
         {
-            return GetModifiedHeroValue(basePower, side, slotIndex, BuffKind.ModifyAbilityPower);
+            return GetModifiedAbilityPower(basePower, UnitDescriptor.Hero(side, slotIndex, HeroActionType.DealDamage));
+        }
+
+        public float GetModifiedAbilityPower(float basePower, UnitDescriptor target)
+        {
+            return GetModifiedUnitValue(basePower, target, BuffKind.ModifyAbilityPower);
         }
 
         public float GetModifiedActivationEnergyCost(float baseCost, BattleSide side, int slotIndex)
@@ -155,14 +160,20 @@ namespace Project.Scripts.Shared.Passives
 
         private float GetModifiedHeroValue(float baseValue, BattleSide side, int slotIndex, BuffKind kind)
         {
+            return GetModifiedUnitValue(baseValue, UnitDescriptor.Hero(side, slotIndex, HeroActionType.DealDamage), kind);
+        }
+
+        private float GetModifiedUnitValue(float baseValue, UnitDescriptor target, BuffKind kind)
+        {
             var result = baseValue;
+            var targetKey = BattleUnitKey.FromDescriptor(target);
             for (var i = 0; i < _buffs.Count; i++)
             {
                 var buff = _buffs[i];
                 if (buff.Definition.Kind != kind)
                     continue;
 
-                if (buff.Target.Side != side || buff.Target.Kind != UnitKind.Hero || buff.Target.SlotIndex != slotIndex)
+                if (BattleUnitKey.FromDescriptor(buff.Target) != targetKey)
                     continue;
 
                 result = BuffRules.Apply(result, buff.Definition, buff.StackCount);

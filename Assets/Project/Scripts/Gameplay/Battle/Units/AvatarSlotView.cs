@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Configs.UI;
 using Project.Scripts.Gameplay.Battle.Targeting;
+using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Services.Combat;
 using Project.Scripts.Shared.Heroes;
 using R3;
@@ -17,6 +18,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
         private static readonly int GrayscaleEnabledShaderId = Shader.PropertyToID("_GrayscaleEnabled");
         private const float DisabledPortraitBrightness = 0.45f;
+        private const float AbilityPowerAnimDuration = 0.25f;
 
         
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
@@ -48,6 +50,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         [Tooltip("Текст HP (только текущее значение) - скрывается при MaxHP = 0 (бессмертный юнит)")]
         [SerializeField] private TMP_Text _hpText;
+
+        [Tooltip("Текст стоимости активации способности в единицах энергии")]
+        [SerializeField] private TMP_Text _energyCostLabel;
+
+        [Tooltip("Текст величины силы способности (урон / лечение)")]
+        [SerializeField] private TMP_Text _abilityPowerLabel;
 
         [Tooltip("Transform, используемый как якорь для всплывающих чисел урона/лечения")]
         [SerializeField] private Transform _hitAnchor;
@@ -83,6 +91,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
         private Tween _resultPulseTween;
+        private AnimatedIntegerText _abilityPowerTextTween;
         private MaterialPropertyBlock _portraitPropertyBlock;
         private bool _isAvailabilityDimmed;
 
@@ -92,6 +101,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             _hitFlashTween?.Kill();
             _knockbackTween?.Kill();
             _resultPulseTween?.Kill();
+            _abilityPowerTextTween?.Dispose();
             _disposables?.Dispose();
         }
 
@@ -115,7 +125,10 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindDeathState(viewModel);
             BindAvailabilityState(viewModel);
             BindCooldownSweep(viewModel);
-            GetComponentInChildren<DebugEnergyCostLabel>()?.Show(viewModel.ActivationEnergyCost);
+            if (_energyCostLabel)
+                _energyCostLabel.text = $"{viewModel.ActivationEnergyCost}";
+
+            BindAbilityPowerLabel(viewModel);
         }
 
         public async UniTask PlayResultPulse(AvatarPulseStepConfig config)
@@ -282,6 +295,19 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     _cooldownSweep?.SetCooldown(info.Remaining, info.Duration);
                     SetPortraitGrayscale(info.Remaining > 0f && _config && _config.CooldownGrayscaleEnabled);
                 })
+                .AddTo(_disposables);
+        }
+
+        private void BindAbilityPowerLabel(AvatarSlotViewModel viewModel)
+        {
+            if (!_abilityPowerLabel)
+                return;
+
+            _abilityPowerTextTween?.Dispose();
+            _abilityPowerTextTween = new AnimatedIntegerText(_abilityPowerLabel);
+            _abilityPowerTextTween.SetInstant(viewModel.AbilityPower);
+            viewModel.AbilityPowerChanged
+                .Subscribe(power => _abilityPowerTextTween.AnimateTo(power, AbilityPowerAnimDuration, Ease.OutQuad))
                 .AddTo(_disposables);
         }
 

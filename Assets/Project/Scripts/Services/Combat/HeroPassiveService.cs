@@ -131,7 +131,7 @@ namespace Project.Scripts.Services.Combat
                 if (buffsChanged)
                 {
                     _eventBus.Publish(new BuffsChangedEvent());
-                    PublishAllHeroAbilityStatsChanged();
+                    PublishAllAbilityStatsChanged();
                     RefreshAllSlotKindPassiveStates();
                 }
                 else
@@ -173,7 +173,7 @@ namespace Project.Scripts.Services.Combat
                 return;
 
             _eventBus.Publish(new BuffsChangedEvent());
-            PublishAllHeroAbilityStatsChanged();
+            PublishAllAbilityStatsChanged();
             RefreshAllSlotKindPassiveStates();
         }
 
@@ -232,7 +232,7 @@ namespace Project.Scripts.Services.Combat
                     if (_buffService.AddBuff(source, targets[j], state.SlotKind, entry.Buff, _currentRound))
                     {
                         buffsChanged = true;
-                        PublishHeroAbilityStatsChanged(targets[j]);
+                        PublishAbilityStatsChanged(targets[j]);
                     }
                 }
             }
@@ -260,23 +260,50 @@ namespace Project.Scripts.Services.Combat
 
         private int GetAbilityPower(BattleSide side, int slotIndex, int basePower)
         {
-            return (_buffService as IHeroAbilityModifierService)?.GetAbilityPower(side, slotIndex, basePower)
+            return (_buffService as IAbilityPowerModifierService)
+                       ?.GetAbilityPower(UnitDescriptor.Hero(side, slotIndex, GetSourceActionType(side, slotIndex)), basePower)
                    ?? basePower;
         }
 
-        private void PublishHeroAbilityStatsChanged(UnitDescriptor target)
+        private int GetAbilityPower(UnitDescriptor target, int basePower)
         {
-            if (target.Kind == UnitKind.Hero)
-                PublishHeroAbilityStatsChanged(target.Side, target.SlotIndex);
+            return (_buffService as IAbilityPowerModifierService)?.GetAbilityPower(target, basePower)
+                   ?? basePower;
         }
 
-        private void PublishAllHeroAbilityStatsChanged()
+        private void PublishAbilityStatsChanged(UnitDescriptor target)
+        {
+            if (target.Kind == UnitKind.Hero)
+            {
+                PublishHeroAbilityStatsChanged(target.Side, target.SlotIndex);
+                return;
+            }
+
+            PublishAvatarAbilityPowerChanged(target.Side);
+        }
+
+        private void PublishAllAbilityStatsChanged()
         {
             for (var i = 0; i < SlotCount; i++)
             {
                 PublishHeroAbilityStatsChanged(BattleSide.Player, i);
                 PublishHeroAbilityStatsChanged(BattleSide.Enemy, i);
             }
+
+            PublishAvatarAbilityPowerChanged(BattleSide.Player);
+            PublishAvatarAbilityPowerChanged(BattleSide.Enemy);
+        }
+
+        private void PublishAvatarAbilityPowerChanged(BattleSide side)
+        {
+            var config = side == BattleSide.Player
+                ? _levelConfig.PlayerAvatarConfig
+                : _levelConfig.EnemyAvatarConfig;
+            if (!config)
+                return;
+
+            var target = UnitDescriptor.Avatar(side, config.AbilityType);
+            _eventBus.Publish(new AvatarAbilityPowerChangedEvent(side, GetAbilityPower(target, config.AbilityPower)));
         }
 
         private void RefreshAllSlotKindPassiveStates()

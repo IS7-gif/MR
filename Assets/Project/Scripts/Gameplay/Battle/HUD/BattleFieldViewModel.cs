@@ -51,6 +51,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
         private readonly BattleAnimationConfig _battleAnimationConfig;
         private readonly IHeroService _heroService;
         private readonly IBattleSideEnergyService _battleSideEnergyService;
+        private readonly IAbilityPowerModifierService _abilityPowerModifierService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
         private readonly TileKindPaletteConfig _palette;
         private readonly LevelConfig _levelConfig;
@@ -77,6 +78,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             BattleAnimationConfig battleAnimationConfig,
             IHeroService heroService,
             IBattleSideEnergyService battleSideEnergyService,
+            IAbilityPowerModifierService abilityPowerModifierService,
             IUnitActivationCooldownService unitActivationCooldownService,
             TileKindPaletteConfig palette,
             LevelConfig levelConfig,
@@ -97,6 +99,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             _battleAnimationConfig = battleAnimationConfig;
             _heroService = heroService;
             _battleSideEnergyService = battleSideEnergyService;
+            _abilityPowerModifierService = abilityPowerModifierService;
             _unitActivationCooldownService = unitActivationCooldownService;
             _palette = palette;
             _levelConfig = levelConfig;
@@ -135,6 +138,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _battleAnimationConfig,
                 _levelConfig.PlayerAvatarConfig.AbilityType,
                 _levelConfig.PlayerAvatarConfig.ActivationEnergyCost,
+                GetAvatarAbilityPower(BattleSide.Player, _levelConfig.PlayerAvatarConfig),
                 _unitActivationCooldownService,
                 _battleActionRuntimeService);
 
@@ -148,6 +152,7 @@ namespace Project.Scripts.Gameplay.Battle.HUD
                 _battleAnimationConfig,
                 _levelConfig.EnemyAvatarConfig.AbilityType,
                 _levelConfig.EnemyAvatarConfig.ActivationEnergyCost,
+                GetAvatarAbilityPower(BattleSide.Enemy, _levelConfig.EnemyAvatarConfig),
                 _unitActivationCooldownService,
                 _battleActionRuntimeService);
 
@@ -296,6 +301,13 @@ namespace Project.Scripts.Gameplay.Battle.HUD
             }
 
             return slots;
+        }
+
+        private int GetAvatarAbilityPower(BattleSide side, AvatarConfig config)
+        {
+            return _abilityPowerModifierService.GetAbilityPower(
+                UnitDescriptor.Avatar(side, config.AbilityType),
+                config.AbilityPower);
         }
     }
 }

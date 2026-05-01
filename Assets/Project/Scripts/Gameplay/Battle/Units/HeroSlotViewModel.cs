@@ -19,10 +19,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public BattleSide Side { get; }
         public HeroActionType ActionType { get; }
         public int ActivationEnergyCost => ActivationEnergyCostChanged.Value;
+        public int AbilityPower => AbilityPowerChanged.Value;
         public bool IsPlayerSlot => Side == BattleSide.Player;
         public ReactiveProperty<bool>  IsActivatable { get; } = new(false);
         public ReactiveProperty<UnitActivationBlockReason> ActivationBlockReason { get; } = new(UnitActivationBlockReason.None);
         public ReactiveProperty<int> ActivationEnergyCostChanged { get; }
+        public ReactiveProperty<int> AbilityPowerChanged { get; }
         public ReactiveProperty<bool> IsAvailabilityDimmed { get; } = new(false);
         public ReactiveProperty<bool> IsSlotKindPassiveActive { get; } = new(false);
         public ReactiveProperty<(float Remaining, float Duration)> CooldownProgress { get; } = new((0f, 0f));
@@ -46,14 +48,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private bool _isOnCooldown;
 
 
-        public HeroSlotViewModel(
-            int slotIndex,
-            BattleSide side,
-            HeroSlotState state,
-            Color color,
-            Sprite portrait,
-            EventBus eventBus,
-            IUnitActivationCooldownService cooldownService,
+        public HeroSlotViewModel(int slotIndex, BattleSide side, HeroSlotState state, Color color, 
+            Sprite portrait, EventBus eventBus, IUnitActivationCooldownService cooldownService, 
             IBattleActionRuntimeService battleActionRuntimeService)
         {
             SlotIndex = slotIndex;
@@ -61,6 +57,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsAssigned = state.IsAssigned;
             ActionType = state.ActionType;
             ActivationEnergyCostChanged = new ReactiveProperty<int>(state.ActivationEnergyCost);
+            AbilityPowerChanged = new ReactiveProperty<int>(state.ActionValue);
             SlotColor = color;
             Portrait = portrait;
             _battleActionRuntimeService = battleActionRuntimeService;
@@ -124,6 +121,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public void UpdateAbilityStats(int activationEnergyCost, int abilityPower)
         {
             ActivationEnergyCostChanged.Value = activationEnergyCost;
+            AbilityPowerChanged.Value = abilityPower;
             _hasSufficientEnergy = activationEnergyCost <= 0 || _currentEnergy >= activationEnergyCost;
             RefreshActivatable();
         }
@@ -133,6 +131,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             IsActivatable.Dispose();
             ActivationBlockReason.Dispose();
             ActivationEnergyCostChanged.Dispose();
+            AbilityPowerChanged.Dispose();
             IsAvailabilityDimmed.Dispose();
             IsSlotKindPassiveActive.Dispose();
             CooldownProgress.Dispose();
@@ -152,6 +151,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.None;
                 RefreshAvailabilityVisualState();
+                
                 return;
             }
 
@@ -161,6 +161,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.BlockedByPhase;
                 RefreshAvailabilityVisualState();
+                
                 return;
             }
 
@@ -169,6 +170,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.InsufficientEnergy;
                 RefreshAvailabilityVisualState();
+                
                 return;
             }
 
@@ -177,6 +179,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 IsActivatable.Value = false;
                 ActivationBlockReason.Value = UnitActivationBlockReason.Cooldown;
                 RefreshAvailabilityVisualState();
+                
                 return;
             }
 

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Project.Scripts.Gameplay.UI;
 using TMPro;
 using UnityEngine;
 
@@ -38,11 +39,13 @@ namespace Project.Scripts.Gameplay.Battle.Layout
         private float _displayedRatio;
         private float _layoutScale = 1f;
         private Tween _fillTween;
+        private AnimatedIntegerText _valueTextTween;
 
 
         private void OnDestroy()
         {
             _fillTween?.Kill();
+            _valueTextTween?.Dispose();
         }
 
         private void Awake()
@@ -60,13 +63,26 @@ namespace Project.Scripts.Gameplay.Battle.Layout
 #endif
 
 
-        public void SetValue(int value)
+        public void SetValue(int value, bool animate = true)
         {
             if (_valueText)
-                _valueText.text = value.ToString();
+            {
+                _valueTextTween ??= new AnimatedIntegerText(_valueText);
+                if (animate)
+                    _valueTextTween.AnimateTo(value, _animDuration, _animEase);
+                else
+                    _valueTextTween.SetInstant(value);
+            }
 
             var targetRatio = Mathf.Clamp01(value / (float)VisualMax);
             _fillTween?.Kill();
+            if (false == animate)
+            {
+                _displayedRatio = targetRatio;
+                ApplyFill(_displayedRatio);
+                return;
+            }
+
             _fillTween = DOTween.To(
                     () => _displayedRatio,
                     r => { _displayedRatio = r; ApplyFill(r); },

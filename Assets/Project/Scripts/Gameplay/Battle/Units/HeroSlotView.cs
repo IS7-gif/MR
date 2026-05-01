@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Project.Scripts.Configs.Battle;
 using Project.Scripts.Gameplay.Battle.Targeting;
+using Project.Scripts.Gameplay.UI;
 using Project.Scripts.Shared.Heroes;
 using R3;
 using TMPro;
@@ -10,10 +11,11 @@ namespace Project.Scripts.Gameplay.Battle.Units
 {
     public class HeroSlotView : MonoBehaviour, ITargetable
     {
+        private const float DisabledPortraitBrightness = 0.45f;
+        private const float AbilityPowerAnimDuration = 0.25f;
         private static readonly int FillEnabledShaderId = Shader.PropertyToID("_FillEnabled");
         private static readonly int FillReplaceShaderId = Shader.PropertyToID("_FillReplace");
         private static readonly int GrayscaleEnabledShaderId = Shader.PropertyToID("_GrayscaleEnabled");
-        private const float DisabledPortraitBrightness = 0.45f;
 
         
         [Tooltip("SpriteRenderer, определяющий границы слота для таргетинга; не используется для окраски")]
@@ -45,6 +47,12 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         [Tooltip("Текст HP (только текущее значение) - скрывается при MaxHP = 0 (бессмертный юнит)")]
         [SerializeField] private TMP_Text _hpText;
+
+        [Tooltip("Текст стоимости активации способности в единицах энергии")]
+        [SerializeField] private TMP_Text _energyCostLabel;
+
+        [Tooltip("Текст величины силы способности (урон / лечение)")]
+        [SerializeField] private TMP_Text _abilityPowerLabel;
 
         [Tooltip("Якорь для всплывающих чисел урона/лечения - по умолчанию центр слота, если не назначен")]
         [SerializeField] private Transform _hitAnchor;
@@ -81,6 +89,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private Color[] _originalDeathColors;
         private Tween _hitFlashTween;
         private Tween _knockbackTween;
+        private AnimatedIntegerText _abilityPowerTextTween;
         private MaterialPropertyBlock _portraitPropertyBlock;
         private bool _isAvailabilityDimmed;
 
@@ -89,6 +98,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
         {
             _hitFlashTween?.Kill();
             _knockbackTween?.Kill();
+            _abilityPowerTextTween?.Dispose();
             _disposables?.Dispose();
         }
         
@@ -112,7 +122,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
             BindAvailabilityState(viewModel);
             BindCooldownSweep(viewModel);
             BindSlotKindPassiveState(viewModel);
-            BindDebugEnergyCost(viewModel);
+            BindEnergyCostLabel(viewModel);
+            BindAbilityPowerLabel(viewModel);
         }
 
         public bool IsValidTarget(UnitDescriptor source)
@@ -231,13 +242,21 @@ namespace Project.Scripts.Gameplay.Battle.Units
                     if (visuals.ApplyDeathFill)
                         SetPortraitDeathFill(defeated);
 
-                    if (_activateOnDeath != null)
-                        foreach (var go in _activateOnDeath)
-                            if (go) go.SetActive(defeated);
+                    if (null != _activateOnDeath)
+                        for (var i = 0; i < _activateOnDeath.Length; i++)
+                        {
+                            var go = _activateOnDeath[i];
+                            if (go) 
+                                go.SetActive(defeated);
+                        }
 
-                    if (_deactivateOnDeath != null)
-                        foreach (var go in _deactivateOnDeath)
-                            if (go) go.SetActive(false == defeated);
+                    if (null != _deactivateOnDeath)
+                        for (var i = 0; i < _deactivateOnDeath.Length; i++)
+                        {
+                            var go = _deactivateOnDeath[i];
+                            if (go) 
+                                go.SetActive(false == defeated);
+                        }
 
                     ApplySlotKindPassiveObjectsState();
                 })
@@ -269,15 +288,27 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 .AddTo(_disposables);
         }
 
-        private void BindDebugEnergyCost(HeroSlotViewModel viewModel)
+        private void BindEnergyCostLabel(HeroSlotViewModel viewModel)
         {
-            var label = GetComponentInChildren<DebugEnergyCostLabel>();
-            if (!label)
+            if (!_energyCostLabel)
                 return;
 
-            label.Show(viewModel.ActivationEnergyCost);
+            _energyCostLabel.text = $"{viewModel.ActivationEnergyCost}";
             viewModel.ActivationEnergyCostChanged
-                .Subscribe(label.Show)
+                .Subscribe(cost => _energyCostLabel.text = $"{cost}")
+                .AddTo(_disposables);
+        }
+
+        private void BindAbilityPowerLabel(HeroSlotViewModel viewModel)
+        {
+            if (!_abilityPowerLabel)
+                return;
+
+            _abilityPowerTextTween?.Dispose();
+            _abilityPowerTextTween = new AnimatedIntegerText(_abilityPowerLabel);
+            _abilityPowerTextTween.SetInstant(viewModel.AbilityPower);
+            viewModel.AbilityPowerChanged
+                .Subscribe(power => _abilityPowerTextTween.AnimateTo(power, AbilityPowerAnimDuration, Ease.OutQuad))
                 .AddTo(_disposables);
         }
 
@@ -333,6 +364,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             {
                 _hpBar?.SnapFill(update.Fill);
                 _hpLagBar?.SnapFill(update.Fill);
+                
                 return;
             }
 

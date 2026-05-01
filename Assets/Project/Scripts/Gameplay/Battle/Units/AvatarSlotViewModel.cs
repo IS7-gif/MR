@@ -18,6 +18,8 @@ namespace Project.Scripts.Gameplay.Battle.Units
         public EventBus EventBus { get; }
         public HeroActionType AbilityType { get; }
         public int ActivationEnergyCost { get; }
+        public int AbilityPower => AbilityPowerChanged.Value;
+        public ReactiveProperty<int> AbilityPowerChanged { get; }
         public ReactiveProperty<float> HPFill { get; }
         public ReactiveProperty<bool> IsDefeated { get; } = new(false);
         public int CurrentHP { get; private set; }
@@ -37,7 +39,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
 
         public AvatarSlotViewModel(EventBus eventBus, BattleSide side, Color slotColor, Sprite portrait,
             int initialHP, int maxHP, BattleAnimationConfig animConfig, HeroActionType abilityType,
-            int activationEnergyCost,
+            int activationEnergyCost, int abilityPower,
             IUnitActivationCooldownService cooldownService,
             IBattleActionRuntimeService battleActionRuntimeService)
         {
@@ -48,6 +50,7 @@ namespace Project.Scripts.Gameplay.Battle.Units
             EventBus = eventBus;
             AbilityType = abilityType;
             ActivationEnergyCost = activationEnergyCost;
+            AbilityPowerChanged = new ReactiveProperty<int>(abilityPower);
             _prevHP = initialHP;
             CurrentHP = initialHP;
             MaxHP = maxHP;
@@ -65,12 +68,15 @@ namespace Project.Scripts.Gameplay.Battle.Units
                 _subscriptions.Add(eventBus.Subscribe<EnemyHPChangedEvent>(OnEnemyHPChanged));
                 _subscriptions.Add(eventBus.Subscribe<EnemyDefeatedEvent>(_ => OnDefeated()));
             }
+
+            _subscriptions.Add(eventBus.Subscribe<AvatarAbilityPowerChangedEvent>(OnAvatarAbilityPowerChanged));
         }
 
         public void Dispose()
         {
             HPFill.Dispose();
             IsDefeated.Dispose();
+            AbilityPowerChanged.Dispose();
             _healthBarUpdated.Dispose();
             _hit.Dispose();
             _heal.Dispose();
@@ -87,6 +93,14 @@ namespace Project.Scripts.Gameplay.Battle.Units
         private void OnEnemyHPChanged(EnemyHPChangedEvent e)
         {
             ApplyHPChanged(e.Current, e.Max, e.Silent);
+        }
+
+        private void OnAvatarAbilityPowerChanged(AvatarAbilityPowerChangedEvent e)
+        {
+            if (e.Side != Side)
+                return;
+
+            AbilityPowerChanged.Value = e.AbilityPower;
         }
 
         private void ApplyHPChanged(int current, int max, bool silent = false)

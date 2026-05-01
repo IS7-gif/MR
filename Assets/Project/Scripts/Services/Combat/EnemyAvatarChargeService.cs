@@ -14,7 +14,8 @@ namespace Project.Scripts.Services.Combat
         public bool IsReady => _battleSideEnergyService.CanSpend(BattleSide.Enemy, ActivationEnergyCost)
                                && false == _unitActivationCooldownService.IsAvatarOnCooldown(BattleSide.Enemy);
         public HeroActionType AbilityType { get; }
-        public int AbilityPower { get; }
+        public int AbilityPower => _abilityPowerModifierService.GetAbilityPower(
+            UnitDescriptor.Avatar(BattleSide.Enemy, AbilityType), _baseAbilityPower);
 
 
         private readonly EventBus _eventBus;
@@ -22,24 +23,28 @@ namespace Project.Scripts.Services.Combat
         private readonly IBattleActionRuntimeService _battleActionRuntimeService;
         private readonly IUnitActivationCooldownService _unitActivationCooldownService;
         private readonly INextAttackBuffService _nextAttackBuffService;
+        private readonly IAbilityPowerModifierService _abilityPowerModifierService;
+        private readonly int _baseAbilityPower;
 
-        public EnemyAvatarChargeService(
-            EventBus eventBus,
+        
+        public EnemyAvatarChargeService(EventBus eventBus,
             LevelConfig levelConfig,
             IBattleSideEnergyService battleSideEnergyService,
             IBattleActionRuntimeService battleActionRuntimeService,
             IUnitActivationCooldownService unitActivationCooldownService,
-            INextAttackBuffService nextAttackBuffService)
+            INextAttackBuffService nextAttackBuffService,
+            IAbilityPowerModifierService abilityPowerModifierService)
         {
             _eventBus = eventBus;
             _battleSideEnergyService = battleSideEnergyService;
             _battleActionRuntimeService = battleActionRuntimeService;
             _unitActivationCooldownService = unitActivationCooldownService;
             _nextAttackBuffService = nextAttackBuffService;
+            _abilityPowerModifierService = abilityPowerModifierService;
             var config = levelConfig.EnemyAvatarConfig;
             ActivationEnergyCost = config.ActivationEnergyCost;
             AbilityType = config.AbilityType;
-            AbilityPower = config.AbilityPower;
+            _baseAbilityPower = config.AbilityPower;
         }
 
         public void Start()

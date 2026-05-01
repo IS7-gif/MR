@@ -5,7 +5,8 @@ using Project.Scripts.Shared.Tiles;
 
 namespace Project.Scripts.Services.Combat
 {
-    public class HeroBuffService : IBuffService, IEnergyGainModifierService, IHeroAbilityModifierService, INextAttackBuffService
+    public class HeroBuffService : IBuffService, IEnergyGainModifierService, IHeroAbilityModifierService,
+        IAbilityPowerModifierService, INextAttackBuffService
     {
         public IReadOnlyList<BuffRuntimeState> Buffs => _engine.Buffs;
 
@@ -66,7 +67,12 @@ namespace Project.Scripts.Services.Combat
 
         public int GetAbilityPower(BattleSide side, int slotIndex, int basePower)
         {
-            return BuffRules.ToDisplayInt(_engine.GetModifiedAbilityPower(basePower, side, slotIndex));
+            return GetAbilityPower(UnitDescriptor.Hero(side, slotIndex, HeroActionType.DealDamage), basePower);
+        }
+
+        public int GetAbilityPower(UnitDescriptor target, int basePower)
+        {
+            return BuffRules.ToDisplayInt(_engine.GetModifiedAbilityPower(basePower, target));
         }
 
         public int Get(UnitDescriptor source)

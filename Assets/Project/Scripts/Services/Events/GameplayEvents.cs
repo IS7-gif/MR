@@ -187,6 +187,19 @@ namespace Project.Scripts.Services.Events
         }
     }
 
+    public readonly struct AvatarAbilityPowerChangedEvent
+    {
+        public BattleSide Side { get; }
+        public int AbilityPower { get; }
+
+
+        public AvatarAbilityPowerChangedEvent(BattleSide side, int abilityPower)
+        {
+            Side = side;
+            AbilityPower = abilityPower;
+        }
+    }
+
     public readonly struct HeroCooldownChangedEvent
     {
         public BattleSide Side { get; }

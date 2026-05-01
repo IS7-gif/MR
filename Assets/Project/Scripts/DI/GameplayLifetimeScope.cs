@@ -45,6 +45,7 @@ namespace Project.Scripts.DI
                 .As<IBuffService>()
                 .As<IEnergyGainModifierService>()
                 .As<IHeroAbilityModifierService>()
+                .As<IAbilityPowerModifierService>()
                 .As<INextAttackBuffService>();
             builder.RegisterEntryPoint<HeroPassiveService>().As<IHeroPassiveService>();
             builder.RegisterEntryPoint<BattleSideEnergyService>().As<IBattleSideEnergyService>();
