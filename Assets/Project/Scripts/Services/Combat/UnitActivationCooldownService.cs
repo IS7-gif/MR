@@ -1,10 +1,11 @@
+using System;
 using Project.Scripts.Configs.Levels;
 using Project.Scripts.Services.Events;
 using Project.Scripts.Shared.Heroes;
 
 namespace Project.Scripts.Services.Combat
 {
-    public class UnitActivationCooldownService : IUnitActivationCooldownService
+    public class UnitActivationCooldownService : IUnitActivationCooldownService, IDisposable
     {
         private const int SlotCount = 4;
         private const float MinPublishDelta = 0.01f;
@@ -23,6 +24,9 @@ namespace Project.Scripts.Services.Combat
         private float _enemyAvatarRemaining;
         private float _playerAvatarLastPublished = -1f;
         private float _enemyAvatarLastPublished = -1f;
+        private IDisposable _heroDefeatedSubscription;
+        private IDisposable _playerDefeatedSubscription;
+        private IDisposable _enemyDefeatedSubscription;
 
 
         public UnitActivationCooldownService(EventBus eventBus, LevelConfig levelConfig)
@@ -32,6 +36,10 @@ namespace Project.Scripts.Services.Combat
             FillHeroDurations(_enemyHeroDurations, levelConfig.EnemyHeroes);
             _playerAvatarDuration = levelConfig.PlayerAvatarConfig ? levelConfig.PlayerAvatarConfig.ActivationCooldownSeconds : 0f;
             _enemyAvatarDuration = levelConfig.EnemyAvatarConfig ? levelConfig.EnemyAvatarConfig.ActivationCooldownSeconds : 0f;
+
+            _heroDefeatedSubscription = _eventBus.Subscribe<HeroDefeatedEvent>(OnHeroDefeated);
+            _playerDefeatedSubscription = _eventBus.Subscribe<PlayerDefeatedEvent>(_ => ResetAvatarCooldown(BattleSide.Player));
+            _enemyDefeatedSubscription = _eventBus.Subscribe<EnemyDefeatedEvent>(_ => ResetAvatarCooldown(BattleSide.Enemy));
         }
 
 
@@ -93,6 +101,16 @@ namespace Project.Scripts.Services.Combat
             PublishAvatarCooldown(BattleSide.Enemy, _enemyAvatarRemaining, _enemyAvatarDuration);
         }
 
+        public void Dispose()
+        {
+            _heroDefeatedSubscription?.Dispose();
+            _heroDefeatedSubscription = null;
+            _playerDefeatedSubscription?.Dispose();
+            _playerDefeatedSubscription = null;
+            _enemyDefeatedSubscription?.Dispose();
+            _enemyDefeatedSubscription = null;
+        }
+
 
         private void TickHeroSide(BattleSide side, float[] remaining, float[] durations, float[] lastPublished, float deltaTime)
         {
@@ -129,6 +147,46 @@ namespace Project.Scripts.Services.Combat
             }
         }
 
+        private void OnHeroDefeated(HeroDefeatedEvent e)
+        {
+            ResetHeroCooldown(e.Side, e.SlotIndex);
+        }
+
+        private void ResetHeroCooldown(BattleSide side, int slotIndex)
+        {
+            if (slotIndex is < 0 or >= SlotCount)
+                return;
+
+            var remaining = GetHeroRemaining(side);
+            if (remaining[slotIndex] <= 0f)
+                return;
+
+            remaining[slotIndex] = 0f;
+            GetHeroLastPublished(side)[slotIndex] = 0f;
+            PublishHeroCooldown(side, slotIndex, 0f, GetHeroDurations(side)[slotIndex]);
+        }
+
+        private void ResetAvatarCooldown(BattleSide side)
+        {
+            if (side == BattleSide.Player)
+            {
+                if (_playerAvatarRemaining <= 0f)
+                    return;
+
+                _playerAvatarRemaining = 0f;
+                _playerAvatarLastPublished = 0f;
+                PublishAvatarCooldown(BattleSide.Player, 0f, _playerAvatarDuration);
+                return;
+            }
+
+            if (_enemyAvatarRemaining <= 0f)
+                return;
+
+            _enemyAvatarRemaining = 0f;
+            _enemyAvatarLastPublished = 0f;
+            PublishAvatarCooldown(BattleSide.Enemy, 0f, _enemyAvatarDuration);
+        }
+
         private void PublishHeroCooldown(BattleSide side, int slotIndex, float remaining, float duration)
         {
             _eventBus.Publish(new HeroCooldownChangedEvent(side, slotIndex, remaining, duration));
@@ -147,6 +205,11 @@ namespace Project.Scripts.Services.Combat
         private float[] GetHeroDurations(BattleSide side)
         {
             return side == BattleSide.Player ? _playerHeroDurations : _enemyHeroDurations;
+        }
+
+        private float[] GetHeroLastPublished(BattleSide side)
+        {
+            return side == BattleSide.Player ? _playerHeroLastPublished : _enemyHeroLastPublished;
         }
 
         private static void FillHeroDurations(float[] target, Project.Scripts.Configs.Battle.HeroConfig[] configs)

@@ -32,6 +32,8 @@ namespace Project.Scripts.Services.Combat
         private IDisposable _abilityExecutedSubscription;
         private IDisposable _phaseChangedSubscription;
         private IDisposable _roundChangedSubscription;
+        private IDisposable _playerDefeatedSubscription;
+        private IDisposable _enemyDefeatedSubscription;
         private BattlePhaseKind _currentPhase = BattlePhaseKind.Match;
         private int _currentRound = 1;
         private readonly bool[,] _slotKindPassiveStates = new bool[2, SlotCount];
@@ -58,6 +60,8 @@ namespace Project.Scripts.Services.Combat
             _abilityExecutedSubscription = _eventBus.Subscribe<AbilityExecutedEvent>(OnAbilityExecuted);
             _phaseChangedSubscription = _eventBus.Subscribe<BattleFlowPhaseChangedEvent>(OnBattleFlowPhaseChanged);
             _roundChangedSubscription = _eventBus.Subscribe<BattleFlowRoundChangedEvent>(OnBattleFlowRoundChanged);
+            _playerDefeatedSubscription = _eventBus.Subscribe<PlayerDefeatedEvent>(_ => RemoveBuffsForUnit(GetAvatarUnit(BattleSide.Player)));
+            _enemyDefeatedSubscription = _eventBus.Subscribe<EnemyDefeatedEvent>(_ => RemoveBuffsForUnit(GetAvatarUnit(BattleSide.Enemy)));
         }
 
         public void Dispose()
@@ -72,6 +76,10 @@ namespace Project.Scripts.Services.Combat
             _phaseChangedSubscription = null;
             _roundChangedSubscription?.Dispose();
             _roundChangedSubscription = null;
+            _playerDefeatedSubscription?.Dispose();
+            _playerDefeatedSubscription = null;
+            _enemyDefeatedSubscription?.Dispose();
+            _enemyDefeatedSubscription = null;
         }
 
         private void InitializePassives()
@@ -123,20 +131,33 @@ namespace Project.Scripts.Services.Combat
 
         private void OnHeroDefeated(HeroDefeatedEvent e)
         {
-            if (_engine.DisableOwner(e.Side, e.SlotIndex))
-            {
-                var owner = UnitDescriptor.Hero(e.Side, e.SlotIndex, HeroActionType.DealDamage);
-                var buffsChanged = _buffService.RemoveByUnit(owner);
+            var owner = UnitDescriptor.Hero(e.Side, e.SlotIndex, GetSourceActionType(e.Side, e.SlotIndex));
+            var passiveDisabled = _engine.DisableOwner(e.Side, e.SlotIndex);
+            var buffsChanged = _buffService.RemoveByUnit(owner);
+
+            if (passiveDisabled)
                 _eventBus.Publish(new HeroPassiveDisabledEvent(e.Side, e.SlotIndex));
-                if (buffsChanged)
-                {
-                    _eventBus.Publish(new BuffsChangedEvent());
-                    PublishAllAbilityStatsChanged();
-                    RefreshAllSlotKindPassiveStates();
-                }
-                else
-                    RefreshSlotKindPassiveState(e.Side, e.SlotIndex);
+
+            if (buffsChanged)
+            {
+                _eventBus.Publish(new BuffsChangedEvent());
+                PublishAllAbilityStatsChanged();
+                RefreshAllSlotKindPassiveStates();
+                return;
             }
+
+            if (passiveDisabled)
+                RefreshSlotKindPassiveState(e.Side, e.SlotIndex);
+        }
+
+        private void RemoveBuffsForUnit(UnitDescriptor unit)
+        {
+            if (false == _buffService.RemoveByUnit(unit))
+                return;
+
+            _eventBus.Publish(new BuffsChangedEvent());
+            PublishAllAbilityStatsChanged();
+            RefreshAllSlotKindPassiveStates();
         }
 
         private void OnHeroActivated(HeroActivatedEvent e)
@@ -399,6 +420,15 @@ namespace Project.Scripts.Services.Combat
             var hero = GetHeroConfig(side, slotIndex);
             
             return hero ? hero.AbilityType : HeroActionType.DealDamage;
+        }
+
+        private UnitDescriptor GetAvatarUnit(BattleSide side)
+        {
+            var config = side == BattleSide.Player
+                ? _levelConfig.PlayerAvatarConfig
+                : _levelConfig.EnemyAvatarConfig;
+
+            return UnitDescriptor.Avatar(side, config ? config.AbilityType : HeroActionType.DealDamage);
         }
 
         private static int GetSideIndex(BattleSide side)

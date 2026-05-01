@@ -1261,9 +1261,9 @@ MonoBehaviour:
   _deactivateOnDeath:
   - {fileID: 5877986525517868558}
   - {fileID: 3913464817945936822}
-  - {fileID: 1708263719674710700}
   - {fileID: 7320874684612399690}
   - {fileID: 8667159444517577802}
+  - {fileID: 8318433916458042906}
   _activateOnSlotKindPassive:
   - {fileID: 8667159444517577802}
   _deactivateOnSlotKindPassive:

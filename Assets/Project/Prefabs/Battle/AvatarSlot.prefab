@@ -1038,7 +1038,7 @@ MonoBehaviour:
   _deactivateOnDeath:
   - {fileID: 7617384071603433793}
   - {fileID: 8675400822373080042}
-  - {fileID: 1953529887237241453}
+  - {fileID: 2866581587073178723}
 --- !u!1 &8304990819351917047
 GameObject:
   m_ObjectHideFlags: 0
